@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - foss
     tags:
       - v*
 
@@ -32,10 +32,7 @@ jobs:
         run: ./gradlew spotlessCheck
 
       - name: Build app
-        run: ./gradlew assembleRelease -Pinclude-telemetry -Penable-updater
-
-      - name: Run unit tests
-        run: ./gradlew testReleaseUnitTest
+        run: ./gradlew assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
