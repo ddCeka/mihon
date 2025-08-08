@@ -97,5 +97,7 @@ private val LockAfterValues = persistentListOf(
     0, // Always
     1,
     2,
+    5,
+    10,
     -1, // Never
 )
