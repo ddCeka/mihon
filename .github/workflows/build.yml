@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build:
-    name: Build & Test App
+    name: Build
     runs-on: 'ubuntu-24.04'
 
     steps:
@@ -52,11 +52,11 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
-          name: Foss-arm64-v8a-${{ github.sha }}
+          name: Mihon-foss-arm64-v8a
           path: app/build/outputs/apk/release/app-arm64-v8a-release-unsigned-signed.apk
 
       - name: Upload mapping
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
-          name: mapping-${{ github.sha }}
+          name: mapping
           path: app/build/outputs/mapping/release
