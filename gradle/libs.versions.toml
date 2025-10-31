@@ -10,7 +10,7 @@ voyager = "1.1.0-beta03"
 spotless = "8.0.0"
 ktlint-core = "1.7.1"
 markdown = "0.37.0"
-junit = "6.0.0"
+junit = "6.0.1"
 
 [libraries]
 desugar = "com.android.tools:desugar_jdk_libs:2.1.5"
