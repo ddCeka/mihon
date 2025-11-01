@@ -191,15 +191,17 @@ class Downloader(
         if (isRunning) return
 
         downloaderJob = scope.launch {
-            val activeDownloadsFlow = queueState.transformLatest { queue ->
+            val activeDownloadsFlow = combine(
+                queueState,
+                downloadPreferences.parallelSourceLimit().changes(),
+            ) { a, b -> a to b }.transformLatest { (queue, parallelCount) ->
                 while (true) {
                     val activeDownloads = queue.asSequence()
                         // Ignore completed downloads, leave them in the queue
                         .filter { it.status.value <= Download.State.DOWNLOADING.value }
                         .groupBy { it.source }
                         .toList()
-                        // Concurrently download from 5 different sources
-                        .take(5)
+                        .take(parallelCount)
                         .map { (_, downloads) -> downloads.first() }
                     emit(activeDownloads)
 
@@ -211,7 +213,8 @@ class Downloader(
                         }.filter { it }
                     activeDownloadsErroredFlow.first()
                 }
-            }.distinctUntilChanged()
+            }
+                .distinctUntilChanged()
 
             // Use supervisorScope to cancel child jobs when the downloader job is cancelled
             supervisorScope {
@@ -379,11 +382,13 @@ class Downloader(
                                 page.status = Page.State.Error(e)
                             }
                         }
+                    }
 
-                        withIOContext { getOrDownloadImage(page, download, tmpDir) }
-                        emit(page)
-                    }.flowOn(Dispatchers.IO)
+                    withIOContext { getOrDownloadImage(page, download, tmpDir) }
+                    emit(page)
                 }
+                    .flowOn(Dispatchers.IO)
+            }
                 .collect {
                     // Do when page is downloaded.
                     notifier.onProgressChange(download)
