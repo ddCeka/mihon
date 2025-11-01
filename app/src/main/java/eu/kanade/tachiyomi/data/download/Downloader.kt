@@ -369,18 +369,15 @@ class Downloader(
             download.status = Download.State.DOWNLOADING
 
             // Start downloading images, consider we can have downloaded images already
-            // Concurrently do 4 pages at a time
-            pageList.asFlow()
-                .flatMapMerge(concurrency = 4) { page ->
-                    flow {
-                        // Fetch image URL if necessary
-                        if (page.imageUrl.isNullOrEmpty()) {
-                            page.status = Page.State.LoadPage
-                            try {
-                                page.imageUrl = download.source.getImageUrl(page)
-                            } catch (e: Throwable) {
-                                page.status = Page.State.Error(e)
-                            }
+            pageList.asFlow().flatMapMerge(concurrency = downloadPreferences.parallelPageLimit().get()) { page ->
+                flow {
+                    // Fetch image URL if necessary
+                    if (page.imageUrl.isNullOrEmpty()) {
+                        page.status = Page.State.LoadPage
+                        try {
+                            page.imageUrl = download.source.getImageUrl(page)
+                        } catch (e: Throwable) {
+                            page.status = Page.State.Error(e)
                         }
                     }
 
@@ -729,8 +726,8 @@ class Downloader(
     companion object {
         const val TMP_DIR_SUFFIX = "_tmp"
         const val WARNING_NOTIF_TIMEOUT_MS = 30_000L
-        const val CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 60
-        private const val DOWNLOADS_QUEUED_WARNING_THRESHOLD = 100
+        const val CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 15
+        private const val DOWNLOADS_QUEUED_WARNING_THRESHOLD = 30
     }
 }
 
