@@ -62,9 +62,3 @@ jobs:
         with:
           name: Mihon-foss-arm64-v8a
           path: app/build/outputs/apk/release/app-arm64-v8a-release-unsigned-signed.apk
-
-      - name: Upload mapping
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
-        with:
-          name: mapping
-          path: app/build/outputs/mapping/release
