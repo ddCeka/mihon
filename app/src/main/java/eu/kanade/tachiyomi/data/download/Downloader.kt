@@ -128,6 +128,8 @@ class Downloader(
             return false
         }
 
+        notifier.dismissPaused()
+
         val pending = queueState.value.filter { it.status != Download.State.DOWNLOADED }
         pending.forEach { if (it.status != Download.State.QUEUE) it.status = Download.State.QUEUE }
 
@@ -194,6 +196,7 @@ class Downloader(
 
         internalClearQueue()
         notifier.dismissProgress()
+        notifier.dismissPaused()
     }
 
     /**
