@@ -11,6 +11,7 @@ spotless = "8.1.0"
 ktlint-core = "1.8.0"
 markdown = "0.39.0"
 junit = "6.0.1"
+materialKolor = "5.0.0-alpha04"
 
 [libraries]
 desugar = "com.android.tools:desugar_jdk_libs:2.1.5"
@@ -100,6 +101,8 @@ markdown-core = { module = "com.mikepenz:multiplatform-markdown-renderer", versi
 markdown-coil = { module = "com.mikepenz:multiplatform-markdown-renderer-coil3", version.ref = "markdown" }
 
 stringSimilarity = { module = "com.aallam.similarity:string-similarity-kotlin", version = "0.1.0" }
+
+materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 
 [plugins]
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlib_version" }
