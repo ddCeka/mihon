@@ -128,6 +128,8 @@ class Downloader(
             return false
         }
 
+        notifier.dismissPaused()
+
         val pending = queueState.value.filter { it.status != Download.State.DOWNLOADED }
         pending.forEach { if (it.status != Download.State.QUEUE) it.status = Download.State.QUEUE }
 
@@ -143,14 +145,26 @@ class Downloader(
      */
     fun stop(reason: String? = null) {
         cancelDownloaderJob()
-        queueState.value
-            .filter { it.status == Download.State.DOWNLOADING }
-            .forEach { it.status = Download.State.ERROR }
+        val activeDownloads = queueState.value.filter { it.status == Download.State.DOWNLOADING }
 
         if (reason != null) {
+            activeDownloads.forEach { it.status = Download.State.QUEUE }
+
+            if (queueState.value.isNotEmpty()) {
+                isPaused = true
+                notifier.onPaused()
+            } else {
+                notifier.dismissProgress()
+                notifier.dismissPaused()
+            }
+
             notifier.onWarning(reason)
+
+            DownloadJob.stop(context)
             return
         }
+
+        activeDownloads.forEach { it.status = Download.State.ERROR }
 
         if (isPaused && queueState.value.isNotEmpty()) {
             notifier.onPaused()
@@ -182,6 +196,7 @@ class Downloader(
 
         internalClearQueue()
         notifier.dismissProgress()
+        notifier.dismissPaused()
     }
 
     /**
@@ -726,8 +741,8 @@ class Downloader(
     companion object {
         const val TMP_DIR_SUFFIX = "_tmp"
         const val WARNING_NOTIF_TIMEOUT_MS = 30_000L
-        const val CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 15
-        private const val DOWNLOADS_QUEUED_WARNING_THRESHOLD = 30
+        const val CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 300
+        private const val DOWNLOADS_QUEUED_WARNING_THRESHOLD = 300
     }
 }
 
