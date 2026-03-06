@@ -27,7 +27,6 @@ import eu.kanade.domain.DomainModule
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.domain.ui.model.setAppCompatDelegateThemeMode
-import eu.kanade.tachiyomi.core.security.PrivacyPreferences
 import eu.kanade.tachiyomi.crash.CrashActivity
 import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
 import eu.kanade.tachiyomi.data.coil.BufferedSourceFetcher
@@ -35,6 +34,9 @@ import eu.kanade.tachiyomi.data.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.coil.MangaCoverKeyer
 import eu.kanade.tachiyomi.data.coil.MangaKeyer
 import eu.kanade.tachiyomi.data.coil.TachiyomiImageDecoder
+import eu.kanade.tachiyomi.data.download.DownloadJob
+import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.di.AppModule
 import eu.kanade.tachiyomi.di.PreferenceModule
@@ -46,8 +48,12 @@ import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.WebViewUtil
 import eu.kanade.tachiyomi.util.system.animatorDurationScale
 import eu.kanade.tachiyomi.util.system.cancelNotification
+import eu.kanade.tachiyomi.util.system.networkStateFlow
 import eu.kanade.tachiyomi.util.system.notify
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.combineTransform
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import logcat.AndroidLogcatLogger
@@ -55,13 +61,13 @@ import logcat.LogPriority
 import logcat.LogcatLogger
 import mihon.core.migration.Migrator
 import mihon.core.migration.migrations.migrations
-import mihon.telemetry.TelemetryConfig
 import org.conscrypt.Conscrypt
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.util.system.ImageUtil
 import tachiyomi.core.common.util.system.logcat
+import tachiyomi.domain.download.service.DownloadPreferences
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.widget.WidgetManager
 import uy.kohesive.injekt.Injekt
@@ -72,7 +78,6 @@ import java.security.Security
 class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factory {
 
     private val basePreferences: BasePreferences by injectLazy()
-    private val privacyPreferences: PrivacyPreferences by injectLazy()
     private val networkPreferences: NetworkPreferences by injectLazy()
 
     private val disableIncognitoReceiver = DisableIncognitoReceiver()
@@ -81,7 +86,6 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
     override fun onCreate() {
         super<Application>.onCreate()
         patchInjekt()
-        TelemetryConfig.init(applicationContext)
 
         GlobalExceptionHandler.initialize(applicationContext, CrashActivity::class.java)
 
@@ -135,16 +139,6 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
             }
             .launchIn(scope)
 
-        privacyPreferences.analytics()
-            .changes()
-            .onEach(TelemetryConfig::setAnalyticsEnabled)
-            .launchIn(scope)
-
-        privacyPreferences.crashlytics()
-            .changes()
-            .onEach(TelemetryConfig::setCrashlyticsEnabled)
-            .launchIn(scope)
-
         basePreferences.hardwareBitmapThreshold().let { preference ->
             if (!preference.isSet()) preference.set(GLUtil.DEVICE_TEXTURE_LIMIT)
         }
@@ -167,6 +161,26 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
             LogcatLogger.install()
             LogcatLogger.loggers += AndroidLogcatLogger(minLogPriority)
         }
+
+        val downloadManager = Injekt.get<DownloadManager>()
+
+        // Auto-resume downloads that were stopped due to network changes
+        combineTransform(
+            applicationContext.networkStateFlow(),
+            Injekt.get<DownloadPreferences>().downloadOnlyOverWifi().changes(),
+            transform = { state, requireWifi -> emit(state.isOnline && (!requireWifi || state.isWifi)) },
+        )
+            .distinctUntilChanged()
+            .filter { it }
+            .onEach {
+                if (!downloadManager.stoppedByNetwork) return@onEach
+                if (DownloadJob.isRunning(applicationContext)) return@onEach
+                val hasQueuedDownloads = downloadManager.queueState.value.any { it.status == Download.State.QUEUE }
+                if (!hasQueuedDownloads) return@onEach
+
+                downloadManager.startDownloads()
+            }
+            .launchIn(scope)
 
         initializeMigrator()
     }
@@ -277,6 +291,10 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
                 registered = false
             }
         }
+    }
+
+    companion object {
+        val processStartTimeMillis: Long = System.currentTimeMillis()
     }
 }
 

@@ -24,6 +24,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import logcat.LogPriority
@@ -55,6 +56,8 @@ class MetadataUpdateJob(private val context: Context, workerParams: WorkerParame
     private var mangaToUpdate: List<LibraryManga> = mutableListOf()
 
     override suspend fun doWork(): Result {
+        sourceManager.isInitialized.first { it }
+
         setForegroundSafely()
 
         addMangaToQueue()
@@ -175,7 +178,7 @@ class MetadataUpdateJob(private val context: Context, workerParams: WorkerParame
         private const val TAG = "MetadataUpdate"
         private const val WORK_NAME_MANUAL = "MetadataUpdate"
 
-        private const val MANGA_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 60
+        private const val MANGA_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 300
 
         fun startNow(context: Context): Boolean {
             val wm = context.workManager
