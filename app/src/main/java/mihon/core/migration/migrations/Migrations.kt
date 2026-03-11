@@ -8,5 +8,4 @@ val migrations: List<Migration>
         SetupLibraryUpdateMigration(),
         TrustExtensionRepositoryMigration(),
         CategoryPreferencesCleanupMigration(),
-        InstallationIdMigration(),
     )
