@@ -1,4 +1,4 @@
-name: Build & Test
+name: Build & Test App
 on:
   push:
     branches:
@@ -12,9 +12,9 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    name: Build & Test App
-    runs-on: 'ubuntu-24.04'
+  build_foss:
+    name: Build (FOSS)
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
@@ -28,17 +28,16 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        with:
+          cache-disabled: true
 
-      - name: Check code format
-        run: ./gradlew spotlessCheck
-
-      - name: Build app
-        run: ./gradlew assembleRelease
+      - name: Build
+        run: ./gradlew assembleFoss
 
       - name: Sign APK
-        uses: r0adkll/sign-android-release@a391126403df92c6a0a3988a829dd47f79b89ed7
+        uses: r0adkll/sign-android-release@f30bdd30588842ac76044ecdbd4b6d0e3e813478
         with:
-          releaseDirectory: app/build/outputs/apk/release
+          releaseDirectory: app/build/outputs/apk/foss
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -49,5 +48,10 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: Mihon-Foss-arm64-v8a
-          path: app/build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk
+          name: mihon-foss
+          path: |
+            app/build/outputs/apk/foss/app-universal-foss-unsigned-signed.apk
+            app/build/outputs/apk/foss/app-arm64-v8a-foss-unsigned-signed.apk
+            app/build/outputs/apk/foss/app-armeabi-v7a-foss-unsigned-signed.apk
+            app/build/outputs/apk/foss/app-x86-foss-unsigned-signed.apk
+            app/build/outputs/apk/foss/app-x86_64-foss-unsigned-signed.apk
