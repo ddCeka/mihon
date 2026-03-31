@@ -1,28 +1,3 @@
-name: Build & Test App
-on:
-  push:
-    branches:
-      - foss
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-
-jobs:
-  build_foss:
-    name: Build (FOSS)
-    runs-on: ubuntu-24.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Set up JDK
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
-        with:
 name: Build & Test
 on:
   push:
@@ -37,9 +12,9 @@ permissions:
   contents: read
 
 jobs:
-  build_foss:
+  build:
     name: Build (FOSS)
-    runs-on: ubuntu-24.04
+    runs-on: 'ubuntu-24.04'
 
     steps:
       - name: Checkout
@@ -53,8 +28,6 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
-        with:
-          cache-disabled: true
 
       - name: Check code format
         run: ./gradlew spotlessCheck
@@ -73,9 +46,9 @@ jobs:
           name: test-report-${{ github.sha }}
           path: app/build/reports/tests/testReleaseUnitTest
 
-      - name: Build
+      - name: Build app
         run: ./gradlew assembleFoss
-
+        
       - name: Sign APK
         uses: r0adkll/sign-android-release@a391126403df92c6a0a3988a829dd47f79b89ed7
         with:
@@ -97,3 +70,9 @@ jobs:
             app/build/outputs/apk/foss/app-armeabi-v7a-foss-unsigned-signed.apk
             app/build/outputs/apk/foss/app-x86-foss-unsigned-signed.apk
             app/build/outputs/apk/foss/app-x86_64-foss-unsigned-signed.apk
+
+      - name: Upload mapping
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: mapping-${{ github.sha }}
+          path: app/build/outputs/mapping/foss
