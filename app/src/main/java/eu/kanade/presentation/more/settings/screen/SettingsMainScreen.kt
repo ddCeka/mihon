@@ -226,13 +226,5 @@ object SettingsMainScreen : Screen() {
             icon = Icons.Outlined.Code,
             screen = SettingsAdvancedScreen,
         ),
-        Item(
-            titleRes = MR.strings.pref_category_about,
-            formatSubtitle = {
-                "${stringResource(MR.strings.app_name)} ${AboutScreen.getVersionName(withBuildDate = false)}"
-            },
-            icon = Icons.Outlined.Info,
-            screen = AboutScreen,
-        ),
     )
 }
