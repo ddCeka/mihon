@@ -27,6 +27,10 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 ### Fixed
 - Regression with installing/updating extension ([@AntsyLich](https://github.com/AntsyLich))
 
+## [v0.19.9] - 2026-04-11
+### Fixed
+- Regression with installing/updating extension ([@AntsyLich](https://github.com/AntsyLich))
+
 ## [v0.19.8] - 2026-04-11
 ### Added
 - Add dedicated "Support Us" screen ([@AntsyLich](https://github.com/AntsyLich)) ([#3200](https://github.com/mihonapp/mihon/pull/3200))

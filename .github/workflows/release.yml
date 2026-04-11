@@ -150,6 +150,10 @@ jobs:
         with:
           tag_name: ${{ needs.get_tag.outputs.tag }}
           name: Mihon ${{ needs.get_tag.outputs.tag }}
+          body: |
+            > [!TIP]
+            >
+            > ### If you are unsure which version to download then go with `mihon-${{ needs.get_tag.outputs.tag }}.apk`
           files: |
             mihon-${{ needs.get_tag.outputs.tag }}.apk
             mihon-${{ needs.get_tag.outputs.tag }}-foss.apk
@@ -159,3 +163,4 @@ jobs:
             mihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}-foss.apk
           draft: false
           prerelease: true
+          token: ${{ secrets.MIHON_BOT_TOKEN }}

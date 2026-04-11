@@ -168,11 +168,6 @@ object AboutScreen : Screen() {
                         horizontalArrangement = Arrangement.Center,
                     ) {
                         LinkIcon(
-                            label = stringResource(MR.strings.website),
-                            icon = Icons.Outlined.Public,
-                            url = "https://mihon.app",
-                        )
-                        LinkIcon(
                             label = "GitHub",
                             icon = CustomIcons.Github,
                             url = "https://github.com/ddCeka/mihon",

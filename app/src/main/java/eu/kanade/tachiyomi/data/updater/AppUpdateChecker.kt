@@ -41,7 +41,11 @@ class AppUpdateChecker {
 }
 
 val GITHUB_REPO: String by lazy {
-    "ddCeka/mihon"
+    if (isPreviewBuildType) {
+        "ddCeka/mihon-preview"
+    } else {
+        "ddCeka/mihon"
+    }
 }
 
 val RELEASE_TAG: String by lazy {

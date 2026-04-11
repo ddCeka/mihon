@@ -182,6 +182,7 @@ android-application = { id = "com.android.application", version.ref = "android-g
 android-test = { id = "com.android.test", version.ref = "android-gradle" }
 android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "android-gradle" }
 android-library = { id = "com.android.library", version.ref = "android-gradle" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-gradle" }
 kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-gradle" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-gradle" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin-gradle" }
