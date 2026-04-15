@@ -37,7 +37,6 @@ fun rememberRequestPackageInstallsPermissionState(initialValue: Boolean = false)
     }
 
     return installGranted
-
 }
 
 @Composable
@@ -62,5 +61,4 @@ fun rememberLegacyStoragePermissionState(initialValue: Boolean = false): Boolean
     }
 
     return storageGranted
-
 }
