@@ -6,76 +6,86 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * Colors for Tokyo Night theme
+ * Based on the Tokyo Night color scheme by folke
  * https://github.com/folke/tokyonight.nvim
+ *
+ * Key colors:
+ * Primary (blue) #7AA2F7
+ * Secondary (purple) #BB9AF7
+ * Tertiary (cyan) #7DCFFF
+ * Background #1A1B26
  */
 internal object TokyoNightColorScheme : BaseColorScheme() {
 
     override val darkScheme = darkColorScheme(
-        primary = Color(0xFF7AA2F7), // Blue - main accent
-        onPrimary = Color(0xFF1A1B2E),
+        primary = Color(0xFF7AA2F7),
+        onPrimary = Color(0xFF1A1B26),
         primaryContainer = Color(0xFF3D59A1),
-        onPrimaryContainer = Color(0xFFCCD9FF),
-        inversePrimary = Color(0xFF3D59A1),
-        secondary = Color(0xFF9ECE6A), // Green - unread badge
-        onSecondary = Color(0xFF1A1B2E), // Unread badge text
-        secondaryContainer = Color(0xFF3D7A47), // Navigation bar selector pill & progress indicator (remaining)
-        onSecondaryContainer = Color(0xFF9ECE6A), // Navigation bar selector icon
-        tertiary = Color(0xFFBB9AF7), // Purple - downloaded badge
-        onTertiary = Color(0xFF1A1B2E), // Downloaded badge text
-        tertiaryContainer = Color(0xFF6A3FAF),
-        onTertiaryContainer = Color(0xFFE2D4FF),
-        background = Color(0xFF1A1B2E),
+        onPrimaryContainer = Color(0xFFC0CAF5),
+        inversePrimary = Color(0xFF2E7DE9),
+        secondary = Color(0xFFBB9AF7), // Unread badge
+        onSecondary = Color(0xFF1A1B26), // Unread badge text
+        secondaryContainer = Color(0xFF504072), // Navigation bar selector pill & progress indicator (remaining)
+        onSecondaryContainer = Color(0xFFBB9AF7), // Navigation bar selector icon
+        tertiary = Color(0xFF7DCFFF), // Downloaded badge
+        onTertiary = Color(0xFF1A1B26), // Downloaded badge text
+        tertiaryContainer = Color(0xFF2A6485),
+        onTertiaryContainer = Color(0xFFC0CAF5),
+        background = Color(0xFF1A1B26),
         onBackground = Color(0xFFC0CAF5),
-        surface = Color(0xFF1A1B2E),
+        surface = Color(0xFF1A1B26),
         onSurface = Color(0xFFC0CAF5),
-        surfaceVariant = Color(0xFF24283B), // Navigation bar background (ThemePrefWidget)
+        surfaceVariant = Color(0xFF292E42), // Navigation bar background (ThemePrefWidget)
         onSurfaceVariant = Color(0xFFA9B1D6),
         surfaceTint = Color(0xFF7AA2F7),
         inverseSurface = Color(0xFFC0CAF5),
-        inverseOnSurface = Color(0xFF1A1B2E),
+        inverseOnSurface = Color(0xFF1A1B26),
         outline = Color(0xFF565F89),
-        outlineVariant = Color(0xFF414868),
-        onError = Color(0xFF1A1B2E),
+        outlineVariant = Color(0xFF3B4261),
+        error = Color(0xFFF7768E),
+        onError = Color(0xFF1A1B26),
         errorContainer = Color(0xFFF7768E),
-        onErrorContainer = Color(0xFF1A1B2E),
-        surfaceContainerLowest = Color(0xFF13141F),
-        surfaceContainerLow = Color(0xFF1E2030),
-        surfaceContainer = Color(0xFF24283B),
-        surfaceContainerHigh = Color(0xFF2A2F45),
-        surfaceContainerHighest = Color(0xFF2F3549), // Navigation bar background
+        onErrorContainer = Color(0xFF1A1B26),
+        surfaceContainerLowest = Color(0xFF16161E),
+        surfaceContainerLow = Color(0xFF1E1F2B),
+        surfaceContainer = Color(0xFF292E42), // Navigation bar background
+        surfaceContainerHigh = Color(0xFF2F3449),
+        surfaceContainerHighest = Color(0xFF3B4261),
     )
 
     override val lightScheme = lightColorScheme(
-        primary = Color(0xFF3760BF), // Darker blue for light mode
+        primary = Color(0xFF2E7DE9),
         onPrimary = Color(0xFFFFFFFF),
-        primaryContainer = Color(0xFFD0DFFF),
-        onPrimaryContainer = Color(0xFF0A2472),
+        primaryContainer = Color(0xFFB7C1E3),
+        onPrimaryContainer = Color(0xFF1A1B26),
         inversePrimary = Color(0xFF7AA2F7),
-        secondary = Color(0xFF485E30), // Green
-        onSecondary = Color(0xFFFFFFFF),
-        secondaryContainer = Color(0xFFC8ECAA), // Navigation bar selector pill & progress indicator (remaining)
-        onSecondaryContainer = Color(0xFF485E30), // Navigation bar selector icon
-        tertiary = Color(0xFF5A3E8A), // Purple
-        onTertiary = Color(0xFFFFFFFF),
-        tertiaryContainer = Color(0xFFEADDFF),
-        onTertiaryContainer = Color(0xFF3B1F6E),
-        background = Color(0xFFE1E2F0),
-        onBackground = Color(0xFF343B58),
-        surface = Color(0xFFD5D6E8),
-        onSurface = Color(0xFF343B58),
-        surfaceVariant = Color(0xFFCACADF), // Navigation bar background (ThemePrefWidget)
-        onSurfaceVariant = Color(0xFF343B58),
-        surfaceTint = Color(0xFF3760BF),
-        inverseSurface = Color(0xFF343B58),
-        inverseOnSurface = Color(0xFFE1E2F0),
-        outline = Color(0xFF343B58),
+        secondary = Color(0xFF9854F1), // Unread badge
+        onSecondary = Color(0xFFFFFFFF), // Unread badge text
+        secondaryContainer = Color(0xFFCBB8F0), // Navigation bar selector pill & progress indicator (remaining)
+        onSecondaryContainer = Color(0xFF7847BD), // Navigation bar selector icon
+        tertiary = Color(0xFF007197), // Downloaded badge
+        onTertiary = Color(0xFFFFFFFF), // Downloaded badge text
+        tertiaryContainer = Color(0xFFA8D8E8),
+        onTertiaryContainer = Color(0xFF1A1B26),
+        background = Color(0xFFE1E2E7),
+        onBackground = Color(0xFF3760BF),
+        surface = Color(0xFFE1E2E7),
+        onSurface = Color(0xFF3760BF),
+        surfaceVariant = Color(0xFFD0D5E3), // Navigation bar background (ThemePrefWidget)
+        onSurfaceVariant = Color(0xFF6172B0),
+        surfaceTint = Color(0xFF2E7DE9),
+        inverseSurface = Color(0xFF3760BF),
+        inverseOnSurface = Color(0xFFE1E2E7),
+        outline = Color(0xFF848CB5),
+        outlineVariant = Color(0xFFA8AECB),
+        error = Color(0xFFF52A65),
         onError = Color(0xFFFFFFFF),
-        errorContainer = Color(0xFFFFB3BA),
-        onErrorContainer = Color(0xFF5C0009),
-        surfaceContainerLowest = Color(0xFFBBBCCF),
-        surfaceContainerLow = Color(0xFFC2C3D8),
-        surfaceContainer = Color(0xFFCACADF), // Navigation bar background
-        surfaceContainerHigh = Color(0xFFD8D9EC),
-        surfaceContainerHighest = Color(0xFFE9EAF5),
+        errorContainer = Color(0xFFF52A65),
+        onErrorContainer = Color(0xFFFFFFFF),
+        surfaceContainerLowest = Color(0xFFC4C8DA),
+        surfaceContainerLow = Color(0xFFCDD2E1),
+        surfaceContainer = Color(0xFFD0D5E3), // Navigation bar background
+        surfaceContainerHigh = Color(0xFFDCDFE9),
+        surfaceContainerHighest = Color(0xFFE8EAF0),
     )
 }
