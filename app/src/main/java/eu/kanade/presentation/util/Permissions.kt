@@ -37,6 +37,7 @@ fun rememberRequestPackageInstallsPermissionState(initialValue: Boolean = false)
     }
 
     return installGranted
+
 }
 
 @Composable
