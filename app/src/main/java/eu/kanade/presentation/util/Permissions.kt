@@ -61,4 +61,5 @@ fun rememberLegacyStoragePermissionState(initialValue: Boolean = false): Boolean
     }
 
     return storageGranted
+
 }
