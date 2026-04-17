@@ -11,6 +11,7 @@ enum class AppTheme(val titleRes: StringResource?) {
     LAVENDER(MR.strings.theme_lavender),
     MIDNIGHT_DUSK(MR.strings.theme_midnightdusk),
     NORD(MR.strings.theme_nord),
+    OBSIDIAN(MR.strings.theme_obsidian),
     STRAWBERRY_DAIQUIRI(MR.strings.theme_strawberrydaiquiri),
     TAKO(MR.strings.theme_tako),
     TEALTURQUOISE(MR.strings.theme_tealturquoise),
