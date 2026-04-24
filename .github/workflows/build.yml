@@ -65,7 +65,7 @@ jobs:
           FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: Set MIHON_VERSION
-        run: echo "MIHON_VERSION=v$(grep --only-matching --perl-regexp 'versionName\s=\s\"\K([0-9\.]+)' './app/build.gradle.kts')+$(git rev-parse --short 'HEAD')" >> "${GITHUB_ENV}"
+        run: echo "MIHON_VERSION=v$(grep --only-matching --perl-regexp 'versionName\s=\s\"\K([0-9\.]+)' './app/build.gradle.kts')-$(git rev-parse --short 'HEAD')" >> "${GITHUB_ENV}"
 
       - name: Upload APK
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.0
@@ -77,9 +77,3 @@ jobs:
             app/build/outputs/apk/foss/app-armeabi-v7a-foss-unsigned-signed.apk
             app/build/outputs/apk/foss/app-x86-foss-unsigned-signed.apk
             app/build/outputs/apk/foss/app-x86_64-foss-unsigned-signed.apk
-
-      - name: Upload mapping
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.0
-        with:
-          name: mapping-${{ github.sha }}
-          path: app/build/outputs/mapping/foss
