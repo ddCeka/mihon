@@ -35,7 +35,7 @@ directionalViewPager = "1.0.0"
 diskLruCache = "2.0.2"
 flexibleAdapter = "c8013533"
 google-services = "4.4.4"
-image-decoder = "41c059e540"
+image-decoder = "e03b81e18a"
 injekt = "91edab2317"
 jsoup = "1.22.2"
 junit = "6.0.3"
@@ -122,7 +122,7 @@ conscrypt = { module = "org.conscrypt:conscrypt-android", version.ref = "conscry
 directionalViewPager = { module = "com.github.tachiyomiorg:DirectionalViewPager", version.ref = "directionalViewPager" }
 diskLruCache = { module = "com.jakewharton:disklrucache", version.ref = "diskLruCache" }
 flexibleAdapter = { module = "com.github.arkon.FlexibleAdapter:flexible-adapter", version.ref = "flexibleAdapter" }
-image-decoder = { module = "com.github.tachiyomiorg:image-decoder", version.ref = "image-decoder" }
+image-decoder = { module = "com.github.mihonapp:image-decoder", version.ref = "image-decoder" }
 injekt = { module = "com.github.mihonapp:injekt", version.ref = "injekt" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
