@@ -41,7 +41,7 @@ internal object DraculaColorScheme : BaseColorScheme() {
         surfaceContainerLow = Color(0xFF44475A),
         surfaceContainer = Color(0xFF44475A),
         surfaceContainerHigh = Color(0xFF44475A),
-        surfaceContainerHighest = Color(0xFF44475A)
+        surfaceContainerHighest = Color(0xFF44475A),
     )
 
     override val lightScheme = lightColorScheme(
@@ -79,6 +79,6 @@ internal object DraculaColorScheme : BaseColorScheme() {
         surfaceContainerLow = Color(0xFFF8F8F2),
         surfaceContainer = Color(0xFFF8F8F2),
         surfaceContainerHigh = Color(0xFFF8F8F2),
-        surfaceContainerHighest = Color(0xFFF8F8F2)
+        surfaceContainerHighest = Color(0xFFF8F8F2),
     )
 }

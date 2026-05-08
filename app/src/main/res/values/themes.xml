@@ -129,7 +129,7 @@
     </style>
 
     <!--== Dracula Theme ==-->
-    <style name="Theme.Tachiyomi.Dracula"> 
+    <style name="Theme.Tachiyomi.Dracula">
         <item name="colorPrimary">@color/dracula_primary</item>
         <item name="colorOnPrimary">@color/dracula_onPrimary</item>
         <item name="colorPrimaryContainer">@color/dracula_primaryContainer</item>
@@ -359,7 +359,7 @@
         <item name="colorSurfaceContainerLowest">@color/nord_surfaceContainerLowest</item>
     </style>
 
-    <!--== Obsidian Theme ==-->   
+    <!--== Obsidian Theme ==-->
     <style name="Theme.Tachiyomi.Obsidian">
         <item name="colorPrimary">@color/obsidian_primary</item>
         <item name="colorOnPrimary">@color/obsidian_onPrimary</item>

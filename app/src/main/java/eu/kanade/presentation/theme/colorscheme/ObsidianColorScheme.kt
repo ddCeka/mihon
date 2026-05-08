@@ -41,7 +41,7 @@ internal object ObsidianColorScheme : BaseColorScheme() {
         surfaceContainerLow = Color(0xFF252527),
         surfaceContainer = Color(0xFF252527),
         surfaceContainerHigh = Color(0xFF2A2A2C),
-        surfaceContainerHighest = Color(0xFF444446)
+        surfaceContainerHighest = Color(0xFF444446),
     )
 
     override val lightScheme = lightColorScheme(
@@ -79,6 +79,6 @@ internal object ObsidianColorScheme : BaseColorScheme() {
         surfaceContainerLow = Color(0xFFD5D5D6),
         surfaceContainer = Color(0xFFD5D5D6),
         surfaceContainerHigh = Color(0xFFD5D5D6),
-        surfaceContainerHighest = Color(0xFFA4A4A7)
+        surfaceContainerHighest = Color(0xFFA4A4A7),
     )
 }
