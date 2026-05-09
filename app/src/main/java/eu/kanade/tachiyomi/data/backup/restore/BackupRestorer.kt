@@ -13,13 +13,20 @@ import eu.kanade.tachiyomi.data.backup.restore.restorers.CategoriesRestorer
 import eu.kanade.tachiyomi.data.backup.restore.restorers.ExtensionRepoRestorer
 import eu.kanade.tachiyomi.data.backup.restore.restorers.MangaRestorer
 import eu.kanade.tachiyomi.data.backup.restore.restorers.PreferenceRestorer
+import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import logcat.LogPriority
 import tachiyomi.core.common.i18n.stringResource
+import tachiyomi.core.common.util.system.logcat
 import tachiyomi.i18n.MR
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -34,11 +41,14 @@ class BackupRestorer(
     private val preferenceRestorer: PreferenceRestorer = PreferenceRestorer(context),
     private val extensionRepoRestorer: ExtensionRepoRestorer = ExtensionRepoRestorer(),
     private val mangaRestorer: MangaRestorer = MangaRestorer(),
+    private val onProgressUpdate: suspend (String, Int, Int, Boolean) -> Unit = { _, _, _, _ -> },
 ) {
 
     private var restoreAmount = 0
     private var restoreProgress = 0
     private val errors = mutableListOf<Pair<Date, String>>()
+    private val restoreProgressMutex = Mutex()
+    private val errorsMutex = Mutex()
 
     /**
      * Mapping of source ID to source name from backup data
@@ -49,6 +59,14 @@ class BackupRestorer(
         val startTime = System.currentTimeMillis()
 
         restoreFromFile(uri, options)
+
+        if (options.libraryEntries) {
+            try {
+                Injekt.get<DownloadCache>().invalidateCache()
+            } catch (e: Exception) {
+                logcat(LogPriority.ERROR, e) { "Failed to invalidate download cache after restore" }
+            }
+        }
 
         val time = System.currentTimeMillis() - startTime
 
@@ -111,13 +129,7 @@ class BackupRestorer(
         ensureActive()
         categoriesRestorer(backupCategories)
 
-        restoreProgress += 1
-        notifier.showRestoreProgress(
-            context.stringResource(MR.strings.categories),
-            restoreProgress,
-            restoreAmount,
-            isSync,
-        )
+        updateRestoreProgress(context.stringResource(MR.strings.categories))
     }
 
     private fun CoroutineScope.restoreManga(
@@ -132,11 +144,10 @@ class BackupRestorer(
                     mangaRestorer.restore(it, backupCategories)
                 } catch (e: Exception) {
                     val sourceName = sourceMapping[it.source] ?: it.source.toString()
-                    errors.add(Date() to "${it.title} [$sourceName]: ${e.message}")
+                    addError("${it.title} [$sourceName]: ${e.message}")
                 }
 
-                restoreProgress += 1
-                notifier.showRestoreProgress(it.title, restoreProgress, restoreAmount, isSync)
+                updateRestoreProgress(it.title)
             }
     }
 
@@ -150,13 +161,7 @@ class BackupRestorer(
             categories,
         )
 
-        restoreProgress += 1
-        notifier.showRestoreProgress(
-            context.stringResource(MR.strings.app_settings),
-            restoreProgress,
-            restoreAmount,
-            isSync,
-        )
+        updateRestoreProgress(context.stringResource(MR.strings.app_settings))
     }
 
     private fun CoroutineScope.restoreSourcePreferences(preferences: List<BackupSourcePreferences>) = launch {
@@ -185,14 +190,24 @@ class BackupRestorer(
                     errors.add(Date() to "Error Adding Repo: ${it.name} : ${e.message}")
                 }
 
-                restoreProgress += 1
-                notifier.showRestoreProgress(
-                    context.stringResource(MR.strings.extensionRepo_settings),
-                    restoreProgress,
-                    restoreAmount,
-                    isSync,
-                )
+                updateRestoreProgress(context.stringResource(MR.strings.extensionRepo_settings))
             }
+    }
+
+    private suspend fun updateRestoreProgress(content: String) {
+        val progress = restoreProgressMutex.withLock {
+            restoreProgress += 1
+            restoreProgress
+        }
+
+        notifier.showRestoreProgress(content, progress, restoreAmount, isSync)
+        onProgressUpdate(content, progress, restoreAmount, isSync)
+    }
+
+    private suspend fun addError(message: String) {
+        errorsMutex.withLock {
+            errors.add(Date() to message)
+        }
     }
 
     private fun writeErrorLog(): File {
