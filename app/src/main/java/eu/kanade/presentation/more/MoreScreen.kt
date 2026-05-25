@@ -9,17 +9,13 @@ import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.tachiyomi.ui.more.DownloadQueueState
 import mihon.icons.materialsymbols.MaterialSymbols
-import mihon.icons.materialsymbols.automirroredrounded.Help
 import mihon.icons.materialsymbols.automirroredrounded.Label
 import mihon.icons.materialsymbols.rounded.CloudOff
 import mihon.icons.materialsymbols.rounded.Download
 import mihon.icons.materialsymbols.rounded.Eyeglasses2
 import mihon.icons.materialsymbols.rounded.Info
-import mihon.icons.materialsymbols.rounded.QueryStats
 import mihon.icons.materialsymbols.rounded.Settings
 import mihon.icons.materialsymbols.rounded.Storage
-import mihon.icons.materialsymbols.roundedfilled.VolunteerActivism
-import tachiyomi.core.common.Constants
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
@@ -35,10 +31,8 @@ fun MoreScreen(
     onIncognitoModeChange: (Boolean) -> Unit,
     onClickDownloadQueue: () -> Unit,
     onClickCategories: () -> Unit,
-    onClickStats: () -> Unit,
     onClickDataAndStorage: () -> Unit,
     onClickSettings: () -> Unit,
-    onClickSupport: () -> Unit,
     onClickAbout: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -47,7 +41,7 @@ fun MoreScreen(
         ScrollbarLazyColumn(contentPadding = contentPadding) {
             item {
                 LogoHeader(
-                    iconPadding = PaddingValues(vertical = 32.dp),
+                    iconPadding = PaddingValues(vertical = 108.dp),
                 )
             }
             item {
@@ -109,13 +103,6 @@ fun MoreScreen(
             }
             item {
                 TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_stats),
-                    icon = MaterialSymbols.Rounded.QueryStats,
-                    onPreferenceClick = onClickStats,
-                )
-            }
-            item {
-                TextPreferenceWidget(
                     title = stringResource(MR.strings.label_data_storage),
                     icon = MaterialSymbols.Rounded.Storage,
                     onPreferenceClick = onClickDataAndStorage,
@@ -133,23 +120,9 @@ fun MoreScreen(
             }
             item {
                 TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_support_us),
-                    icon = MaterialSymbols.RoundedFilled.VolunteerActivism,
-                    onPreferenceClick = onClickSupport,
-                )
-            }
-            item {
-                TextPreferenceWidget(
                     title = stringResource(MR.strings.pref_category_about),
                     icon = MaterialSymbols.Rounded.Info,
                     onPreferenceClick = onClickAbout,
-                )
-            }
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_help),
-                    icon = MaterialSymbols.AutoMirroredRounded.Help,
-                    onPreferenceClick = { uriHandler.openUri(Constants.URL_HELP) },
                 )
             }
         }
