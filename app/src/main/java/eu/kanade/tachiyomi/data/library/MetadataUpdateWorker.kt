@@ -93,7 +93,6 @@ class MetadataUpdateWorker(context: Context, workerParams: WorkerParameters) :
      */
     private suspend fun addMangaToQueue() {
         mangaToUpdate = getLibraryManga.await()
-        notifier.showQueueSizeWarningNotificationIfNeeded(mangaToUpdate)
     }
 
     private suspend fun updateMetadata() {
@@ -169,8 +168,6 @@ class MetadataUpdateWorker(context: Context, workerParams: WorkerParameters) :
     companion object {
         private const val TAG = "MetadataUpdate"
         private const val WORK_NAME_MANUAL = "MetadataUpdate"
-
-        private const val MANGA_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 60
 
         fun startNow(workManager: WorkManager): Boolean {
             if (workManager.isRunning(TAG)) {
