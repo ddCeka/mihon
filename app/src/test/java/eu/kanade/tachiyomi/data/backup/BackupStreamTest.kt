@@ -193,7 +193,6 @@ class BackupStreamTest {
                 badgeLabel = null,
                 signingKey = "key",
                 contactWebsite = "https://example.org",
-                contactDiscord = null,
                 isLegacy = false,
                 extensionListUrl = null,
             ),
