@@ -160,11 +160,6 @@ object SettingsAdvancedScreen : SearchableSettings {
                         }
                     },
                 ),
-                Preference.PreferenceItem.TextPreference(
-                    title = "Don't kill my app!",
-                    subtitle = stringResource(MR.strings.about_dont_kill_my_app),
-                    onClick = { uriHandler.openUri("https://dontkillmyapp.com/") },
-                ),
             ),
         )
     }
