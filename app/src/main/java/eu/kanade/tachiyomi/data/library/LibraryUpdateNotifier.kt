@@ -115,33 +115,6 @@ class LibraryUpdateNotifier(
     }
 
     /**
-     * Warn when excessively checking any single source.
-     */
-    suspend fun showQueueSizeWarningNotificationIfNeeded(mangaToUpdate: List<LibraryManga>) {
-        val maxUpdatesFromSource = mangaToUpdate
-            .groupBy { it.manga.source }
-            .filter { (sourceId, _) -> sourceManager.get(sourceId) !is UnmeteredSource }
-            .maxOfOrNull { it.value.size } ?: 0
-
-        if (maxUpdatesFromSource <= MANGA_PER_SOURCE_QUEUE_WARNING_THRESHOLD) {
-            return
-        }
-
-        context.notify(
-            Notifications.ID_LIBRARY_SIZE_WARNING,
-            Notifications.CHANNEL_LIBRARY_PROGRESS,
-        ) {
-            setContentTitle(context.stringResource(MR.strings.label_warning))
-            setStyle(
-                NotificationCompat.BigTextStyle().bigText(context.stringResource(MR.strings.notification_size_warning)),
-            )
-            setSmallIcon(MaterialSymbolsR.drawable.rounded_filled_warning)
-            setTimeoutAfter(Downloader.WARNING_NOTIF_TIMEOUT_MS)
-            setContentIntent(NotificationHandler.openUrl(context, HELP_WARNING_URL))
-        }
-    }
-
-    /**
      * Shows notification containing update entries that failed with action to open full log.
      *
      * @param failed Number of entries that failed to update.
@@ -268,19 +241,16 @@ class LibraryUpdateNotifier(
                 ),
             )
             // Download chapters action
-            // Only add the action when chapters is within threshold
-            if (chapters.size <= Downloader.CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD) {
-                addAction(
-                    android.R.drawable.stat_sys_download_done,
-                    context.stringResource(MR.strings.action_download),
-                    NotificationReceiver.downloadChaptersPendingBroadcast(
-                        context,
-                        manga,
-                        chapters,
-                        Notifications.ID_NEW_CHAPTERS,
-                    ),
-                )
-            }
+            addAction(
+                android.R.drawable.stat_sys_download_done,
+                context.stringResource(MR.strings.action_download),
+                NotificationReceiver.downloadChaptersPendingBroadcast(
+                    context,
+                    manga,
+                    chapters,
+                    Notifications.ID_NEW_CHAPTERS,
+                ),
+            )
         }.build()
     }
 
@@ -377,14 +347,8 @@ class LibraryUpdateNotifier(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
     }
-
-    companion object {
-        const val HELP_WARNING_URL =
-            "https://mihon.app/docs/faq/library#why-am-i-warned-about-large-bulk-updates-and-downloads"
-    }
 }
 
 private const val NOTIF_MAX_CHAPTERS = 5
 private const val NOTIF_TITLE_MAX_LEN = 45
 private const val NOTIF_ICON_SIZE = 192
-private const val MANGA_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 60
