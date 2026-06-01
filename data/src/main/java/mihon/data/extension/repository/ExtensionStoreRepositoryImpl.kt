@@ -30,7 +30,6 @@ class ExtensionStoreRepositoryImpl(
             badgeLabel = name,
             signingKey = "NO_SIGNING_KEY",
             contactWebsite = indexUrl,
-            contactDiscord = null,
             isLegacy = false,
         )
     }
@@ -65,7 +64,6 @@ class ExtensionStoreRepositoryImpl(
             badgeLabel = store.badgeLabel,
             signingKey = store.signingKey,
             contactWebsite = store.contact.website,
-            contactDiscord = store.contact.discord,
             isLegacy = store.isLegacy,
         )
     }
@@ -115,7 +113,6 @@ class ExtensionStoreRepositoryImpl(
         badgeLabel: String,
         signingKey: String,
         contactWebsite: String,
-        contactDiscord: String?,
         isLegacy: Boolean,
     ): ExtensionStore = ExtensionStore(
         indexUrl = indexUrl,
@@ -124,7 +121,6 @@ class ExtensionStoreRepositoryImpl(
         signingKey = signingKey,
         contact = ExtensionStore.Contact(
             website = contactWebsite,
-            discord = contactDiscord,
         ),
         isLegacy = isLegacy,
     )

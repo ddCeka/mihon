@@ -10,6 +10,5 @@ data class ExtensionStore(
 ) {
     data class Contact(
         val website: String,
-        val discord: String?,
     )
 }
