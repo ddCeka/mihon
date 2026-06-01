@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Launch
 import androidx.compose.material.icons.outlined.Settings
@@ -43,6 +45,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastMap
 import eu.kanade.domain.extension.interactor.ExtensionSourceItem
 import eu.kanade.presentation.browse.components.ExtensionIcon
 import eu.kanade.presentation.components.AppBar
@@ -56,6 +59,9 @@ import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.ui.browse.extension.details.ExtensionDetailsScreenModel
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.copyToClipboard
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import tachiyomi.domain.category.model.Category
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
@@ -74,6 +80,7 @@ fun ExtensionDetailsScreen(
     onClickUninstall: () -> Unit,
     onClickSource: (sourceId: Long) -> Unit,
     onClickIncognito: (Boolean) -> Unit,
+    onSetDefaultCategory: (Long?) -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
     val url = remember(state.extension) {
@@ -141,10 +148,14 @@ fun ExtensionDetailsScreen(
             extension = state.extension,
             sources = state.sources,
             incognitoMode = state.isIncognito,
+            perSourceDefaultCategoryEnabled = state.perSourceDefaultCategoryEnabled,
+            extensionDefaultCategory = state.extensionDefaultCategory,
+            allCategories = state.allCategories,
             onClickSourcePreferences = onClickSourcePreferences,
             onClickUninstall = onClickUninstall,
             onClickSource = onClickSource,
             onClickIncognito = onClickIncognito,
+            onSetDefaultCategory = onSetDefaultCategory,
         )
     }
 }
@@ -155,10 +166,14 @@ private fun ExtensionDetails(
     extension: Extension.Installed,
     sources: List<ExtensionSourceItem>,
     incognitoMode: Boolean,
+    perSourceDefaultCategoryEnabled: Boolean,
+    extensionDefaultCategory: Long?,
+    allCategories: ImmutableList<Category>,
     onClickSourcePreferences: (sourceId: Long) -> Unit,
     onClickUninstall: () -> Unit,
     onClickSource: (sourceId: Long) -> Unit,
     onClickIncognito: (Boolean) -> Unit,
+    onSetDefaultCategory: (Long?) -> Unit,
 ) {
     val context = LocalContext.current
     var showNsfwWarning by remember { mutableStateOf(false) }
@@ -176,6 +191,9 @@ private fun ExtensionDetails(
             DetailsHeader(
                 extension = extension,
                 extIncognitoMode = incognitoMode,
+                perSourceDefaultCategoryEnabled = perSourceDefaultCategoryEnabled,
+                extensionDefaultCategory = extensionDefaultCategory,
+                allCategories = allCategories,
                 onClickUninstall = onClickUninstall,
                 onClickAppInfo = {
                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -188,6 +206,7 @@ private fun ExtensionDetails(
                     showNsfwWarning = true
                 },
                 onExtIncognitoChange = onClickIncognito,
+                onSetDefaultCategory = onSetDefaultCategory,
             )
         }
 
@@ -216,10 +235,14 @@ private fun ExtensionDetails(
 private fun DetailsHeader(
     extension: Extension,
     extIncognitoMode: Boolean,
+    perSourceDefaultCategoryEnabled: Boolean,
+    extensionDefaultCategory: Long?,
+    allCategories: ImmutableList<Category>,
     onClickAgeRating: () -> Unit,
     onClickUninstall: () -> Unit,
     onClickAppInfo: (() -> Unit)?,
     onExtIncognitoChange: (Boolean) -> Unit,
+    onSetDefaultCategory: (Long?) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -365,6 +388,49 @@ private fun DetailsHeader(
                 }
             },
         )
+
+        if (perSourceDefaultCategoryEnabled) {
+            var showCategoryDialog by remember { mutableStateOf(false) }
+            val labels = listOf(stringResource(MR.strings.default_category_summary)) + allCategories.fastMap { it.name }
+            val ids = listOf(-1L) + allCategories.fastMap { it.id }
+
+            TextPreferenceWidget(
+                modifier = Modifier.padding(horizontal = MaterialTheme.padding.small),
+                title = stringResource(MR.strings.default_category),
+                subtitle = labels[ids.indexOf(extensionDefaultCategory ?: -1L)],
+                onPreferenceClick = { showCategoryDialog = true },
+            )
+
+            if (showCategoryDialog) {
+                AlertDialog(
+                    onDismissRequest = { showCategoryDialog = false },
+                    title = { Text(text = stringResource(MR.strings.default_category)) },
+                    text = {
+                        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                            ids.forEachIndexed { index, id ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            onSetDefaultCategory(id.takeIf { it != -1L })
+                                            showCategoryDialog = false
+                                        }
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(text = labels[index])
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showCategoryDialog = false }) {
+                            Text(text = stringResource(MR.strings.action_cancel))
+                        }
+                    },
+                )
+            }
+        }
 
         HorizontalDivider()
     }
