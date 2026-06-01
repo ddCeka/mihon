@@ -45,7 +45,6 @@ class ExtensionStoresScreen(
             onClickCreate = { screenModel.showDialog(ExtensionStoreDialog.Create()) },
             onCopy = { context.copyToClipboard(it.indexUrl, it.indexUrl) },
             onOpenWebsite = { it.contact.website.let(context::openInBrowser) },
-            onOpenDiscord = { it.contact.discord?.let(context::openInBrowser) },
             onClickDelete = { screenModel.showDialog(ExtensionStoreDialog.Delete(it)) },
             onClickRefresh = { screenModel.refreshRepos() },
             navigateUp = navigator::pop,
