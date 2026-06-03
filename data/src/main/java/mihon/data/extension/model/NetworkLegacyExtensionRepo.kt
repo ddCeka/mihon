@@ -25,7 +25,6 @@ data class NetworkLegacyExtensionRepo(
             signingKey = meta.signingKeyFingerprint,
             contact = ExtensionStore.Contact(
                 website = meta.website,
-                discord = null,
             ),
             isLegacy = true,
         )
