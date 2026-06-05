@@ -151,14 +151,6 @@ jobs:
           tag_name: ${{ needs.get_tag.outputs.tag }}
           name: Mihon ${{ needs.get_tag.outputs.tag }}
           body: |
-            Check out the [past release notes](https://github.com/ddCeka/mihon/releases) if you're upgrading from an earlier version.
-
-            <!-->
-
-
-
-            <!-->
-
             > [!TIP]
             >
             > ### If you are unsure which version to download then go with `mihon-${{ needs.get_tag.outputs.tag }}.apk`
