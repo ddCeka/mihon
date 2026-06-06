@@ -158,4 +158,4 @@ jobs:
             mihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
             mihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}-foss.apk
           draft: false
-          prerelease: false
+          prerelease: true
