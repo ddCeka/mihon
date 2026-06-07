@@ -16,6 +16,8 @@ import androidx.annotation.AttrRes
 import androidx.annotation.CallSuper
 import androidx.annotation.StyleRes
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.postDelayed
 import androidx.core.view.isVisible
 import coil3.BitmapImage
@@ -24,6 +26,7 @@ import coil3.dispose
 import coil3.imageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import coil3.request.allowHardware
 import coil3.request.crossfade
 import coil3.size.Precision
 import coil3.size.ViewSizeResolver
@@ -39,6 +42,7 @@ import eu.kanade.tachiyomi.data.coil.customDecoder
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonSubsamplingImageView
 import eu.kanade.tachiyomi.util.system.animatorDurationScale
 import eu.kanade.tachiyomi.util.view.isVisibleOnScreen
+import moe.grass.webgpuviewer.WebGpuImageViewer
 import okio.BufferedSource
 import tachiyomi.core.common.util.system.ImageUtil
 import uy.kohesive.injekt.Injekt
@@ -235,27 +239,31 @@ open class ReaderPageImageView @JvmOverloads constructor(
         if (pageView is SubsamplingScaleImageView) return
         removeView(pageView)
 
-        pageView = if (isWebtoon) {
-            WebtoonSubsamplingImageView(context)
+        pageView = if (Injekt.get<BasePreferences>().highQualityRenderer.get()) {
+            ComposeView(context)
         } else {
-            SubsamplingScaleImageView(context)
-        }.apply {
-            setMaxTileSize(ImageUtil.hardwareBitmapThreshold)
-            setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_CENTER)
-            setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
-            setMinimumTileDpi(180)
-            setOnStateChangedListener(
-                object : SubsamplingScaleImageView.OnStateChangedListener {
-                    override fun onScaleChanged(newScale: Float, origin: Int) {
-                        this@ReaderPageImageView.onScaleChanged(newScale)
-                    }
+            if (isWebtoon) {
+                WebtoonSubsamplingImageView(context)
+            } else {
+                SubsamplingScaleImageView(context)
+            }.apply {
+                setMaxTileSize(ImageUtil.hardwareBitmapThreshold)
+                setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_CENTER)
+                setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
+                setMinimumTileDpi(180)
+                setOnStateChangedListener(
+                    object : SubsamplingScaleImageView.OnStateChangedListener {
+                        override fun onScaleChanged(newScale: Float, origin: Int) {
+                            this@ReaderPageImageView.onScaleChanged(newScale)
+                        }
 
-                    override fun onCenterChanged(newCenter: PointF?, origin: Int) {
-                        // Not used
-                    }
-                },
-            )
-            setOnClickListener { this@ReaderPageImageView.onViewClicked() }
+                        override fun onCenterChanged(newCenter: PointF?, origin: Int) {
+                            // Not used
+                        }
+                    },
+                )
+                setOnClickListener { this@ReaderPageImageView.onViewClicked() }
+            }
         }
         addView(pageView, MATCH_PARENT, MATCH_PARENT)
     }
@@ -300,6 +308,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
                 setImage(ImageSource.bitmap(data.bitmap))
                 isVisible = true
             }
+
             is BufferedSource -> {
                 val isHardwareBitmapSupported = ImageUtil.canUseHardwareBitmap(data)
                 if (!isWebtoon || alwaysDecodeLongStripWithSSIV || !isHardwareBitmapSupported) {
@@ -333,11 +342,67 @@ open class ReaderPageImageView @JvmOverloads constructor(
                     .build()
                     .let(context.imageLoader::enqueue)
             }
+
             else -> {
                 throw IllegalArgumentException("Not implemented for class ${data::class.simpleName}")
             }
         }
     }
+        ?: (pageView as? ComposeView)?.apply {
+            val offset = if (config.landscapeZoom) {
+                when (config.zoomStartPosition) {
+                    ZoomStartPosition.LEFT -> Offset(-1f, 0f)
+                    ZoomStartPosition.RIGHT -> Offset(1f, 0f)
+                    ZoomStartPosition.CENTER -> Offset(0f, 0f)
+                }
+            } else {
+                Offset(0.5f, 0.5f)
+            }
+            when (data) {
+                is BitmapDrawable -> {
+                    setContent {
+                        WebGpuImageViewer(data.bitmap, zoomWide = config.landscapeZoom, zoomStartPosition = offset)
+                    }
+                    isVisible = true
+                }
+
+                is BufferedSource -> {
+                    ImageRequest.Builder(context)
+                        .data(data)
+                        .memoryCachePolicy(CachePolicy.DISABLED)
+                        .diskCachePolicy(CachePolicy.DISABLED)
+                        .target(
+                            onSuccess = { result ->
+                                val image = result as BitmapImage
+                                setContent {
+                                    WebGpuImageViewer(
+                                        image.bitmap,
+                                        zoomWide = config.landscapeZoom,
+                                        zoomStartPosition = offset,
+                                    )
+                                }
+                                isVisible = true
+                            },
+                        )
+                        .listener(
+                            onError = { _, result ->
+                                onImageLoadError(result.throwable)
+                            },
+                        )
+                        .allowHardware(false)
+                        .precision(Precision.INEXACT)
+                        .cropBorders(config.cropBorders)
+                        .customDecoder(true)
+                        .crossfade(false)
+                        .build()
+                        .let(context.imageLoader::enqueue)
+                }
+
+                else -> {
+                    throw IllegalArgumentException("Not implemented for class ${data::class.simpleName}")
+                }
+            }
+        }
 
     private fun prepareAnimatedImageView() {
         if (pageView is AppCompatImageView) return
