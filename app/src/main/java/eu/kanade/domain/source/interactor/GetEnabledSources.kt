@@ -31,7 +31,7 @@ class GetEnabledSources(
                     val flag = if ("${it.id}" in pinnedSourceIds) Pins.pinned else Pins.unpinned
                     val source = it.copy(pin = flag)
                     val toFlatten = mutableListOf(source)
-                    if (showLastUsedSource && source.id == lastUsedSource) {
+                    if (source.id == lastUsedSource) {
                         toFlatten.add(source.copy(isUsedLast = true, pin = source.pin - Pin.Actual))
                     }
                     toFlatten
