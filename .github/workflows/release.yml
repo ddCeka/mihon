@@ -161,6 +161,6 @@ jobs:
             mihon-arm64-v8a-${{ needs.get_tag.outputs.tag }}-foss.apk
             mihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
             mihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}-foss.apk
-          draft: false
+          draft: true
           prerelease: true
           token: ${{ secrets.MIHON_BOT_TOKEN }}
