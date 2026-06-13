@@ -13,6 +13,7 @@ import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.screen.browse.ExtensionStoresScreen
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.authenticate
+import kotlinx.collections.immutable.persistentMapOf
 import mihon.domain.extension.interactor.GetExtensionStoreCountAsFlow
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
@@ -44,6 +45,14 @@ object SettingsBrowseScreen : SearchableSettings {
                     Preference.PreferenceItem.SwitchPreference(
                         preference = sourcePreferences.hideInLibraryItems,
                         title = stringResource(MR.strings.pref_hide_in_library_items),
+                    ),
+                    Preference.PreferenceItem.ListPreference(
+                        preference = sourcePreferences.defaultTab,
+                        title = stringResource(MR.strings.pref_source_default_tab),
+                        entries = persistentMapOf(
+                            SourcePreferences.DataView.POPULAR to stringResource(MR.strings.popular),
+                            SourcePreferences.DataView.LATEST to stringResource(MR.strings.latest),
+                        ),
                     ),
                     Preference.PreferenceItem.TextPreference(
                         title = stringResource(MR.strings.extensionStores),
