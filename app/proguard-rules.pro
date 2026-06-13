@@ -76,7 +76,3 @@
 
 # XmlUtil
 -keep public enum nl.adaptivity.xmlutil.EventType { *; }
-
-# webgpu
--keep interface androidx.webgpu.** { *; }
--keep class androidx.webgpu.** { *; }
