@@ -336,7 +336,6 @@ class MainActivity : BaseActivity() {
         }
     }
 
-
     /**
      * Sets custom splash screen exit animation on devices prior to Android 12.
      *

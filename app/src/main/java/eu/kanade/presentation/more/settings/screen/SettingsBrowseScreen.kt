@@ -46,6 +46,10 @@ object SettingsBrowseScreen : SearchableSettings {
                         preference = sourcePreferences.hideInLibraryItems,
                         title = stringResource(MR.strings.pref_hide_in_library_items),
                     ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        preference = sourcePreferences.showLastUsedSource,
+                        title = stringResource(MR.strings.pref_show_last_used_source),
+                    ),
                     Preference.PreferenceItem.ListPreference(
                         preference = sourcePreferences.defaultTab,
                         title = stringResource(MR.strings.pref_source_default_tab),
