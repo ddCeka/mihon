@@ -41,19 +41,11 @@ class AppUpdateChecker {
 }
 
 val GITHUB_REPO: String by lazy {
-    if (isPreviewBuildType) {
-        "ddCeka/mihon-preview"
-    } else {
-        "ddCeka/mihon"
-    }
+    "ddCeka/mihon"
 }
 
 val RELEASE_TAG: String by lazy {
-    if (isPreviewBuildType) {
-        "r${BuildConfig.COMMIT_COUNT}"
-    } else {
-        "v${BuildConfig.VERSION_NAME}"
-    }
+    "v${BuildConfig.VERSION_NAME}"
 }
 
 val RELEASE_URL = "https://github.com/$GITHUB_REPO/releases/tag/$RELEASE_TAG"
