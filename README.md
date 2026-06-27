@@ -9,12 +9,10 @@
 ### Full-featured reader
 Discover and read manga, webtoons, comics, and more – easier than ever on your Android device.
 
-[![CI](https://img.shields.io/github/actions/workflow/status/ddCeka/mihon/build.yml?labelColor=27303D)](https://github.com/ddCeka/mihon/actions/workflows/build_push.yml)
-[![License: Apache-2.0](https://img.shields.io/github/license/ddCeka/mihon?labelColor=27303D&color=0877d2)](/LICENSE)
-
 ## Download
 
-[![Mihon Preview](https://img.shields.io/github/release/ddCeka/mihon.svg?maxAge=3600&label=Preview&labelColor=06599d&color=043b69)](https://github.com/ddCeka/mihon/releases)
+[![Mihon Stable](https://img.shields.io/github/v/release/ddCeka/mihon.svg?maxAge=3600&label=Stable&labelColor=06599d&color=043b69)](https://github.com/ddCeka/mihon/releases)
+[![Mihon Beta](https://img.shields.io/github/v/release/ddCeka/mihon.svg?include_prereleases&label=Beta&labelColor=2c2c47&color=1c1c39)](https://github.com/ddCeka/mihon/releases)
 
 *Requires Android 8.0 or higher.*
 
