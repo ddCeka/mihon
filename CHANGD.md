@@ -15,5 +15,8 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+### Added
+- Add setting to hide Last Used sources section
+
 ### Changed
 - Refactor Release build into foss
