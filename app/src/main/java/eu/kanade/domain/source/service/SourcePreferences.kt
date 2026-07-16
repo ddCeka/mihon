@@ -43,6 +43,11 @@ class SourcePreferences(
         -1,
     )
 
+    val showLastUsedSource: Preference<Boolean> = preferenceStore.getBoolean(
+        "show_last_used_source",
+        true,
+    )
+
     val enabledContentWarnings: Preference<Set<ContentWarning>> = preferenceStore.getEnumSet(
         "enabled_content_warnings",
         setOf(ContentWarning.SAFE, ContentWarning.MIXED, ContentWarning.NSFW),
