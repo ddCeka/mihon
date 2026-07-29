@@ -19,4 +19,5 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add setting to hide Last Used sources section
 
 ### Changed
+- Change Smart Update feature to off by default
 - Refactor Release build into foss
