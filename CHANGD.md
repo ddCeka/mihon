@@ -22,3 +22,6 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Change Smart Update feature to off by default
 - Revert "Stop tap zones from triggering when scrolling is stopped by tapping"
 - Refactor Release build into foss
+
+### Fixed
+- Fix Search keyboard not closing on Enter and reopening on navigation back
