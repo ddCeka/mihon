@@ -202,6 +202,7 @@ class WebtoonPageHolder(
                     isAnimated,
                     ReaderPageImageView.Config(
                         zoomDuration = viewer.config.doubleTapAnimDuration,
+                        doubleTapZoom = true, // WebtoonViewer uses a separate doubletap suppression mechanism
                         minimumScaleType = SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH,
                         cropBorders = viewer.config.imageCropBorders,
                     ),
