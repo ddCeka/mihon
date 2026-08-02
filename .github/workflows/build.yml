@@ -11,6 +11,7 @@ on:
       - 'i18n/src/commonMain/moko-resources/base/plurals.xml'
   push:
     branches:
+      - dev
       - master
 
 concurrency:
