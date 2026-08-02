@@ -40,6 +40,7 @@ class CategoryScreen : Screen() {
             onClickCreate = { viewModel.showDialog(CategoryDialog.Create) },
             onClickRename = { viewModel.showDialog(CategoryDialog.Rename(it)) },
             onClickDelete = { viewModel.showDialog(CategoryDialog.Delete(it)) },
+            onToggleIncognito = { viewModel.toggleIncognito(it) },
             onChangeOrder = viewModel::changeOrder,
             navigateUp = navigator::pop,
         )
