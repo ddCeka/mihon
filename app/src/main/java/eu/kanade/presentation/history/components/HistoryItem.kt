@@ -89,7 +89,7 @@ fun HistoryItem(
             if (readProgress != null) {
                 Text(
                     text = readProgress,
-                    modifier = Modifier.padding(top = 2.dp),
+                    modifier = Modifier.padding(top = 4.dp),
                     style = textStyle,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_ALPHA),
                 )
