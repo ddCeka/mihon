@@ -99,6 +99,7 @@ class HistoryviewModelStateProvider : PreviewParameterProvider<HistoryViewModel.
                         mangaId = Random.nextLong(),
                         title = "Test Title",
                         chapterNumber = Random.nextDouble(),
+                        lastPageRead = Random.nextLong(0, 20),
                         readAt = Date.from(Clock.System.now().toJavaInstant()),
                         readDuration = Random.nextLong(),
                         coverData = MangaCover(
