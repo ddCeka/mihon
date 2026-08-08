@@ -26,6 +26,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Refactor Release build into foss
 
 ### Fixed
+- Fix tracking date selection for all timezones
 - Fix page flashing on auto background
 - Fix split wide pages cause IndexOutOfBoundsException crash
 - Fix Search keyboard not closing on Enter and reopening on navigation back
