@@ -49,7 +49,7 @@ import eu.kanade.tachiyomi.network.PREF_DOH_SHECAN
 import eu.kanade.tachiyomi.ui.more.OnboardingScreen
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.GLUtil
-import eu.kanade.tachiyomi.util.system.isReleaseBuildType
+import eu.kanade.tachiyomi.util.system.isPreviewBuildType
 import eu.kanade.tachiyomi.util.system.isShizukuInstalled
 import eu.kanade.tachiyomi.util.system.powerManager
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
@@ -422,8 +422,7 @@ object SettingsAdvancedScreen : SearchableSettings {
                     preference = extensionInstallerPref,
                     entries = extensionInstallerPref.entries
                         .filter {
-                            // TODO: allow private option in stable versions once URL handling is more fleshed out
-                            if (isReleaseBuildType) {
+                            if (isPreviewBuildType) {
                                 it != BasePreferences.ExtensionInstaller.PRIVATE
                             } else {
                                 true
