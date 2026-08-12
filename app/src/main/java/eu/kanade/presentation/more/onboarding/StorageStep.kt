@@ -1,6 +1,5 @@
 package eu.kanade.presentation.more.onboarding
 
-import android.content.ActivityNotFoundException
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,11 +13,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.more.settings.screen.SettingsDataScreen
-import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.flow.collectLatest
 import tachiyomi.domain.storage.service.StoragePreferences
 import tachiyomi.i18n.MR
@@ -39,7 +36,6 @@ internal class StorageStep : OnboardingStep {
 
     @Composable
     override fun Content() {
-        val context = LocalContext.current
         val handler = LocalUriHandler.current
 
         val pickStorageLocation = SettingsDataScreen.storageLocationPicker(storagePref)
@@ -58,13 +54,7 @@ internal class StorageStep : OnboardingStep {
 
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    try {
-                        pickStorageLocation.launch(null)
-                    } catch (e: ActivityNotFoundException) {
-                        context.toast(MR.strings.file_picker_error)
-                    }
-                },
+                onClick = pickStorageLocation,
             ) {
                 Text(stringResource(MR.strings.onboarding_storage_action_select))
             }
