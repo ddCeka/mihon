@@ -402,11 +402,11 @@ class Downloader(
                 val extensionDir = mangaDir.parentFile
                 val mangaNameSanitized = DiskUtil.buildValidFilename(download.manga.title)
                 val destFile = extensionDir?.createFile("$mangaNameSanitized.pdf")
-                
+
                 if (destFile != null) {
                     val document = PdfDocument()
                     val imageFiles = tmpDir.listFiles()?.filter { it.isFile }?.sortedBy { it.name }
-                    
+
                     imageFiles?.forEachIndexed { index, imgFile ->
                         imgFile.openInputStream().use { stream ->
                             val bitmap = BitmapFactory.decodeStream(stream)
@@ -419,7 +419,7 @@ class Downloader(
                                 val page = document.startPage(pageInfo)
                                 page.canvas.drawBitmap(bitmap, null, Rect(0, 0, bitmap.width, bitmap.height), null)
                                 document.finishPage(page)
-                                bitmap.recycle() 
+                                bitmap.recycle()
                             }
                         }
                     }
@@ -429,7 +429,6 @@ class Downloader(
                     document.close()
                 }
                 tmpDir.delete()
-
             } else {
                 // Only rename the directory if it's downloaded
                 if (downloadPreferences.saveChaptersAsCBZ.get()) {
