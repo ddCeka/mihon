@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.browse.source.browse
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -9,9 +10,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CollectionsBookmark
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.FlipToBack
 import androidx.compose.material.icons.outlined.NewReleases
+import androidx.compose.material.icons.outlined.SelectAll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -20,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,10 +46,12 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.core.util.ifSourcesLoaded
 import eu.kanade.presentation.browse.BrowseSourceContent
 import eu.kanade.presentation.browse.MissingSourceScreen
+import eu.kanade.presentation.browse.components.BrowseSourceSelectionToolbar
 import eu.kanade.presentation.browse.components.BrowseSourceToolbar
 import eu.kanade.presentation.browse.components.RemoveMangaDialog
 import eu.kanade.presentation.category.components.ChangeCategoryDialog
 import eu.kanade.presentation.manga.DuplicateMangaDialog
+import eu.kanade.presentation.manga.components.LocalSourceBottomActionMenu
 import eu.kanade.presentation.util.AssistContentScreen
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -128,6 +137,20 @@ data class BrowseSourceScreen(
             assistUrl = (viewModel.source as? HttpSource)?.getHomeUrl()
         }
 
+        val mangaPagingItems = viewModel.mangaPagerFlowFlow.collectAsLazyPagingItems()
+
+        val allLoadedManga = {
+            (0 until mangaPagingItems.itemCount).mapNotNull { mangaPagingItems[it]?.value }
+        }
+        val selectedManga = {
+            allLoadedManga().filter { it.id in state.selection }
+        }
+
+        // Handle back press in selection mode
+        BackHandler(enabled = state.selectionMode) {
+            viewModel.clearSelection()
+        }
+
         Scaffold(
             topBar = {
                 Column(
@@ -135,79 +158,92 @@ data class BrowseSourceScreen(
                         .background(MaterialTheme.colorScheme.surface)
                         .pointerInput(Unit) {},
                 ) {
-                    BrowseSourceToolbar(
-                        searchQuery = state.toolbarQuery,
-                        onSearchQueryChange = viewModel::setToolbarQuery,
-                        source = viewModel.source,
-                        displayMode = viewModel.displayMode,
-                        onDisplayModeChange = { viewModel.displayMode = it },
-                        navigateUp = navigateUp,
-                        onWebViewClick = onWebViewClick,
-                        onHelpClick = onHelpClick,
-                        onSettingsClick = { navigator.push(SourcePreferencesScreen(sourceId)) },
-                        onSearch = viewModel::search,
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .horizontalScroll(rememberScrollState())
-                            .padding(horizontal = MaterialTheme.padding.small),
-                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-                    ) {
-                        FilterChip(
-                            selected = state.listing == Listing.Popular,
-                            onClick = {
-                                viewModel.resetFilters()
-                                viewModel.setListing(Listing.Popular)
+                    if (state.selectionMode) {
+                        BrowseSourceSelectionToolbar(
+                            selectedCount = state.selection.size,
+                            onClickUnselectAll = viewModel::clearSelection,
+                            onClickSelectAll = {
+                                viewModel.selectAll(allLoadedManga())
                             },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Outlined.Favorite,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(FilterChipDefaults.IconSize),
-                                )
-                            },
-                            label = {
-                                Text(text = stringResource(MR.strings.popular))
+                            onClickInvertSelection = {
+                                viewModel.invertSelection(allLoadedManga())
                             },
                         )
-                        if (viewModel.source.supportsLatest) {
+                    } else {
+                        BrowseSourceToolbar(
+                            searchQuery = state.toolbarQuery,
+                            onSearchQueryChange = viewModel::setToolbarQuery,
+                            source = viewModel.source,
+                            displayMode = viewModel.displayMode,
+                            onDisplayModeChange = { viewModel.displayMode = it },
+                            navigateUp = navigateUp,
+                            onWebViewClick = onWebViewClick,
+                            onHelpClick = onHelpClick,
+                            onSettingsClick = { navigator.push(SourcePreferencesScreen(sourceId)) },
+                            onSearch = viewModel::search,
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .horizontalScroll(rememberScrollState())
+                                .padding(horizontal = MaterialTheme.padding.small),
+                            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+                        ) {
                             FilterChip(
-                                selected = state.listing == Listing.Latest,
+                                selected = state.listing == Listing.Popular,
                                 onClick = {
                                     viewModel.resetFilters()
-                                    viewModel.setListing(Listing.Latest)
+                                    viewModel.setListing(Listing.Popular)
                                 },
                                 leadingIcon = {
                                     Icon(
-                                        imageVector = Icons.Outlined.NewReleases,
+                                        imageVector = Icons.Outlined.Favorite,
                                         contentDescription = null,
                                         modifier = Modifier
                                             .size(FilterChipDefaults.IconSize),
                                     )
                                 },
                                 label = {
-                                    Text(text = stringResource(MR.strings.latest))
+                                    Text(text = stringResource(MR.strings.popular))
                                 },
                             )
-                        }
-                        if (state.filters.isNotEmpty()) {
-                            FilterChip(
-                                selected = state.listing is Listing.Search,
-                                onClick = viewModel::openFilterSheet,
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Outlined.FilterList,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .size(FilterChipDefaults.IconSize),
-                                    )
-                                },
-                                label = {
-                                    Text(text = stringResource(MR.strings.action_filter))
-                                },
-                            )
+                            if (viewModel.source.supportsLatest) {
+                                FilterChip(
+                                    selected = state.listing == Listing.Latest,
+                                    onClick = {
+                                        viewModel.resetFilters()
+                                        viewModel.setListing(Listing.Latest)
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Outlined.NewReleases,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .size(FilterChipDefaults.IconSize),
+                                        )
+                                    },
+                                    label = {
+                                        Text(text = stringResource(MR.strings.latest))
+                                    },
+                                )
+                            }
+                            if (state.filters.isNotEmpty()) {
+                                FilterChip(
+                                    selected = state.listing is Listing.Search,
+                                    onClick = viewModel::openFilterSheet,
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Outlined.FilterList,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .size(FilterChipDefaults.IconSize),
+                                        )
+                                    },
+                                    label = {
+                                        Text(text = stringResource(MR.strings.action_filter))
+                                    },
+                                )
+                            }
                         }
                     }
 
@@ -215,10 +251,25 @@ data class BrowseSourceScreen(
                 }
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            bottomBar = {
+                if (viewModel.isLocalSource) {
+                    LocalSourceBottomActionMenu(
+                        visible = state.selectionMode,
+                        onAddToLibraryClicked = {
+                            viewModel.addFavorites(selectedManga())
+                        },
+                        onDeleteClicked = {
+                            viewModel.setDialog(
+                                BrowseSourceViewModel.Dialog.DeleteLocalMangas(selectedManga()),
+                            )
+                        },
+                    )
+                }
+            },
         ) { paddingValues ->
             BrowseSourceContent(
                 source = viewModel.source,
-                mangaList = viewModel.mangaPagerFlowFlow.collectAsLazyPagingItems(),
+                mangaList = mangaPagingItems,
                 columns = viewModel.getColumnsPreference(LocalConfiguration.current.orientation),
                 displayMode = viewModel.displayMode,
                 snackbarHostState = snackbarHostState,
@@ -226,19 +277,42 @@ data class BrowseSourceScreen(
                 onWebViewClick = onWebViewClick,
                 onHelpClick = { uriHandler.openUri(Constants.URL_HELP) },
                 onLocalSourceHelpClick = onHelpClick,
-                onMangaClick = { navigator.push((MangaScreen(it.id, true))) },
-                onMangaLongClick = { manga ->
-                    scope.launchIO {
-                        val duplicates = viewModel.getDuplicateLibraryManga(manga)
-                        when {
-                            manga.favorite -> viewModel.setDialog(BrowseSourceViewModel.Dialog.RemoveManga(manga))
-                            duplicates.isNotEmpty() -> viewModel.setDialog(
-                                BrowseSourceViewModel.Dialog.AddDuplicateManga(manga, duplicates),
-                            )
-                            else -> viewModel.addFavorite(manga)
-                        }
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onMangaClick = { manga ->
+                    if (state.selectionMode) {
+                        viewModel.toggleSelection(manga)
+                    } else {
+                        navigator.push(MangaScreen(manga.id, true))
                     }
+                },
+                onMangaLongClick = { manga ->
+                    if (viewModel.isLocalSource) {
+                        if (state.selectionMode) {
+                            viewModel.toggleSelection(manga)
+                        } else {
+                            viewModel.toggleSelection(manga)
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }
+                    } else {
+                        scope.launchIO {
+                            val duplicates = viewModel.getDuplicateLibraryManga(manga)
+                            when {
+                                manga.favorite -> viewModel.setDialog(
+                                    BrowseSourceViewModel.Dialog.RemoveManga(manga),
+                                )
+                                duplicates.isNotEmpty() -> viewModel.setDialog(
+                                    BrowseSourceViewModel.Dialog.AddDuplicateManga(manga, duplicates),
+                                )
+                                else -> viewModel.addFavorite(manga)
+                            }
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }
+                    }
+                },
+                selection = state.selection,
+                onDeleteSwipe = if (viewModel.isLocalSource) { manga ->
+                    viewModel.setDialog(BrowseSourceViewModel.Dialog.DeleteLocalManga(manga))
+                } else {
+                    null
                 },
             )
         }
@@ -293,6 +367,37 @@ data class BrowseSourceScreen(
                     },
                 )
             }
+            is BrowseSourceviewModel.Dialog.ChangeMangaCategoryForMultiple -> {
+                ChangeCategoryDialog(
+                    initialSelection = dialog.initialSelection,
+                    onDismissRequest = onDismissRequest,
+                    onEditCategories = { navigator.push(CategoryScreen()) },
+                    onConfirm = { include, _ ->
+                        viewModel.changeMangasFavorite(dialog.mangas)
+                        viewModel.moveMangasToCategories(dialog.mangas, include)
+                    },
+                )
+            }
+            is BrowseSourceviewModel.Dialog.DeleteLocalManga -> {
+                DeleteLocalMangaDialog(
+                    mangaTitle = dialog.manga.title,
+                    onDismissRequest = onDismissRequest,
+                    onConfirm = {
+                        viewModel.deleteLocalManga(dialog.manga)
+                        onDismissRequest()
+                    },
+                )
+            }
+            is BrowseSourceViewModel.Dialog.DeleteLocalMangas -> {
+                DeleteLocalMangaDialog(
+                    count = dialog.mangas.size,
+                    onDismissRequest = onDismissRequest,
+                    onConfirm = {
+                        viewModel.deleteLocalMangas(dialog.mangas)
+                        onDismissRequest()
+                    },
+                )
+            }
             else -> {}
         }
 
@@ -318,4 +423,36 @@ data class BrowseSourceScreen(
         class Text(txt: String) : SearchType(txt)
         class Genre(txt: String) : SearchType(txt)
     }
+}
+
+@Composable
+private fun DeleteLocalMangaDialog(
+    mangaTitle: String? = null,
+    count: Int = 1,
+    onDismissRequest: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(text = stringResource(MR.strings.action_remove)) },
+        text = {
+            Text(
+                text = if (mangaTitle != null) {
+                    stringResource(MR.strings.delete_manga_confirm, mangaTitle)
+                } else {
+                    stringResource(MR.strings.delete_mangas_confirm, count)
+                },
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(text = stringResource(MR.strings.action_ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = stringResource(MR.strings.action_cancel))
+            }
+        },
+    )
 }
