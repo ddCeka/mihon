@@ -21,6 +21,7 @@ import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.allowRgb565
 import coil3.request.crossfade
 import coil3.util.DebugLogger
+import com.github.awxkee.avifcoil.decoder.HeifDecoder
 import dev.mihon.injekt.patchInjekt
 import eu.kanade.domain.DomainModule
 import eu.kanade.domain.base.BasePreferences
@@ -178,6 +179,7 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
                 // NetworkFetcher.Factory
                 add(OkHttpNetworkFetcherFactory(callFactoryLazy::value))
                 // Decoder.Factory
+                add(HeifDecoder.Factory())
                 add(TachiyomiImageDecoder.Factory())
                 // Fetcher.Factory
                 add(BufferedSourceFetcher.Factory())
