@@ -51,11 +51,9 @@ android {
 
     buildTypes {
         val debug = getByName("debug") {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            applicationIdSuffix = ".debug"
             versionNameSuffix = "-${getLatestCommitCount()}"
-            proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
-            buildConfigField("String", "BUILD_TIME", "\"${getBuildTime(useLatestCommitTime = true)}\"")
+            isPseudoLocalesEnabled = true
         }
         val release = getByName("release") {
             isMinifyEnabled = true
@@ -66,6 +64,16 @@ android {
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
 
             buildConfigField("String", "BUILD_TIME", "\"${getBuildTime(useLatestCommitTime = true)}\"")
+        }
+
+        val commonMatchingFallbacks = listOf(release.name)
+
+        create("foss") {
+            initWith(release)
+
+            applicationIdSuffix = ".foss"
+
+            matchingFallbacks.addAll(commonMatchingFallbacks)
         }
     }
 

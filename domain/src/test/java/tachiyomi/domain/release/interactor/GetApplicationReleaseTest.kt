@@ -47,8 +47,6 @@ class GetApplicationReleaseTest {
         val result = getApplicationRelease.await(
             GetApplicationRelease.Arguments(
                 isFoss = false,
-                isPreview = true,
-                commitCount = 1000,
                 versionName = "",
                 repository = "test",
             ),
@@ -76,8 +74,6 @@ class GetApplicationReleaseTest {
         val result = getApplicationRelease.await(
             GetApplicationRelease.Arguments(
                 isFoss = false,
-                isPreview = false,
-                commitCount = 0,
                 versionName = "v1.0.0",
                 repository = "test",
             ),
@@ -105,8 +101,6 @@ class GetApplicationReleaseTest {
         val result = getApplicationRelease.await(
             GetApplicationRelease.Arguments(
                 isFoss = false,
-                isPreview = false,
-                commitCount = 0,
                 versionName = "v2.0.0",
                 repository = "test",
             ),
@@ -116,7 +110,7 @@ class GetApplicationReleaseTest {
     }
 
     @Test
-    fun `When now is before thirty days expect no new update`() = runTest {
+    fun `When now is before three days expect no new update`() = runTest {
         every { preference.get() } returns Instant.now().toEpochMilli()
         every { preference.set(any()) }.answers { }
 
@@ -132,8 +126,6 @@ class GetApplicationReleaseTest {
         val result = getApplicationRelease.await(
             GetApplicationRelease.Arguments(
                 isFoss = false,
-                isPreview = false,
-                commitCount = 0,
                 versionName = "v2.0.0",
                 repository = "test",
             ),
