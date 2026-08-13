@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add save one-shot as pdf
 - Add Gotham theme
 - Add disable doubletap option to paged reader
 - Add setting to hide Last Used sources section
