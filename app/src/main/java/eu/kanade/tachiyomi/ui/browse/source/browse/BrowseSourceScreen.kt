@@ -309,8 +309,10 @@ data class BrowseSourceScreen(
                     }
                 },
                 selection = state.selection,
-                onDeleteSwipe = if (viewModel.isLocalSource) { manga ->
-                    viewModel.setDialog(BrowseSourceViewModel.Dialog.DeleteLocalManga(manga))
+                onDeleteSwipe = if (viewModel.isLocalSource) {
+                    { manga ->
+                        viewModel.setDialog(BrowseSourceViewModel.Dialog.DeleteLocalManga(manga))
+                    }
                 } else {
                     null
                 },
