@@ -77,6 +77,7 @@ import eu.kanade.tachiyomi.ui.more.NewUpdateScreen
 import eu.kanade.tachiyomi.ui.more.OnboardingScreen
 import eu.kanade.tachiyomi.ui.setting.SettingsScreen
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.isDebugBuildType
 import eu.kanade.tachiyomi.util.system.isNavigationBarNeedsScrim
 import eu.kanade.tachiyomi.util.system.updaterEnabled
 import eu.kanade.tachiyomi.util.view.setComposeContent
@@ -235,8 +236,10 @@ class MainActivity : BaseActivity() {
 
                 HandleOnNewIntent(context = context, navigator = navigator)
 
-                if (isLaunch) CheckForUpdates()
-                ShowOnboarding()
+                if (!isDebugBuildType) {
+                    if (isLaunch) CheckForUpdates()
+                    ShowOnboarding()
+                }
             }
         }
 
