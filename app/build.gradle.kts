@@ -243,6 +243,10 @@ dependencies {
     }
     implementation(libs.image.decoder)
 
+    // Media3 (video support in reader)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+
     // UI libraries
     implementation(libs.material)
     implementation(libs.flexibleAdapter)
