@@ -74,7 +74,7 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
                 ImageUtil.findImageType(it)
             }
             return when (type) {
-                ImageUtil.ImageType.AVIF, ImageUtil.ImageType.JXL, ImageUtil.ImageType.HEIF -> true
+                ImageUtil.ImageType.JXL, ImageUtil.ImageType.HEIF -> true
                 else -> false
             }
         }
