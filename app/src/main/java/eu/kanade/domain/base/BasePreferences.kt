@@ -44,6 +44,4 @@ class BasePreferences(
         "pref_always_decode_long_strip_with_ssiv",
         false,
     )
-
-    val installationId: Preference<String> = preferenceStore.getString(Preference.appStateKey("installation_id"), "")
 }
