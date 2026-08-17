@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -14,7 +15,10 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material3.AlertDialog
@@ -38,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -101,6 +106,7 @@ object SettingsDataScreen : SearchableSettings {
 
         return listOf(
             getStorageLocationPref(storagePreferences = storagePreferences),
+            getDirectStorageLocationPref(storagePreferences = storagePreferences),
             Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.pref_storage_location_info)),
 
             getBackupAndRestoreGroup(backupPreferences = backupPreferences),
@@ -148,14 +154,152 @@ object SettingsDataScreen : SearchableSettings {
         val context = LocalContext.current
         val storageDir by storageDirPref.collectAsState()
 
-        if (storageDir == storageDirPref.defaultValue()) {
+        val file = remember(storageDir) { UniFile.fromUri(context, storageDir.toUri()) }
+        if (file?.exists() != true) {
             return stringResource(MR.strings.no_location_set)
         }
 
-        return remember(storageDir) {
-            val file = UniFile.fromUri(context, storageDir.toUri())
-            file?.displayablePath
-        } ?: stringResource(MR.strings.invalid_location, storageDir)
+        return file.displayablePath
+    }
+
+    private fun hasManageExternalStorage(): Boolean {
+        return android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.R ||
+            android.os.Environment.isExternalStorageManager()
+    }
+
+    private fun requestManageExternalStorage(context: Context) {
+        try {
+            context.startActivity(
+                Intent(
+                    android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION,
+                    "package:${context.packageName}".toUri(),
+                ),
+            )
+        } catch (e: ActivityNotFoundException) {
+            try {
+                // Some OEM ROMs don't implement the per-app deep link; fall back to the
+                // general management screen.
+                context.startActivity(Intent(android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
+            } catch (e2: ActivityNotFoundException) {
+                context.toast(MR.strings.file_picker_error)
+            }
+        }
+    }
+
+    /**
+     * Direct filesystem folder browser, bypassing the SAF picker's DocumentsUI dependency.
+     * Requires MANAGE_EXTERNAL_STORAGE on API 30+ to list arbitrary directories; on older
+     * APIs plain file access already works. Keeps the SAF picker above as the fallback when
+     * this permission is refused.
+     */
+    @Composable
+    private fun getDirectStorageLocationPref(
+        storagePreferences: StoragePreferences,
+    ): Preference.PreferenceItem.TextPreference {
+        val context = LocalContext.current
+        var showDialog by remember { mutableStateOf(false) }
+
+        if (showDialog) {
+            val onDismissRequest = { showDialog = false }
+            val volumeRoots = remember {
+                context.getExternalFilesDirs(null)
+                    .filterNotNull()
+                    .mapNotNull { f ->
+                        val idx = f.path.indexOf("/Android/data/")
+                        if (idx >= 0) java.io.File(f.path.substring(0, idx)) else null
+                    }
+                    .distinct()
+            }
+            var currentDir by remember { mutableStateOf<java.io.File?>(null) }
+            val hasPermission = hasManageExternalStorage()
+
+            val entries = remember(currentDir, hasPermission) {
+                if (!hasPermission) {
+                    emptyList()
+                } else if (currentDir == null) {
+                    volumeRoots
+                } else {
+                    currentDir!!.listFiles { f -> f.isDirectory && !f.isHidden }
+                        ?.sortedBy { it.name.lowercase() }
+                        ?: emptyList()
+                }
+            }
+
+            AlertDialog(
+                onDismissRequest = onDismissRequest,
+                title = { Text(text = currentDir?.path ?: "Select a storage volume") },
+                text = {
+                    if (!hasPermission) {
+                        Text(text = "\"All files access\" is required to browse folders directly.")
+                    } else {
+                        Column(modifier = Modifier.heightIn(max = 350.dp)) {
+                            LazyColumn {
+                                if (currentDir != null) {
+                                    item {
+                                        Text(
+                                            text = "..",
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    val dir = currentDir!!
+                                                    currentDir = if (volumeRoots.any { it.path == dir.path }) {
+                                                        null
+                                                    } else {
+                                                        dir.parentFile
+                                                    }
+                                                }
+                                                .padding(vertical = 12.dp, horizontal = 4.dp),
+                                        )
+                                    }
+                                }
+                                items(entries) { entry ->
+                                    Text(
+                                        text = entry.name,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable { currentDir = entry }
+                                            .padding(vertical = 12.dp, horizontal = 4.dp),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    if (!hasPermission) {
+                        TextButton(
+                            onClick = {
+                                requestManageExternalStorage(context)
+                                onDismissRequest()
+                            },
+                        ) {
+                            Text(text = "Grant permission")
+                        }
+                    } else {
+                        TextButton(
+                            enabled = currentDir != null,
+                            onClick = {
+                                storagePreferences.baseStorageDirectory.set(currentDir!!.toUri().toString())
+                                onDismissRequest()
+                            },
+                        ) {
+                            Text(text = "Select this folder")
+                        }
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = onDismissRequest) {
+                        Text(text = stringResource(MR.strings.action_cancel))
+                    }
+                },
+            )
+        }
+
+        return Preference.PreferenceItem.TextPreference(
+            title = "Set storage path directly",
+            subtitle = "Browse the filesystem directly, bypassing the folder picker",
+            onClick = { showDialog = true },
+        )
     }
 
     @Composable
