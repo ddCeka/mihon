@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add dynamic theme support for older android
 - Add direct filesystem storage bypassing SAF picker
 - Add save one-shot as pdf
 - Add Gotham theme
