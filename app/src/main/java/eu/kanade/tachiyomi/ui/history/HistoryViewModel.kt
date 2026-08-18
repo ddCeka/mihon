@@ -4,6 +4,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.core.util.insertSeparators
 import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.domain.track.interactor.AddTracks
@@ -46,8 +47,12 @@ import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaWithChapterCount
 import tachiyomi.domain.source.service.SourceManager
+import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import java.util.Date
 import kotlin.time.Duration.Companion.seconds
 
 class HistoryViewModel(
@@ -131,6 +136,30 @@ class HistoryViewModel(
     fun removeAllFromHistory(mangaId: Long) {
         viewModelScope.launchIO {
             removeHistory.await(mangaId)
+        }
+    }
+
+    fun removeHistoryInRange(startDate: Date, endDate: Date) {
+        viewModelScope.launchIO {
+            val result = removeHistory.awaitRange(startDate, endDate)
+            if (!result) return@launchIO
+            _events.send(Event.HistoryCleared)
+        }
+    }
+
+    fun removeHistoryTimeRange(timeRange: HistoryDeleteTimeRange) {
+        val now = Instant.now()
+        when (timeRange) {
+            HistoryDeleteTimeRange.LAST_HOUR -> {
+                val start = now.minus(1, ChronoUnit.HOURS)
+                removeHistoryInRange(Date.from(start), Date.from(now))
+            }
+
+            HistoryDeleteTimeRange.TODAY_AND_YESTERDAY -> {
+                val start = now.minus(2, ChronoUnit.DAYS)
+                removeHistoryInRange(Date.from(start), Date.from(now))
+            }
+            HistoryDeleteTimeRange.EVERYTHING -> removeAllHistory()
         }
     }
 
@@ -246,6 +275,12 @@ class HistoryViewModel(
         }
     }
 
+    enum class HistoryDeleteTimeRange(val timeRange: StringResource) {
+        LAST_HOUR(MR.strings.delete_range_last_hour),
+        TODAY_AND_YESTERDAY(MR.strings.delete_range_today_yesterday),
+        EVERYTHING(MR.strings.delete_range_everything),
+    }
+
     @Immutable
     data class State(
         val searchQuery: String? = null,
@@ -254,7 +289,7 @@ class HistoryViewModel(
     )
 
     sealed interface Dialog {
-        data object DeleteAll : Dialog
+        data object DeleteTimeRange : Dialog
         data class Delete(val history: HistoryWithRelations) : Dialog
         data class DuplicateManga(val manga: Manga, val duplicates: List<MangaWithChapterCount>) : Dialog
         data class ChangeCategory(
