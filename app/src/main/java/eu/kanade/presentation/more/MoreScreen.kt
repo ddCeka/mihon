@@ -5,7 +5,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.GetApp
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material3.HorizontalDivider
@@ -31,7 +30,6 @@ fun MoreScreen(
     onDownloadedOnlyChange: (Boolean) -> Unit,
     incognitoMode: Boolean,
     onIncognitoModeChange: (Boolean) -> Unit,
-    onClickStats: () -> Unit,
     onClickDownloadQueue: () -> Unit,
     onClickDataAndStorage: () -> Unit,
     onClickSettings: () -> Unit,
@@ -43,7 +41,7 @@ fun MoreScreen(
         ScrollbarLazyColumn(contentPadding = contentPadding) {
             item {
                 LogoHeader(
-                    iconPadding = PaddingValues(vertical = 32.dp),
+                    iconPadding = PaddingValues(vertical = 108.dp),
                 )
             }
             item {
@@ -62,16 +60,6 @@ fun MoreScreen(
                     icon = ImageVector.vectorResource(R.drawable.ic_glasses_24dp),
                     checked = incognitoMode,
                     onCheckedChanged = onIncognitoModeChange,
-                )
-            }
-
-            item { HorizontalDivider() }
-
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_stats),
-                    icon = Icons.Outlined.QueryStats,
-                    onPreferenceClick = onClickStats,
                 )
             }
 
