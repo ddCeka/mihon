@@ -63,7 +63,6 @@ jobs:
         run: |
           set -e
 
-          mv app/build/outputs/apk/release/app-universal-release-unsigned-signed.apk mihon-${{ needs.get_tag.outputs.tag }}.apk
           mv app/build/outputs/apk/release/app-arm64-v8a-release-unsigned-signed.apk mihon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
           mv app/build/outputs/apk/release/app-armeabi-v7a-release-unsigned-signed.apk mihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
 
@@ -72,7 +71,6 @@ jobs:
         with:
           name: mihon
           path: |
-            mihon-${{ needs.get_tag.outputs.tag }}.apk
             mihon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
             mihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
 
@@ -88,6 +86,12 @@ jobs:
         with:
           merge-multiple: true
 
+      - name: Delete all artifacts
+        uses: geekyeggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118 # v6.0.0
+        with:
+          failOnError: false
+          name: mihon
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
@@ -96,11 +100,11 @@ jobs:
           body: |
             > [!TIP]
             >
-            > ### If you are unsure which version to download then go with `mihon-${{ needs.get_tag.outputs.tag }}.apk`
+            > ### If you are unsure which version to download then go with `mihon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk`
           files: |
-            mihon-${{ needs.get_tag.outputs.tag }}.apk
             mihon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
             mihon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
-          draft: true
+          draft: false
           prerelease: true
+          generate_release_notes: true
           token: ${{ secrets.MIHON_BOT_TOKEN }}
