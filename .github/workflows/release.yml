@@ -98,6 +98,9 @@ jobs:
           tag_name: ${{ needs.get_tag.outputs.tag }}
           name: Mihon ${{ needs.get_tag.outputs.tag }}
           body: |
+
+            Check out the [changelog](https://github.com/ddCeka/mihon/blob/legacy/CHANGD.md) if you want to know what this fork change.
+
             > [!TIP]
             >
             > ### If you are unsure which version to download then go with `mihon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk`
