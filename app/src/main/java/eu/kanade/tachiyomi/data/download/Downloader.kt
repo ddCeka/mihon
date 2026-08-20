@@ -341,6 +341,7 @@ class Downloader(
             download.chapter.url,
         )
         val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)!!
+        DiskUtil.createNoMediaFile(tmpDir, context)
 
         try {
             // If the page list already exists, start from the file
@@ -438,8 +439,6 @@ class Downloader(
                 }
                 cache.addChapter(chapterDirname, mangaDir, download.manga)
             }
-            DiskUtil.createNoMediaFile(tmpDir, context)
-
             download.status = Download.State.DOWNLOADED
         } catch (error: Throwable) {
             if (error is CancellationException) throw error
