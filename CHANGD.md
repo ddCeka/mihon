@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add parallel chapters download
 - Add dynamic theme support for older android
 - Add parallelize per-manga chapter listing
 - Add direct filesystem storage bypassing SAF picker
