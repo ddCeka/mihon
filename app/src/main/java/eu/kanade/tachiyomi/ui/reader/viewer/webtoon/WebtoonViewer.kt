@@ -21,8 +21,6 @@ import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -50,23 +48,19 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
     private val frame = WebtoonFrame(activity)
 
     /**
-     * Configuration used by this viewer, like allow taps, or crop image borders.
-     */
-    val config = WebtoonConfig(scope)
-
-    /**
      * Distance to scroll when the user taps on one side of the recycler view.
      */
-    private val scrollDistance: Int
-        get() {
-            val distance = config.pageTransitionDistance.takeUnless { it == 0 } ?: 75
-            return activity.resources.displayMetrics.heightPixels * distance / 100
-        }
+    private val scrollDistance = activity.resources.displayMetrics.heightPixels * 3 / 4
 
     /**
      * Layout manager of the recycler view.
      */
     private val layoutManager = WebtoonLayoutManager(activity, scrollDistance)
+
+    /**
+     * Configuration used by this viewer, like allow taps, or crop image borders.
+     */
+    val config = WebtoonConfig(scope)
 
     /**
      * Adapter of the recycler view.
@@ -85,10 +79,6 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
             .threshold
 
     init {
-        Injekt.get<ReaderPreferences>().pageTransitionDistance.changes()
-            .onEach { layoutManager.extraLayoutSpace = scrollDistance }
-            .launchIn(scope)
-
         recycler.setItemViewCacheSize(RECYCLER_VIEW_CACHE_SIZE)
         recycler.isVisible = false // Don't let the recycler layout yet
         recycler.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
@@ -294,7 +284,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
      */
     private fun scrollUp() {
         if (config.usePageTransitions) {
-            smoothScrollBy(-scrollDistance)
+            recycler.smoothScrollBy(0, -scrollDistance)
         } else {
             recycler.scrollBy(0, -scrollDistance)
         }
@@ -305,27 +295,9 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
      */
     private fun scrollDown() {
         if (config.usePageTransitions) {
-            smoothScrollBy(-scrollDistance)
+            recycler.smoothScrollBy(0, -scrollDistance)
         } else {
             recycler.scrollBy(0, scrollDistance)
-        }
-    }
-
-    private fun smoothScrollBy(distance: Int) {
-        if (config.pageTransitionDuration == 0) {
-            recycler.smoothScrollBy(0, distance)
-            return
-        }
-        android.animation.ValueAnimator.ofInt(0, distance).apply {
-            duration = config.pageTransitionDuration.toLong()
-            interpolator = android.view.animation.DecelerateInterpolator()
-            var lastValue = 0
-            addUpdateListener {
-                val currentValue = it.animatedValue as Int
-                recycler.scrollBy(0, currentValue - lastValue)
-                lastValue = currentValue
-            }
-            start()
         }
     }
 

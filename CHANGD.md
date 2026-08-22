@@ -18,16 +18,16 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - Add option to disable doubletap action to paged reader ([added](https://github.com/ddCeka/mihon/commit/f50f51e4e6ca34a8a9aa70b500747511eca60ae0))
 - Add gotham colorscheme ([added](https://github.com/ddCeka/mihon/commit/6453c5073955cf390be2ec8dab7ba1b5a762b6b5))
 - Add uninstall orphaned button on extension list ([added](https://github.com/ddCeka/mihon/commit/03689319c4af3067f964831e1b266e7273250f84))
-- Add option to save one-shot type comic as pdf ([added](https://github.com/ddCeka/mihon/commit/cf7684a082d8f08244ad57e27576e64233dc274c))
+- Add option to save one-shot type manga as pdf ([added](https://github.com/ddCeka/mihon/commit/cf7684a082d8f08244ad57e27576e64233dc274c))
 - Add legacy storage support by directly access to path folders, bypassing SAF picker ([added](https://github.com/ddCeka/mihon/commit/cc9121117b0e79bb9d1556c50dc02fb4bb691c36))
 - Add option delete history on time range ([added](https://github.com/ddCeka/mihon/commit/482a170819cfbf7258ade4a9774d68dc5088d09a))
-- Add animation speed and scroll distance settings to reader ([added](https://github.com/ddCeka/mihon/commit/fe5ebfe392845756981519b2c7ad5684cb4c9586))
 - Add option to resume History from last seen page ([added](https://github.com/ddCeka/mihon/commit/e56d3ad475836ba1c3b96a163cd09501cb00004d))
 - Add toggle hardware bitmaps for manga covers ([added](https://github.com/ddCeka/mihon/commit/62b586c96bb3a346e9e1459bf33bcb4f390621d7))
+- Add parallel chapters download ([added](https://github.com/ddCeka/mihon/commit/ae93fcf23c5241aaf979d22939554686aa9dcaba))
 
 ### Changed
 - Rebranding to differentiate with upstream ([modified](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
-- Increase the parallel download page limit to 30 ([modified](https://github.com/ddCeka/mihon/commit/54ca55cabe3dc1fdfce2112316ce8cdaee0ab726))
+- Increase the parallel download page limit to 30 ([modified](https://github.com/ddCeka/mihon/commit/f40fc6509e273cf2b55a513ed352f517cdd4c993))
 - Disable the annoying download notification warning when updating library ([modified](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
 - Keep the legacy image decoder for this legacy branch ([modified](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
 - Revert Fix reader tap zones triggering after scrolling is stopped by tapping, because it doesn't need a fix ([source:#2680](https://github.com/mihonapp/mihon/pull/2680)) ([modified](https://github.com/ddCeka/mihon/commit/62876f7fbe698e9bfac71b0d6f8be25f996a7379))
@@ -35,7 +35,7 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - Use custom decoder in wide page operations ([modified](https://github.com/ddCeka/mihon/commit/3a997c084097ee66cb7d06d91bc0bc0ec670c792))
 - Partially Revert Check for app and extension update on every cold start ([source:#3658](https://github.com/mihonapp/mihon/pull/3658)) ([modified](https://github.com/ddCeka/mihon/commit/e679a5ac21b69b537d5ea1e01963b422f0b4a2ed))
 - Hide redundant categories screen in more screen ([modified](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
-- Hide statistics screen from settings ([modified](https://github.com/ddCeka/mihon/commit/132a4d1a33abf327c3b59328b616c5e96e6eeefb))
+- Hide statistics screen from settings ([modified](https://github.com/ddCeka/mihon/commit/40d8043b7579dcbfc099efa1e3faca029df229fd))
 
 ### Improved
 - Make "Support Us" no more prominent in this repository ([deleted](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
@@ -51,7 +51,7 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - Removed user timezone tracking in debug logs ([deleted](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
 - Removed uneccessary clutter in more screen ([deleted](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
 - Removed annoying updater flags, let the user choose when to update and not get spoon-fed just because it have a "New Update Screen" ([deleted](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
-- Removed download 1 chapter, only from drop down menu since it's redundant ([deleted](https://github.com/ddCeka/mihon/commit/9928fd05ac7587784451fb8351f00b6b46df18e7))
+- Removed download 1 chapter from drop down menu since it's redundant ([deleted](https://github.com/ddCeka/mihon/commit/9928fd05ac7587784451fb8351f00b6b46df18e7))
 - Removed x86 abis build ([deleted](https://github.com/ddCeka/mihon/commit/1be3a150466432ea30ade983b52ee7d3ba54dec8))
 
 ### Fixed
