@@ -49,6 +49,10 @@ object SettingsBrowseScreen : SearchableSettings {
                         preference = sourcePreferences.showLastUsedSource,
                         title = stringResource(MR.strings.pref_show_last_used_source),
                     ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        preference = sourcePreferences.showExtensionUpdatesCount,
+                        title = stringResource(MR.strings.pref_extension_update_show_tab_badge),
+                    ),
                     Preference.PreferenceItem.TextPreference(
                         title = stringResource(MR.strings.extensionStores),
                         subtitle = pluralStringResource(MR.plurals.num_repos, reposCount.toInt(), reposCount),
