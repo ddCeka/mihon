@@ -13,6 +13,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -89,7 +90,7 @@ abstract class SearchViewModel(
             )
     }
 
-    private fun getSelectedSources(): List<Source> {
+    private suspend fun getSelectedSources(): List<Source> {
         val enabledSources = getEnabledSources()
 
         val filter = extensionFilter
@@ -97,7 +98,7 @@ abstract class SearchViewModel(
             return enabledSources
         }
 
-        return extensionManager.installedExtensionsFlow.value
+        return extensionManager.installedExtensionsFlow.first()
             .filter { it.pkgName == filter }
             .flatMap { it.sources }
             .filter { it in enabledSources }
@@ -130,23 +131,23 @@ abstract class SearchViewModel(
 
         searchJob?.cancel()
 
-        val sources = getSelectedSources()
-
-        // Reuse previous results if possible
-        if (sameQuery) {
-            val existingResults = state.value.items
-            updateItems(
-                sources
-                    .associateWith { existingResults[it] ?: SearchItemResult.Loading },
-            )
-        } else {
-            updateItems(
-                sources
-                    .associateWith { SearchItemResult.Loading },
-            )
-        }
-
         searchJob = viewModelScope.launchIO {
+            val sources = getSelectedSources()
+
+            // Reuse previous results if possible
+            if (sameQuery) {
+                val existingResults = state.value.items
+                updateItems(
+                    sources
+                        .associateWith { existingResults[it] ?: SearchItemResult.Loading },
+                )
+            } else {
+                updateItems(
+                    sources
+                        .associateWith { SearchItemResult.Loading },
+                )
+            }
+
             sources.map { source ->
                 async {
                     if (state.value.items[source] !is SearchItemResult.Loading) {
