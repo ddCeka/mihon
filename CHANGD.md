@@ -16,7 +16,7 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 ### Added
 - Add a toggle to turn on or off Last Used extensions from sources tab menu ([added](https://github.com/ddCeka/mihon/commit/d4eb4d320b742d1850082760a2f932827c265716))
 - Add option to disable doubletap action to paged reader ([added](https://github.com/ddCeka/mihon/commit/f50f51e4e6ca34a8a9aa70b500747511eca60ae0))
-- Add gotham colorscheme ([added](https://github.com/ddCeka/mihon/commit/6453c5073955cf390be2ec8dab7ba1b5a762b6b5))
+- Add Gotham colorscheme ([added](https://github.com/ddCeka/mihon/commit/6453c5073955cf390be2ec8dab7ba1b5a762b6b5))
 - Add uninstall orphaned button on extension list ([added](https://github.com/ddCeka/mihon/commit/03689319c4af3067f964831e1b266e7273250f84))
 - Add option to save one-shot type manga as pdf ([added](https://github.com/ddCeka/mihon/commit/cf7684a082d8f08244ad57e27576e64233dc274c))
 - Add legacy storage support by directly access to path folders, bypassing SAF picker ([added](https://github.com/ddCeka/mihon/commit/cc9121117b0e79bb9d1556c50dc02fb4bb691c36))
@@ -24,6 +24,7 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - Add option to resume History from last seen page ([added](https://github.com/ddCeka/mihon/commit/e56d3ad475836ba1c3b96a163cd09501cb00004d))
 - Add toggle hardware bitmaps for manga covers ([added](https://github.com/ddCeka/mihon/commit/62b586c96bb3a346e9e1459bf33bcb4f390621d7))
 - Add parallel chapters download ([added](https://github.com/ddCeka/mihon/commit/ae93fcf23c5241aaf979d22939554686aa9dcaba))
+- Add Github colorscheme ([added](https://github.com/ddCeka/mihon/commit/333de6fb824459ef6764d016091a6eb1e105ad21))
 
 ### Changed
 - Rebranding to differentiate with upstream ([modified](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
@@ -36,6 +37,7 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - Partially Revert Check for app and extension update on every cold start ([source:#3658](https://github.com/mihonapp/mihon/pull/3658)) ([modified](https://github.com/ddCeka/mihon/commit/e679a5ac21b69b537d5ea1e01963b422f0b4a2ed))
 - Hide redundant categories screen in more screen ([modified](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
 - Hide statistics screen from settings ([modified](https://github.com/ddCeka/mihon/commit/40d8043b7579dcbfc099efa1e3faca029df229fd))
+- Handle downloads for chapters removed from source ([modified](https://github.com/ddCeka/mihon/commit/06963cd34286aa2fb47ef1b85f1573e7c8360fee))
 
 ### Improved
 - Make "Support Us" no more prominent in this repository ([deleted](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
@@ -59,7 +61,6 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - Fixed janky custom animation splash screen exit for android 12 and below ([fix](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
 - Fixed IndexOutOfBoundsException crash when using split wide pages ([fix](https://github.com/ddCeka/mihon/commit/9a591fec9f1b0f945b2bddb258ecd77dcac95d4f))
 - Fixed blank image on oversized webtoon pages by using tiled decoding ([fix](https://github.com/ddCeka/mihon/commit/4e3db450e35c20ebcde37d44848356cfb41651cc))
-- Fixed resume downloads after network recovery ([fix](https://github.com/ddCeka/mihon/commit/28fb219b3a054a8c09e437d8c5a2b19b4ebfa561))
 - Fixed page flashing on auto background ([fix](https://github.com/ddCeka/mihon/commit/ea412a1288d7186f765aee5359b0b83d2a5ae7fb))
 - Fixed tracking date selection for all timezones ([fix](https://github.com/ddCeka/mihon/commit/a519d4f57c3c33508813eacd67f442a1e90309b6))
 - Fixed update badge overflow when having extensions in the 3 digit ([fix](https://github.com/ddCeka/mihon/commit/780cb12a80aa561b19df892aa93c94574ad476af))

@@ -176,17 +176,6 @@ class Downloader(
     }
 
     /**
-     * Pauses active downloads while the worker waits for network recovery.
-     */
-    fun pauseForNetwork(reason: String) {
-        cancelDownloaderJob()
-        queueState.value
-            .filter { it.status == Download.State.DOWNLOADING }
-            .forEach { it.status = Download.State.QUEUE }
-        notifier.onWarning(reason)
-    }
-
-    /**
      * Removes everything from the queue.
      */
     fun clearQueue() {
@@ -606,16 +595,12 @@ class Downloader(
         tmpDir: UniFile,
     ): Boolean {
         // Page list hasn\'t been initialized
-        val downloadPageCount = download.pages?.size
-        if (downloadPageCount == null) {
-            logcat(LogPriority.ERROR) {
-                "Download validation failed: page list not initialized for ${download.manga.title} - " +
-                    download.chapter.name
-            }
+        val downloadPageCount = download.pages?.size ?: return false
+
+        // Ensure that all pages have been downloaded
+        if (download.downloadedImages != downloadPageCount) {
             return false
         }
-
-        val downloadedImages = download.downloadedImages
 
         // Ensure that the chapter folder has all the pages
         val downloadedImagesCount = tmpDir.listFiles().orEmpty().count {
@@ -628,16 +613,7 @@ class Downloader(
                 else -> true
             }
         }
-
-        val isSuccessful = downloadedImages == downloadPageCount && downloadedImagesCount == downloadPageCount
-        if (!isSuccessful) {
-            logcat(LogPriority.ERROR) {
-                "Download validation failed for ${download.manga.title} - ${download.chapter.name}: " +
-                    "readyPages=$downloadedImages/$downloadPageCount, " +
-                    "files=$downloadedImagesCount/$downloadPageCount"
-            }
-        }
-        return isSuccessful
+        return downloadedImagesCount == downloadPageCount
     }
 
     /**
