@@ -26,6 +26,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add setting to hide Last Used sources section
 
 ### Changed
+- Change author and artist name lines limited to 1 with ellipsis
 - Change Smart Update feature to off by default
 - Revert "Stop tap zones from triggering when scrolling is stopped by tapping"
 - Refactor Release build into foss
