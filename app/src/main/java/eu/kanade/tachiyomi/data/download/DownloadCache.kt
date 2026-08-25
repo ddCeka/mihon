@@ -156,11 +156,12 @@ class DownloadCache(
         if (sourceDir != null) {
             val mangaDir = sourceDir.mangaDirs[provider.getMangaDirName(mangaTitle)]
             if (mangaDir != null) {
-                return provider.getValidChapterDirNames(
+                return getCachedChapterDirNames(
+                    mangaDir,
                     chapterName,
                     chapterScanlator,
                     chapterUrl,
-                ).any { it in mangaDir.chapterDirs }
+                ).isNotEmpty()
             }
         }
         return false
@@ -195,6 +196,22 @@ class DownloadCache(
             }
         }
         return 0
+    }
+
+    private fun getCachedChapterDirNames(
+        mangaDir: MangaDirectory,
+        chapterName: String,
+        chapterScanlator: String?,
+        chapterUrl: String,
+    ): List<String> {
+        val exactMatches = provider.getValidChapterDirNames(chapterName, chapterScanlator, chapterUrl)
+            .filter { it in mangaDir.chapterDirs }
+        if (exactMatches.isNotEmpty()) return exactMatches
+
+        val urlHashMatch = mangaDir.chapterDirs.asSequence()
+            .filter { provider.isChapterDirNameForUrl(it, chapterUrl) }
+            .singleOrNull()
+        return listOfNotNull(urlHashMatch)
     }
 
     /**
@@ -240,10 +257,8 @@ class DownloadCache(
         rootDownloadsDirMutex.withLock {
             val sourceDir = rootDownloadsDir.sourceDirs[manga.source] ?: return
             val mangaDir = sourceDir.mangaDirs[provider.getMangaDirName(manga.title)] ?: return
-            provider.getValidChapterDirNames(chapter.name, chapter.scanlator, chapter.url).forEach {
-                if (it in mangaDir.chapterDirs) {
-                    mangaDir.chapterDirs -= it
-                }
+            getCachedChapterDirNames(mangaDir, chapter.name, chapter.scanlator, chapter.url).forEach {
+                mangaDir.chapterDirs -= it
             }
         }
 
@@ -261,10 +276,8 @@ class DownloadCache(
             val sourceDir = rootDownloadsDir.sourceDirs[manga.source] ?: return
             val mangaDir = sourceDir.mangaDirs[provider.getMangaDirName(manga.title)] ?: return
             chapters.forEach { chapter ->
-                provider.getValidChapterDirNames(chapter.name, chapter.scanlator, chapter.url).forEach {
-                    if (it in mangaDir.chapterDirs) {
-                        mangaDir.chapterDirs -= it
-                    }
+                getCachedChapterDirNames(mangaDir, chapter.name, chapter.scanlator, chapter.url).forEach {
+                    mangaDir.chapterDirs -= it
                 }
             }
         }
