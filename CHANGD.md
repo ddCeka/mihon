@@ -26,3 +26,6 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Change author and artist name lines limited to 1 with ellipsis
 - Change Smart Update feature to off by default
 - Refactor Release build into foss
+
+### Fixed
+- Fix calendar to follow system locale change
