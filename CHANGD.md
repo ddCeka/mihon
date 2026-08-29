@@ -9,7 +9,7 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Added` - for new features.
 - `Changed ` - for changes in existing functionality.
 - `Improved` - for enhancement or optimization in existing functionality.
-- `Removed` - for now removed features.
+- `Removed` - for currently removed features.
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
@@ -25,6 +25,9 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - Add toggle hardware bitmaps for manga covers ([added](https://github.com/ddCeka/mihon/commit/62b586c96bb3a346e9e1459bf33bcb4f390621d7))
 - Add parallel chapters download ([added](https://github.com/ddCeka/mihon/commit/ae93fcf23c5241aaf979d22939554686aa9dcaba))
 - Add Github colorscheme ([added](https://github.com/ddCeka/mihon/commit/333de6fb824459ef6764d016091a6eb1e105ad21))
+- Add setting to hide pending extension updates count ([added](https://github.com/ddCeka/mihon/commit/ee9ed7d80069874a9a899249fc489008e006eea9))
+- Add local source filtering ([added](https://github.com/ddCeka/mihon/commit/a03c7290ff2756589cc5640b5031a629b29ca6cf))
+- Add legacy storage permission check for saving covers ([added](https://github.com/ddCeka/mihon/commit/a579d123faf19766dab1a8cf934e6b09d06f426d))
 
 ### Changed
 - Rebranding to differentiate with upstream ([modified](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
@@ -38,6 +41,7 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - Hide redundant categories screen in more screen ([modified](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
 - Hide statistics screen from settings ([modified](https://github.com/ddCeka/mihon/commit/40d8043b7579dcbfc099efa1e3faca029df229fd))
 - Handle downloads for chapters removed from source ([modified](https://github.com/ddCeka/mihon/commit/06963cd34286aa2fb47ef1b85f1573e7c8360fee))
+- Limit author and artist name lines to 1 with ellipsis ([modified](https://github.com/ddCeka/mihon/commit/9f841330a90a117a944b3238daaac0115e61af68))
 
 ### Improved
 - Make "Support Us" no more prominent in this repository ([deleted](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
@@ -45,6 +49,8 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - Parallelize per-manga chapter listing ([modified](https://github.com/ddCeka/mihon/commit/2451ddf6dea570cd12cfb0fe35c68c2c03f6ff90))
 - Support dynamic theme for older android ([modified](https://github.com/ddCeka/mihon/commit/c9ec91fca0b9a4ea3c74b57f7e3f360845771de3))
 - Reduce unnecessary media scanning ([modified](https://github.com/ddCeka/mihon/commit/f3c77446ba984e086b1e320c7a9cbaf2aa9d3856))
+- Include local source in global search results ([modified](https://github.com/ddCeka/mihon/commit/20f26bacf4086d38210b868cea6590abc563df0f))
+- Ui from rectangle to rounded covers and tweak appbar titles ([modified](https://github.com/ddCeka/mihon/commit/b18d4f0b79ba71aa15b5f8fcec171b3a63b8512c))
 
 ### Removed
 - Removed uneccessary Telemetry ([deleted](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
@@ -64,6 +70,8 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - Fixed page flashing on auto background ([fix](https://github.com/ddCeka/mihon/commit/ea412a1288d7186f765aee5359b0b83d2a5ae7fb))
 - Fixed tracking date selection for all timezones ([fix](https://github.com/ddCeka/mihon/commit/a519d4f57c3c33508813eacd67f442a1e90309b6))
 - Fixed update badge overflow when having extensions in the 3 digit ([fix](https://github.com/ddCeka/mihon/commit/780cb12a80aa561b19df892aa93c94574ad476af))
+- Fixed calendar to follow system locale change ([fix](https://github.com/ddCeka/mihon/commit/cfba16a4b0e05d559d3fdd6f41d6a73b63edffbb))
 
 ### Other
 - Refactor release build into foss ([modified](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
+- **In Testing** Make Cloudflare Interceptor attempt to solve challenge when interactive ([modified](https://github.com/ddCeka/mihon/commit/78b27d3943bbf52b916a55e9c6707deae2e67cc0))
