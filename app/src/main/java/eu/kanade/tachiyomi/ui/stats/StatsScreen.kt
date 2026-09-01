@@ -10,6 +10,7 @@ import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.more.stats.StatsScreenContent
 import eu.kanade.presentation.more.stats.StatsScreenState
 import eu.kanade.presentation.util.Screen
+import eu.kanade.tachiyomi.ui.browse.source.globalsearch.GlobalSearchScreen
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
@@ -27,7 +28,7 @@ class StatsScreen : Screen() {
         Scaffold(
             topBar = { scrollBehavior ->
                 AppBar(
-                    title = stringResource(MR.strings.label_stats),
+                    title = stringResource(MR.strings.label_tracker),
                     navigateUp = navigator::pop,
                     scrollBehavior = scrollBehavior,
                 )
@@ -41,6 +42,7 @@ class StatsScreen : Screen() {
             StatsScreenContent(
                 state = state as StatsScreenState.Success,
                 paddingValues = paddingValues,
+                onOpenGlobalSearch = { navigator.push(GlobalSearchScreen(it)) },
             )
         }
     }
