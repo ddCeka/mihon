@@ -2,11 +2,16 @@ package eu.kanade.presentation.manga.components
 
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -23,6 +28,7 @@ import eu.kanade.tachiyomi.util.system.isReleaseBuildType
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import tachiyomi.domain.manga.interactor.FetchInterval
+import tachiyomi.domain.track.local.model.LocalReadingStatus
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.WheelTextPicker
 import tachiyomi.presentation.core.components.material.padding
@@ -59,6 +65,54 @@ fun DeleteChaptersDialog(
         },
         text = {
             Text(text = stringResource(MR.strings.confirm_delete_chapters))
+        },
+    )
+}
+
+@Composable
+fun SetLocalStatusDialog(
+    selected: LocalReadingStatus,
+    onDismissRequest: () -> Unit,
+    onSelect: (LocalReadingStatus) -> Unit,
+) {
+    val options = remember {
+        listOf(
+            LocalReadingStatus.READING to MR.strings.status_reading,
+            LocalReadingStatus.COMPLETED to MR.strings.status_completed,
+            LocalReadingStatus.PLAN_TO_READ to MR.strings.status_plan_to_read,
+            LocalReadingStatus.ON_HOLD to MR.strings.status_on_hold,
+        )
+    }
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(text = stringResource(MR.strings.action_set_status)) },
+        text = {
+            Column {
+                options.forEach { (status, labelRes) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = status == selected,
+                                onClick = { onSelect(status) },
+                            )
+                            .padding(vertical = MaterialTheme.padding.small),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = status == selected,
+                            onClick = null,
+                        )
+                        Spacer(modifier = Modifier.width(MaterialTheme.padding.medium))
+                        Text(text = stringResource(labelRes))
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = stringResource(MR.strings.action_cancel))
+            }
         },
     )
 }
