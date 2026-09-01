@@ -46,6 +46,8 @@ class BackupManga(
     @ProtoNumber(110) var notes: String = "",
     @ProtoNumber(111) var initialized: Boolean = false,
     @ProtoNumber(112) var memo: ByteArray = JsonObjectEmptyBytes,
+    // In-app local tracker reading status (0 = none/Reading; see LocalReadingStatus.value)
+    @ProtoNumber(113) var localReadingStatus: Long = 0,
 ) {
     fun getMangaImpl(): Manga {
         return Manga.create().copy(

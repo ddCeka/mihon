@@ -45,6 +45,7 @@ import tachiyomi.data.release.ReleaseServiceImpl
 import tachiyomi.data.source.SourceRepositoryImpl
 import tachiyomi.data.source.StubSourceRepositoryImpl
 import tachiyomi.data.track.TrackRepositoryImpl
+import tachiyomi.data.track.local.LocalTrackRepositoryImpl
 import tachiyomi.data.updates.UpdatesRepositoryImpl
 import tachiyomi.domain.category.interactor.CreateCategoryWithName
 import tachiyomi.domain.category.interactor.DeleteCategory
@@ -92,6 +93,9 @@ import tachiyomi.domain.track.interactor.DeleteTrack
 import tachiyomi.domain.track.interactor.GetTracks
 import tachiyomi.domain.track.interactor.GetTracksPerManga
 import tachiyomi.domain.track.interactor.InsertTrack
+import tachiyomi.domain.track.local.interactor.GetLocalTracks
+import tachiyomi.domain.track.local.interactor.SetLocalReadingStatus
+import tachiyomi.domain.track.local.repository.LocalTrackRepository
 import tachiyomi.domain.track.repository.TrackRepository
 import tachiyomi.domain.updates.interactor.GetUpdates
 import tachiyomi.domain.updates.repository.UpdatesRepository
@@ -152,6 +156,10 @@ class DomainModule : InjektModule {
         addFactory { GetTracks(get()) }
         addFactory { InsertTrack(get()) }
         addFactory { SyncChapterProgressWithTrack(get(), get(), get()) }
+
+        addSingletonFactory<LocalTrackRepository> { LocalTrackRepositoryImpl(get()) }
+        addFactory { GetLocalTracks(get()) }
+        addFactory { SetLocalReadingStatus(get()) }
 
         addSingletonFactory<ChapterRepository> { ChapterRepositoryImpl(get()) }
         addFactory { GetChapter(get()) }

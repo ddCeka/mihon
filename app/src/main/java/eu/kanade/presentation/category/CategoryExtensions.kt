@@ -11,11 +11,13 @@ val Category.visualName: String
     @Composable
     get() = when {
         isSystemCategory -> stringResource(MR.strings.label_default)
+        id == Category.BACKLOG_ID -> stringResource(MR.strings.label_backlog)
         else -> name
     }
 
 fun Category.visualName(context: Context): String =
     when {
         isSystemCategory -> context.stringResource(MR.strings.label_default)
+        id == Category.BACKLOG_ID -> context.stringResource(MR.strings.label_backlog)
         else -> name
     }

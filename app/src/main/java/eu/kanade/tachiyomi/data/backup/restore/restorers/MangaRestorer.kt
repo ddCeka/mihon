@@ -78,6 +78,7 @@ class MangaRestorer(
                 history = backupManga.history,
                 tracks = backupManga.tracking,
                 excludedScanlators = backupManga.excludedScanlators,
+                localReadingStatus = backupManga.localReadingStatus,
             )
         }
     }
@@ -278,14 +279,29 @@ class MangaRestorer(
         history: List<BackupHistory>,
         tracks: List<BackupTracking>,
         excludedScanlators: List<String>,
+        localReadingStatus: Long,
     ): Manga {
         restoreCategories(manga, categories, backupCategories)
         restoreChapters(manga, chapters)
         restoreTracking(manga, tracks)
+        restoreLocalTrack(manga, localReadingStatus)
         restoreHistory(manga, history)
         restoreExcludedScanlators(manga, excludedScanlators)
         updateManga.awaitUpdateFetchInterval(manga, timeZone, now, currentFetchWindow)
         return manga
+    }
+
+    /**
+     * Restores the in-app local tracker status. A value of 0 means no explicit status (Reading),
+     * so nothing is stored.
+     */
+    private suspend fun restoreLocalTrack(manga: Manga, localReadingStatus: Long) {
+        if (localReadingStatus == 0L) return
+        database.manga_local_trackQueries.upsert(
+            mangaId = manga.id,
+            status = localReadingStatus,
+            lastModified = System.currentTimeMillis(),
+        )
     }
 
     /**

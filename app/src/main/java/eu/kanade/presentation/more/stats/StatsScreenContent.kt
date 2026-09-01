@@ -18,13 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.presentation.more.stats.components.StatsItem
 import eu.kanade.presentation.more.stats.components.StatsOverviewItem
+import eu.kanade.presentation.more.stats.components.TrackerTitleItem
 import eu.kanade.presentation.more.stats.data.StatsData
+import eu.kanade.presentation.track.local.stringRes
 import eu.kanade.presentation.util.toDurationString
+import tachiyomi.domain.track.local.model.LocalReadingStatus
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.SectionCard
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
-import java.util.Locale
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -32,6 +34,7 @@ import kotlin.time.toDuration
 fun StatsScreenContent(
     state: StatsScreenState.Success,
     paddingValues: PaddingValues,
+    onOpenGlobalSearch: (String) -> Unit,
 ) {
     LazyColumn(
         contentPadding = paddingValues,
@@ -46,8 +49,18 @@ fun StatsScreenContent(
         item {
             ChapterStats(state.chapters)
         }
-        item {
-            TrackerStats(state.trackers)
+
+        val grouped = state.tracked.groupBy { it.status }
+        LocalReadingStatus.entries.forEach { status ->
+            val titles = grouped[status].orEmpty()
+            if (titles.isEmpty()) return@forEach
+            item(key = "tracker-section-${status.name}") {
+                TrackerSection(
+                    status = status,
+                    titles = titles,
+                    onOpenGlobalSearch = onOpenGlobalSearch,
+                )
+            }
         }
     }
 }
@@ -131,31 +144,16 @@ private fun LazyItemScope.ChapterStats(
 }
 
 @Composable
-private fun LazyItemScope.TrackerStats(
-    data: StatsData.Trackers,
+private fun LazyItemScope.TrackerSection(
+    status: LocalReadingStatus,
+    titles: List<StatsData.TrackedTitle>,
+    onOpenGlobalSearch: (String) -> Unit,
 ) {
-    val notApplicable = stringResource(MR.strings.not_applicable)
-    val meanScoreStr = remember(data.trackedTitleCount, data.meanScore) {
-        if (data.trackedTitleCount > 0 && !data.meanScore.isNaN()) {
-            // All other numbers are localized in English
-            "%.2f ★".format(Locale.ENGLISH, data.meanScore)
-        } else {
-            notApplicable
-        }
-    }
-    SectionCard(MR.strings.label_tracker_section) {
-        Row {
-            StatsItem(
-                data.trackedTitleCount.toString(),
-                stringResource(MR.strings.label_tracked_titles),
-            )
-            StatsItem(
-                meanScoreStr,
-                stringResource(MR.strings.label_mean_score),
-            )
-            StatsItem(
-                data.trackerCount.toString(),
-                stringResource(MR.strings.label_used),
+    SectionCard(titleRes = status.stringRes()) {
+        titles.forEach { tracked ->
+            TrackerTitleItem(
+                title = tracked.title,
+                onClick = { onOpenGlobalSearch(tracked.title) },
             )
         }
     }

@@ -61,6 +61,8 @@ import tachiyomi.domain.manga.model.MangaUpdate
 import tachiyomi.domain.manga.model.applyFilter
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracksPerManga
+import tachiyomi.domain.track.local.interactor.GetLocalTracks
+import tachiyomi.domain.track.local.model.LocalReadingStatus
 import tachiyomi.domain.track.model.Track
 import tachiyomi.source.local.isLocal
 import uy.kohesive.injekt.Injekt
@@ -72,6 +74,7 @@ class LibraryViewModel(
     private val getLibraryManga: GetLibraryManga = Injekt.get(),
     private val getCategories: GetCategories = Injekt.get(),
     private val getTracksPerManga: GetTracksPerManga = Injekt.get(),
+    private val getLocalTracks: GetLocalTracks = Injekt.get(),
     private val getNextChapters: GetNextChapters = Injekt.get(),
     private val getChaptersByMangaId: GetChaptersByMangaId = Injekt.get(),
     private val getBookmarkedChaptersByMangaId: GetBookmarkedChaptersByMangaId = Injekt.get(),
@@ -96,9 +99,14 @@ class LibraryViewModel(
                 state.map { it.searchQuery }.distinctUntilChanged().debounce(0.25.seconds),
                 getCategories.subscribe(),
                 getFavoritesFlow(),
-                combine(getTracksPerManga.subscribe(), getTrackingFiltersFlow(), ::Pair),
+                combine(
+                    getTracksPerManga.subscribe(),
+                    getTrackingFiltersFlow(),
+                    getLocalStatusMapFlow(),
+                    ::Triple,
+                ),
                 getLibraryItemPreferencesFlow(),
-            ) { searchQuery, categories, favorites, (tracksMap, trackingFilters), itemPreferences ->
+            ) { searchQuery, categories, favorites, (tracksMap, trackingFilters, localStatusMap), itemPreferences ->
                 val showSystemCategory = favorites.any { it.libraryManga.categories.contains(0) }
                 val filteredFavorites = favorites
                     .applyFilters(tracksMap, trackingFilters, itemPreferences)
@@ -118,6 +126,7 @@ class LibraryViewModel(
                     favorites = filteredFavorites,
                     tracksMap = tracksMap,
                     loggedInTrackerIds = trackingFilters.keys,
+                    localStatusMap = localStatusMap,
                 )
             }
                 .distinctUntilChanged()
@@ -135,7 +144,7 @@ class LibraryViewModel(
                 .distinctUntilChanged()
                 .map { data ->
                     data.favorites
-                        .applyGrouping(data.categories, data.showSystemCategory)
+                        .applyGrouping(data.categories, data.showSystemCategory, data.localStatusMap)
                         .applySort(data.favoritesById, data.tracksMap, data.loggedInTrackerIds)
                 }
                 .collectLatest {
@@ -261,6 +270,7 @@ class LibraryViewModel(
     private fun List<LibraryItem>.applyGrouping(
         categories: List<Category>,
         showSystemCategory: Boolean,
+        localStatusMap: Map<Long, LocalReadingStatus>,
     ): Map<Category, List</* LibraryItem */ Long>> {
         val groupCache = mutableMapOf</* Category */ Long, MutableList</* LibraryItem */ Long>>()
         forEach { item ->
@@ -268,8 +278,32 @@ class LibraryViewModel(
                 groupCache.getOrPut(categoryId) { mutableListOf() }.add(item.id)
             }
         }
-        return categories.filter { showSystemCategory || !it.isSystemCategory }
+        val grouped = categories.filter { showSystemCategory || !it.isSystemCategory }
             .associateWith { groupCache[it.id]?.toList().orEmpty() }
+            .toMutableMap()
+
+        // Virtual "Backlog" category: entries the user marked Plan-to-read or On-hold.
+        val backlogItems = filter {
+            when (localStatusMap[it.libraryManga.id]) {
+                LocalReadingStatus.PLAN_TO_READ, LocalReadingStatus.ON_HOLD -> true
+                else -> false
+            }
+        }.map { it.id }
+        if (backlogItems.isNotEmpty()) {
+            val backlogCategory = Category(
+                id = Category.BACKLOG_ID,
+                name = "",
+                order = (categories.maxOfOrNull { it.order } ?: 0L) + 1,
+                flags = 0L,
+            )
+            grouped[backlogCategory] = backlogItems
+        }
+        return grouped
+    }
+
+    private fun getLocalStatusMapFlow(): Flow<Map</* Manga */ Long, LocalReadingStatus>> {
+        return getLocalTracks.subscribe()
+            .map { tracks -> tracks.associate { it.mangaId to it.status } }
     }
 
     private fun Map<Category, List</* LibraryItem */ Long>>.applySort(
@@ -766,6 +800,7 @@ class LibraryViewModel(
         val favorites: List<LibraryItem> = emptyList(),
         val tracksMap: Map</* Manga */ Long, List<Track>> = emptyMap(),
         val loggedInTrackerIds: Set<Long> = emptySet(),
+        val localStatusMap: Map</* Manga */ Long, LocalReadingStatus> = emptyMap(),
     ) {
         val favoritesById by lazy { favorites.associateBy { it.id } }
     }
