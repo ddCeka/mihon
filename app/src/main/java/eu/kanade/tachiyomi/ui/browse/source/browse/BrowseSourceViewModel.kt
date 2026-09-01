@@ -19,7 +19,6 @@ import eu.kanade.core.preference.asState
 import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.domain.source.interactor.GetIncognitoState
 import eu.kanade.domain.source.service.SourcePreferences
-import eu.kanade.domain.track.interactor.AddTracks
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.util.removeCovers
@@ -66,7 +65,6 @@ class BrowseSourceViewModel(
     private val setMangaDefaultChapterFlags: SetMangaDefaultChapterFlags = Injekt.get(),
     private val getManga: GetManga = Injekt.get(),
     private val updateManga: UpdateManga = Injekt.get(),
-    private val addTracks: AddTracks = Injekt.get(),
     getIncognitoState: GetIncognitoState = Injekt.get(),
 ) : StateViewModel<BrowseSourceViewModel.State>(State(Listing.valueOf(listingQuery))) {
 
@@ -234,7 +232,6 @@ class BrowseSourceViewModel(
                 new = new.removeCovers(coverCache)
             } else {
                 setMangaDefaultChapterFlags.await(manga)
-                addTracks.bindEnhancedTrackers(manga, source)
             }
 
             updateManga.await(new.toMangaUpdate())
