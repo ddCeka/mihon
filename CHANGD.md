@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add webtoon smooth scroll setting
 - Add bold text toggle for better readability
 - Add legacy storage permission check for saving covers
 - Add parallel chapters download
