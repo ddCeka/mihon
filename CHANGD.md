@@ -30,6 +30,7 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - Add legacy storage permission check for saving covers ([added](https://github.com/ddCeka/mihon/commit/a579d123faf19766dab1a8cf934e6b09d06f426d))
 - Add webtoon smooth scroll preference ([added](https://github.com/ddCeka/mihon/commit/727c0a406ce67e3f4bec2f75f9df95fdea5202d6))
 - Add global search history ([added](https://github.com/ddCeka/mihon/commit/559f2b98dbb72a5b47d33e739719de1ee20f24f0))
+- Add local on App tracking, basically statistics is tracked without any 3rd party trackers. ([added](https://github.com/ddCeka/mihon/commit/d0a6c4366a05f01bcfb1f0f38d5790da740e31d6))
 
 ### Changed
 - Rebranding to differentiate with upstream ([modified](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
@@ -45,6 +46,8 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - Handle downloads for chapters removed from source ([modified](https://github.com/ddCeka/mihon/commit/06963cd34286aa2fb47ef1b85f1573e7c8360fee))
 - Limit author and artist name lines to 1 with ellipsis ([modified](https://github.com/ddCeka/mihon/commit/9f841330a90a117a944b3238daaac0115e61af68))
 - Changed downloaded chapters update sorting ([modified](https://github.com/ddCeka/mihon/commit/ce4b2929192f682b41ba97ac45368b05c7239ce7))
+- Changed default theme from monet to base app colour ([modified](https://github.com/ddCeka/mihon/commit/aaffcda90a585e23b2457d445e9bb48da9135610))
+- Changed monet palette style from expressive to tonalspot ([modified](https://github.com/ddCeka/mihon/commit/7523cf5349d08e4b5201cc936eca53dea4dfda58))
 
 ### Improved
 - Make "Support Us" no more prominent in this repository ([deleted](https://github.com/ddCeka/mihon/commit/66bf6843f37667190a458eb315b50cd4ed48fae6))
@@ -69,6 +72,8 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - Removed resume downloads after network recovery [source commit](https://github.com/ddCeka/mihon/commit/28fb219b3a054a8c09e437d8c5a2b19b4ebfa561) ([deleted](https://github.com/ddCeka/mihon/commit/29f71dba69f4fddc3ac8a7d21646e93b0df28639))
   + **NOTE** this cause downloader worker to stuck and eat up battery on some occasion
 - Removed x86 abis build ([deleted](https://github.com/ddCeka/mihon/commit/1be3a150466432ea30ade983b52ee7d3ba54dec8))
+- Removed the smart update logics so that now when a global update occurs then all the manga in the category will be updated. This change will use more data. ([deleted](https://github.com/ddCeka/mihon/commit/0267b80fb97043f911ecea55788ff7abc913d3e1))
+- Removed the not needed 3rd party tracking fluff. This commit while destructive is still compatible with backup restore from Mihon. ([deleted](https://github.com/ddCeka/mihon/commit/3c1e3a07b974a1eab240aa6f051b5dc044d23a0e))
 
 ### Fixed
 - Fixed Search keyboard not closing on Enter and reopening on navigation back ([fix](https://github.com/ddCeka/mihon/commit/a835770b5ec4fb337936435936cc1b6cf63ed191))
