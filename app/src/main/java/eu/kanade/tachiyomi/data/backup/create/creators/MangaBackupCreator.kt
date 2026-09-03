@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.backup.models.BackupChapter
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.backup.models.backupChapterMapper
-import eu.kanade.tachiyomi.data.backup.models.backupTrackMapper
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
 import tachiyomi.data.Database
 import tachiyomi.data.MemoColumnAdapter
@@ -60,13 +59,6 @@ class MangaBackupCreator(
         }
 
         if (options.tracking) {
-            val tracks = database.manga_syncQueries
-                .getTracksByMangaId(manga.id, backupTrackMapper)
-                .awaitAsList()
-            if (tracks.isNotEmpty()) {
-                mangaObject.tracking = tracks
-            }
-
             // In-app local tracker status (only non-Reading statuses are stored)
             val localStatus = database.manga_local_trackQueries
                 .getByMangaId(manga.id) { _, status -> status }

@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import dev.icerock.moko.resources.StringResource
 import eu.kanade.core.util.insertSeparators
 import eu.kanade.domain.manga.interactor.UpdateManga
-import eu.kanade.domain.track.interactor.AddTracks
 import eu.kanade.presentation.history.HistoryUiModel
 import eu.kanade.tachiyomi.util.lang.toLocalDate
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +46,6 @@ import tachiyomi.domain.manga.interactor.GetDuplicateLibraryManga
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaWithChapterCount
-import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -57,7 +55,6 @@ import java.util.Date
 import kotlin.time.Duration.Companion.seconds
 
 class HistoryViewModel(
-    private val addTracks: AddTracks = Injekt.get(),
     private val getCategories: GetCategories = Injekt.get(),
     private val getDuplicateLibraryManga: GetDuplicateLibraryManga = Injekt.get(),
     private val getChapter: GetChapter = Injekt.get(),
@@ -69,7 +66,6 @@ class HistoryViewModel(
     private val setMangaCategories: SetMangaCategories = Injekt.get(),
     private val updateManga: UpdateManga = Injekt.get(),
     val snackbarHostState: SnackbarHostState = SnackbarHostState(),
-    private val sourceManager: SourceManager = Injekt.get(),
 ) : ViewModel() {
 
     private val _events: Channel<Event> = Channel(Channel.UNLIMITED)
@@ -262,9 +258,6 @@ class HistoryViewModel(
                 // Choose a category
                 else -> showChangeCategoryDialog(manga)
             }
-
-            // Sync with tracking services if applicable
-            addTracks.bindEnhancedTrackers(manga, sourceManager.getOrStub(manga.source))
         }
     }
 
