@@ -285,6 +285,7 @@ object SettingsAdvancedScreen : SearchableSettings {
     ): Preference.PreferenceGroup {
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
+        val basePreferences = remember { Injekt.get<BasePreferences>() }
 
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.label_library),
@@ -292,6 +293,11 @@ object SettingsAdvancedScreen : SearchableSettings {
                 Preference.PreferenceItem.TextPreference(
                     title = stringResource(MR.strings.pref_refresh_library_covers),
                     onClick = { MetadataUpdateJob.startNow(context) },
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = basePreferences.allowHardwareBitmapForCovers,
+                    title = stringResource(MR.strings.pref_allow_hardware_bitmap_covers),
+                    subtitle = stringResource(MR.strings.pref_allow_hardware_bitmap_covers_summary),
                 ),
                 Preference.PreferenceItem.TextPreference(
                     title = stringResource(MR.strings.pref_reset_viewer_flags),
