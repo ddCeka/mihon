@@ -472,6 +472,8 @@ private fun ColumnScope.MangaContentInfo(
             text = author?.takeIf { it.isNotBlank() }
                 ?: stringResource(MR.strings.unknown_author),
             style = MaterialTheme.typography.titleSmall,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
             modifier = Modifier
                 .clickableNoIndication(
                     onLongClick = {
@@ -502,6 +504,8 @@ private fun ColumnScope.MangaContentInfo(
             Text(
                 text = artist,
                 style = MaterialTheme.typography.titleSmall,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
                 modifier = Modifier
                     .clickableNoIndication(
                         onLongClick = { context.copyToClipboard(artist, artist) },
