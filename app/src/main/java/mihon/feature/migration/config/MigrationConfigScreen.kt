@@ -306,7 +306,7 @@ class MigrationConfigScreen(private val mangaIds: Collection<Long>) : Screen() {
         }
     }
 
-    class Model(
+    internal class Model(
         val sourcePreferences: SourcePreferences = Injekt.get(),
         private val sourceManager: SourceManager = Injekt.get(),
     ) : StateViewModel<Model.State>(State()) {

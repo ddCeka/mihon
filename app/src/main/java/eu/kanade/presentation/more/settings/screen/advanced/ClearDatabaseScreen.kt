@@ -220,7 +220,7 @@ class ClearDatabaseScreen : Screen() {
     }
 }
 
-class ClearDatabaseViewModel : StateViewModel<ClearDatabaseViewModel.State>(State.Loading) {
+internal class ClearDatabaseViewModel : StateViewModel<ClearDatabaseViewModel.State>(State.Loading) {
     private val getSourcesWithNonLibraryManga: GetSourcesWithNonLibraryManga = Injekt.get()
     private val database: Database = Injekt.get()
 

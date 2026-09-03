@@ -933,6 +933,13 @@
     <string name="crash_screen_restart_application">Restart the application</string>
 
     <!-- Stats screen -->
+    <string name="label_tracker">Tracker</string>
+    <string name="action_set_status">Set status</string>
+    <string name="status_reading">Reading</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_plan_to_read">Plan to read</string>
+    <string name="status_on_hold">On hold</string>
+    <string name="label_backlog">Backlog</string>
     <string name="label_overview_section">Overview</string>
     <string name="label_completed_titles">Completed entries</string>
     <string name="label_read_duration">Read duration</string>

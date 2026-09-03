@@ -1,5 +1,10 @@
--- rescale Kitsu (sync_id 3) scores to native 2-20 int scale
--- old scores were rescaled from Kitsu's 2-20 down to 1, 1.5, ..., 10 at the API boundary
-UPDATE manga_sync
-SET score = score * 2
-WHERE sync_id = 3;
+CREATE TABLE manga_local_track(
+    _id INTEGER NOT NULL PRIMARY KEY,
+    manga_id INTEGER NOT NULL UNIQUE,
+    status INTEGER NOT NULL,
+    last_modified INTEGER NOT NULL,
+    FOREIGN KEY(manga_id) REFERENCES mangas (_id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX idx_manga_local_track_manga_id ON manga_local_track(manga_id);

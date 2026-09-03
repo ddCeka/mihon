@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -81,6 +82,9 @@ import tachiyomi.domain.manga.model.applyFilter
 import tachiyomi.domain.manga.repository.MangaRepository
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracks
+import tachiyomi.domain.track.local.interactor.GetLocalTracks
+import tachiyomi.domain.track.local.interactor.SetLocalReadingStatus
+import tachiyomi.domain.track.local.model.LocalReadingStatus
 import tachiyomi.i18n.MR
 import tachiyomi.source.local.isLocal
 import uy.kohesive.injekt.Injekt
@@ -111,6 +115,8 @@ class MangaViewModel(
     private val getCategories: GetCategories = Injekt.get(),
     private val getTracks: GetTracks = Injekt.get(),
     private val addTracks: AddTracks = Injekt.get(),
+    private val getLocalTracks: GetLocalTracks = Injekt.get(),
+    private val setLocalReadingStatus: SetLocalReadingStatus = Injekt.get(),
     private val setMangaCategories: SetMangaCategories = Injekt.get(),
     private val mangaRepository: MangaRepository = Injekt.get(),
     private val filterChaptersForDownload: FilterChaptersForDownload = Injekt.get(),
@@ -244,6 +250,7 @@ class MangaViewModel(
 
             // Start observe tracking since it only needs mangaId
             observeTrackers()
+            observeLocalStatus()
 
             // Fetch info-chapters when needed
             if ((needRefreshInfo || needRefreshChapter) && viewModelScope.isActive) {
@@ -1062,6 +1069,31 @@ class MangaViewModel(
 
     // Track sheet - end
 
+    // Local tracker - start
+
+    private fun observeLocalStatus() {
+        val manga = successState?.manga ?: return
+
+        viewModelScope.launchIO {
+            getLocalTracks.subscribe()
+                .map { tracks -> tracks.firstOrNull { it.mangaId == manga.id }?.status ?: LocalReadingStatus.READING }
+                .distinctUntilChanged()
+                .collectLatest { status ->
+                    updateSuccessState { it.copy(localStatus = status) }
+                }
+        }
+    }
+
+    fun setLocalStatus(status: LocalReadingStatus) {
+        val manga = successState?.manga ?: return
+        dismissDialog()
+        viewModelScope.launchNonCancellable {
+            setLocalReadingStatus.await(manga.id, status)
+        }
+    }
+
+    // Local tracker - end
+
     sealed interface Dialog {
         data class ChangeCategory(
             val manga: Manga,
@@ -1073,6 +1105,7 @@ class MangaViewModel(
         data class SetFetchInterval(val manga: Manga) : Dialog
         data object SettingsSheet : Dialog
         data object TrackSheet : Dialog
+        data object SetLocalStatus : Dialog
         data object FullCover : Dialog
     }
 
@@ -1090,6 +1123,10 @@ class MangaViewModel(
 
     fun showTrackDialog() {
         updateSuccessState { it.copy(dialog = Dialog.TrackSheet) }
+    }
+
+    fun showLocalStatusDialog() {
+        updateSuccessState { it.copy(dialog = Dialog.SetLocalStatus) }
     }
 
     fun showCoverDialog() {
@@ -1121,6 +1158,7 @@ class MangaViewModel(
             val excludedScanlators: Set<String>,
             val trackingCount: Int = 0,
             val hasLoggedInTrackers: Boolean = false,
+            val localStatus: LocalReadingStatus = LocalReadingStatus.READING,
             val isRefreshingData: Boolean = false,
             val dialog: Dialog? = null,
             val hasPromptedToAddBefore: Boolean = false,

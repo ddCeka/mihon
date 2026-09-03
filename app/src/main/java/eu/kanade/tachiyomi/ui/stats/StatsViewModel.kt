@@ -1,12 +1,10 @@
 package eu.kanade.tachiyomi.ui.stats
 
 import androidx.compose.ui.util.fastDistinctBy
-import androidx.compose.ui.util.fastFilter
 import androidx.lifecycle.viewModelScope
 import eu.kanade.presentation.more.stats.StatsScreenState
 import eu.kanade.presentation.more.stats.data.StatsData
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.source.model.SManga
 import kotlinx.coroutines.flow.update
 import mihon.core.viewmodel.StateViewModel
@@ -15,8 +13,8 @@ import tachiyomi.domain.history.interactor.GetTotalReadDuration
 import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.manga.interactor.GetLibraryManga
-import tachiyomi.domain.track.interactor.GetTracks
-import tachiyomi.domain.track.model.Track
+import tachiyomi.domain.track.local.interactor.GetLocalTracks
+import tachiyomi.domain.track.local.model.LocalReadingStatus
 import tachiyomi.source.local.isLocal
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -25,23 +23,15 @@ class StatsViewModel(
     private val downloadManager: DownloadManager = Injekt.get(),
     private val getLibraryManga: GetLibraryManga = Injekt.get(),
     private val getTotalReadDuration: GetTotalReadDuration = Injekt.get(),
-    private val getTracks: GetTracks = Injekt.get(),
+    private val getLocalTracks: GetLocalTracks = Injekt.get(),
     private val preferences: LibraryPreferences = Injekt.get(),
-    private val trackerManager: TrackerManager = Injekt.get(),
 ) : StateViewModel<StatsScreenState>(StatsScreenState.Loading) {
-
-    private val loggedInTrackers by lazy { trackerManager.loggedInTrackers() }
 
     init {
         viewModelScope.launchIO {
             val libraryManga = getLibraryManga.await()
 
             val distinctLibraryManga = libraryManga.fastDistinctBy { it.id }
-
-            val mangaTrackMap = getMangaTrackMap(distinctLibraryManga)
-            val scoredMangaTrackerMap = getScoredMangaTrackMap(mangaTrackMap)
-
-            val meanScore = getTrackMeanScore(scoredMangaTrackerMap)
 
             val overviewStatData = StatsData.Overview(
                 libraryMangaCount = distinctLibraryManga.size,
@@ -63,18 +53,14 @@ class StatsViewModel(
                 downloadCount = downloadManager.getDownloadCount(),
             )
 
-            val trackersStatData = StatsData.Trackers(
-                trackedTitleCount = mangaTrackMap.count { it.value.isNotEmpty() },
-                meanScore = meanScore,
-                trackerCount = loggedInTrackers.size,
-            )
+            val trackedTitles = getTrackedTitles(distinctLibraryManga)
 
             mutableState.update {
                 StatsScreenState.Success(
                     overview = overviewStatData,
                     titles = titlesStatData,
                     chapters = chaptersStatData,
-                    trackers = trackersStatData,
+                    tracked = trackedTitles,
                 )
             }
         }
@@ -93,37 +79,20 @@ class StatsViewModel(
         }
     }
 
-    private suspend fun getMangaTrackMap(libraryManga: List<LibraryManga>): Map<Long, List<Track>> {
-        val loggedInTrackerIds = loggedInTrackers.map { it.id }.toHashSet()
-        return libraryManga.associate { manga ->
-            val tracks = getTracks.await(manga.id)
-                .fastFilter { it.trackerId in loggedInTrackerIds }
-
-            manga.id to tracks
-        }
-    }
-
-    private fun getScoredMangaTrackMap(mangaTrackMap: Map<Long, List<Track>>): Map<Long, List<Track>> {
-        return mangaTrackMap.mapNotNull { (mangaId, tracks) ->
-            val trackList = tracks.mapNotNull { track ->
-                track.takeIf { it.score > 0.0 }
+    /**
+     * Builds the in-app tracker list. Every library entry has an effective status: its explicitly
+     * stored [LocalReadingStatus], or [LocalReadingStatus.READING] when none is stored.
+     */
+    private suspend fun getTrackedTitles(libraryManga: List<LibraryManga>): List<StatsData.TrackedTitle> {
+        val statusByMangaId = getLocalTracks.await().associate { it.mangaId to it.status }
+        return libraryManga
+            .map { libraryManga ->
+                StatsData.TrackedTitle(
+                    mangaId = libraryManga.id,
+                    title = libraryManga.manga.title,
+                    status = statusByMangaId[libraryManga.id] ?: LocalReadingStatus.READING,
+                )
             }
-            if (trackList.isEmpty()) return@mapNotNull null
-            mangaId to trackList
-        }.toMap()
-    }
-
-    private fun getTrackMeanScore(scoredMangaTrackMap: Map<Long, List<Track>>): Double {
-        return scoredMangaTrackMap
-            .map { (_, tracks) ->
-                tracks.map(::get10PointScore).average()
-            }
-            .fastFilter { !it.isNaN() }
-            .average()
-    }
-
-    private fun get10PointScore(track: Track): Double {
-        val service = trackerManager.get(track.trackerId)!!
-        return service.get10PointScore(track)
+            .sortedBy { it.title.lowercase() }
     }
 }

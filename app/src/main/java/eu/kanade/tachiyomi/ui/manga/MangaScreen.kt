@@ -35,6 +35,7 @@ import eu.kanade.presentation.manga.components.DeleteChaptersDialog
 import eu.kanade.presentation.manga.components.MangaCoverDialog
 import eu.kanade.presentation.manga.components.ScanlatorFilterDialog
 import eu.kanade.presentation.manga.components.SetIntervalDialog
+import eu.kanade.presentation.manga.components.SetLocalStatusDialog
 import eu.kanade.presentation.util.AssistContentScreen
 import eu.kanade.presentation.util.LEGACY_STORAGE_PERMISSION
 import eu.kanade.presentation.util.Screen
@@ -50,7 +51,6 @@ import eu.kanade.tachiyomi.ui.home.HomeScreen
 import eu.kanade.tachiyomi.ui.manga.notes.MangaNotesScreen
 import eu.kanade.tachiyomi.ui.manga.track.TrackInfoDialogHomeScreen
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.setting.SettingsScreen
 import eu.kanade.tachiyomi.ui.webview.WebViewScreen
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 import eu.kanade.tachiyomi.util.system.toShareIntent
@@ -144,13 +144,7 @@ class MangaScreen(
                     viewModel.source,
                 )
             }.takeIf { isHttpSource },
-            onTrackingClicked = {
-                if (!successState.hasLoggedInTrackers) {
-                    navigator.push(SettingsScreen(SettingsScreen.Destination.Tracking))
-                } else {
-                    viewModel.showTrackDialog()
-                }
-            },
+            onEditStatusClicked = viewModel::showLocalStatusDialog,
             onTagSearch = { scope.launch { performGenreSearch(navigator, it, viewModel.source!!) } },
             onFilterButtonClicked = viewModel::showSettingsDialog,
             onRefresh = viewModel::fetchAllFromSource,
@@ -243,6 +237,13 @@ class MangaScreen(
                     ),
                     enableSwipeDismiss = { it.lastItem is TrackInfoDialogHomeScreen },
                     onDismissRequest = onDismissRequest,
+                )
+            }
+            MangaViewModel.Dialog.SetLocalStatus -> {
+                SetLocalStatusDialog(
+                    selected = successState.localStatus,
+                    onDismissRequest = onDismissRequest,
+                    onSelect = viewModel::setLocalStatus,
                 )
             }
             MangaViewModel.Dialog.FullCover -> {

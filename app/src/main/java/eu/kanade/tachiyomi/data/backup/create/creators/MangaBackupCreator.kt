@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.backup.create.creators
 
 import app.cash.sqldelight.async.coroutines.awaitAsList
 import app.cash.sqldelight.async.coroutines.awaitAsOne
+import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import eu.kanade.tachiyomi.data.backup.create.BackupOptions
 import eu.kanade.tachiyomi.data.backup.models.BackupChapter
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
@@ -64,6 +65,14 @@ class MangaBackupCreator(
                 .awaitAsList()
             if (tracks.isNotEmpty()) {
                 mangaObject.tracking = tracks
+            }
+
+            // In-app local tracker status (only non-Reading statuses are stored)
+            val localStatus = database.manga_local_trackQueries
+                .getByMangaId(manga.id) { _, status -> status }
+                .awaitAsOneOrNull()
+            if (localStatus != null) {
+                mangaObject.localReadingStatus = localStatus
             }
         }
 

@@ -1,5 +1,7 @@
 package eu.kanade.presentation.more.stats.data
 
+import tachiyomi.domain.track.local.model.LocalReadingStatus
+
 sealed interface StatsData {
 
     data class Overview(
@@ -20,9 +22,9 @@ sealed interface StatsData {
         val downloadCount: Int,
     ) : StatsData
 
-    data class Trackers(
-        val trackedTitleCount: Int,
-        val meanScore: Double,
-        val trackerCount: Int,
+    data class TrackedTitle(
+        val mangaId: Long,
+        val title: String,
+        val status: LocalReadingStatus,
     ) : StatsData
 }

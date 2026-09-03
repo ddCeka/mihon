@@ -1,0 +1,33 @@
+CREATE TABLE manga_local_track(
+    _id INTEGER NOT NULL PRIMARY KEY,
+    manga_id INTEGER NOT NULL UNIQUE,
+    status INTEGER NOT NULL,
+    last_modified INTEGER NOT NULL,
+    FOREIGN KEY(manga_id) REFERENCES mangas (_id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX idx_manga_local_track_manga_id ON manga_local_track(manga_id);
+
+getAll:
+SELECT manga_id, status
+FROM manga_local_track;
+
+getByMangaId:
+SELECT manga_id, status
+FROM manga_local_track
+WHERE manga_id = :mangaId;
+
+upsert:
+INSERT INTO manga_local_track(manga_id, status, last_modified)
+VALUES (:mangaId, :status, :lastModified)
+ON CONFLICT(manga_id)
+DO UPDATE
+SET
+    status = :status,
+    last_modified = :lastModified
+WHERE manga_id = :mangaId;
+
+deleteByMangaId:
+DELETE FROM manga_local_track
+WHERE manga_id = :mangaId;
