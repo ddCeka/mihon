@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add onboarding permissions request for external storage
 - Add global search history
 - Add webtoon smooth scroll setting
 - Add legacy storage permission check for saving covers
