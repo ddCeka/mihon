@@ -31,6 +31,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add setting to hide Last Used sources section
 
 ### Changed
+- Refactor Pinned Only toggle for global search
 - Change attempt to solve Cloudflare challenge when interactive
 - Change author and artist name lines limited to 1 with ellipsis
 - Change Smart Update feature to off by default
