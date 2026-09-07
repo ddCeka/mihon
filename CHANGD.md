@@ -41,3 +41,6 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Fix page flashing on auto background
 - Fix split wide pages cause IndexOutOfBoundsException crash
 - Fix Search keyboard not closing on Enter and reopening on navigation back
+
+### Improved
+- Improve performance by reducing unnecessary media scanning
