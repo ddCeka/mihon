@@ -47,4 +47,5 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Fix Search keyboard not closing on Enter and reopening on navigation back
 
 ### Improved
+- Improve download and directory access performance
 - Improve performance by reducing unnecessary media scanning
