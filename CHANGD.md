@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add local epub import ui
 - Add onboarding permissions request for external storage
 - Add global search history
 - Add webtoon smooth scroll setting
