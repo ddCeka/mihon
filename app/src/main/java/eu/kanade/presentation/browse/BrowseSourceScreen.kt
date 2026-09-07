@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.source.Source
 import kotlinx.coroutines.flow.StateFlow
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.automirroredrounded.Help
+import mihon.icons.materialsymbols.rounded.Add
 import mihon.icons.materialsymbols.rounded.Public
 import mihon.icons.materialsymbols.rounded.Refresh
 import tachiyomi.core.common.i18n.stringResource
@@ -46,6 +47,7 @@ fun BrowseSourceContent(
     onWebViewClick: () -> Unit,
     onHelpClick: () -> Unit,
     onLocalSourceHelpClick: () -> Unit,
+    onLocalSourceImportClick: (() -> Unit)?,
     onMangaClick: (Manga) -> Unit,
     onMangaLongClick: (Manga) -> Unit,
 ) {
@@ -85,13 +87,24 @@ fun BrowseSourceContent(
                 else -> stringResource(MR.strings.no_results_found)
             },
             actions = if (source is LocalSource) {
-                listOf(
-                    EmptyScreenAction(
-                        stringRes = MR.strings.local_source_help_guide,
-                        icon = MaterialSymbols.AutoMirroredRounded.Help,
-                        onClick = onLocalSourceHelpClick,
-                    ),
-                )
+                buildList {
+                    onLocalSourceImportClick?.let { onImportClick ->
+                        add(
+                            EmptyScreenAction(
+                                stringRes = MR.strings.action_import_local_manga,
+                                icon = MaterialSymbols.Rounded.Add,
+                                onClick = onImportClick,
+                            ),
+                        )
+                    }
+                    add(
+                        EmptyScreenAction(
+                            stringRes = MR.strings.local_source_help_guide,
+                            icon = MaterialSymbols.AutoMirroredRounded.Help,
+                            onClick = onLocalSourceHelpClick,
+                        ),
+                    )
+                }
             } else {
                 listOf(
                     EmptyScreenAction(
