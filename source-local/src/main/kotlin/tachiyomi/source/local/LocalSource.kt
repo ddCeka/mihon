@@ -1,6 +1,8 @@
 package tachiyomi.source.local
 
 import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
 import com.hippo.unifile.UniFile
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
@@ -76,6 +78,84 @@ class LocalSource(
     override fun toString() = name
 
     override val supportsLatest: Boolean = true
+
+    /**
+     * Imports each selected EPUB/CBZ as a local manga. EPUB titles are read from
+     * package metadata; filenames are used as a fallback and for CBZ files.
+     * Re-importing a file updates the existing chapter instead of creating a duplicate.
+     */
+    suspend fun importFiles(uris: List<Uri>): ImportResult = withIOContext {
+        var result = ImportResult()
+        uris.forEach { uri ->
+            val displayName = getDisplayName(uri)
+            if (!LocalImporter.isSupportedImport(displayName)) {
+                result = result.copy(skipped = result.skipped + 1)
+                return@forEach
+            }
+
+            val source = UniFile.fromUri(context, uri)
+                ?: error("Unable to open selected chapter file")
+            val metadataTitle = if (displayName.substringAfterLast('.', "").equals("epub", true)) {
+                runCatching { source.epubReader(context).use { it.getTitle() } }.getOrNull()
+            } else {
+                null
+            }
+            val fallbackTitle = displayName.substringBeforeLast('.', displayName)
+            val mangaName = LocalImporter.sanitizeFileName(metadataTitle ?: fallbackTitle)
+                .takeIf(String::isNotBlank)
+                ?: error("Unable to determine local manga name")
+
+            result += importIntoManga(mangaName, listOf(source to displayName))
+        }
+        result
+    }
+
+    /**
+     * Imports all supported files at the top level of a selected directory as
+     * chapters of one manga. Selecting the same directory later adds new files
+     * and updates matching files in place, preserving chapter URLs/read history.
+     */
+    suspend fun importFolder(uri: Uri): ImportResult = withIOContext {
+        val directory = UniFile.fromUri(context, uri)
+            ?.takeIf { it.isDirectory }
+            ?: error("Unable to open selected manga directory")
+        val mangaName = LocalImporter.sanitizeFileName(directory.name ?: getDisplayName(uri))
+            .takeIf(String::isNotBlank)
+            ?: error("Unable to determine local manga name")
+        val files = directory.listFiles().orEmpty()
+            .filter { !it.isDirectory && LocalImporter.isSupportedImport(it.name.orEmpty()) }
+            .map { it to it.name.orEmpty() }
+
+        if (files.isEmpty()) {
+            ImportResult(skipped = directory.listFiles().orEmpty().count { !it.isDirectory })
+        } else {
+            importIntoManga(mangaName, files)
+        }
+    }
+
+    private fun importIntoManga(mangaName: String, files: List<Pair<UniFile, String>>): ImportResult {
+        val baseDirectory = fileSystem.getBaseDirectory()
+            ?: error("Local source directory is unavailable")
+        val existingDirectory = baseDirectory.findFile(mangaName)
+        val mangaDirectory = when {
+            existingDirectory == null -> baseDirectory.createDirectory(mangaName)
+            existingDirectory.isDirectory -> existingDirectory
+            else -> null
+        } ?: error("Unable to create local manga directory")
+
+        return LocalImporter.importInto(mangaDirectory, files)
+    }
+
+    private fun getDisplayName(uri: Uri): String {
+        val queriedName = context.contentResolver
+            .query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+            ?.use { cursor ->
+                if (cursor.moveToFirst()) cursor.getString(0) else null
+            }
+        return queriedName
+            ?: uri.lastPathSegment?.substringAfterLast('/')
+            ?: "chapter"
+    }
 
     // Browse related
     override suspend fun getPopularManga(page: Int) = getSearchManga(page, "", PopularFilters)
@@ -364,7 +444,7 @@ class LocalSource(
                 }
                 is Format.Epub -> {
                     format.file.epubReader(context).use { epub ->
-                        val entry = epub.getImagesFromPages().firstOrNull()
+                        val entry = epub.getCoverImage() ?: epub.getImagesFromPages().firstOrNull()
 
                         entry?.let { coverManager.update(manga, epub.getInputStream(it)!!) }
                     }
@@ -382,6 +462,20 @@ class LocalSource(
 
         private val LATEST_THRESHOLD = 7.days.inWholeMilliseconds
     }
+}
+
+data class ImportResult(
+    val imported: Int = 0,
+    val updated: Int = 0,
+    val skipped: Int = 0,
+    val manga: Int = 0,
+) {
+    operator fun plus(other: ImportResult) = ImportResult(
+        imported = imported + other.imported,
+        updated = updated + other.updated,
+        skipped = skipped + other.skipped,
+        manga = manga + other.manga,
+    )
 }
 
 fun Manga.isLocal(): Boolean = source == LocalSource.ID
