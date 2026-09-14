@@ -191,6 +191,8 @@
     <string name="onboarding_permission_external_storage">Access "All files" permission</string>
     <string name="onboarding_permission_external_storage_description">Allow direct access all files to media storage</string>
     <string name="onboarding_permission_writing_external_storage_description">Allow direct writing access all files to media storage</string>
+    <string name="onboarding_permission_all_files_access">Access all files</string>
+    <string name="onboarding_permission_all_files_access_description">Allow access to all files to store manga downloads, backups &amp; local sources</string>
     <string name="onboarding_permission_install_apps">Install apps permission</string>
     <string name="onboarding_permission_install_apps_description">To install source extensions.</string>
     <string name="onboarding_permission_notifications">Notification permission</string>
