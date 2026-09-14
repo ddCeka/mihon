@@ -2,9 +2,11 @@ package eu.kanade.presentation.more.onboarding
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -48,6 +50,7 @@ internal class PermissionStep : OnboardingStep {
     private var notificationGranted by mutableStateOf(false)
     private var batteryGranted by mutableStateOf(false)
     private var storageGranted by mutableStateOf(false)
+    private var allFilesAccessGranted by mutableStateOf(false)
 
     override val isComplete: Boolean = true
 
@@ -79,6 +82,8 @@ internal class PermissionStep : OnboardingStep {
                         context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
                             PackageManager.PERMISSION_GRANTED
                     }
+                    allFilesAccessGranted = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                        Environment.isExternalStorageManager()
                 }
             }
             lifecycleOwner.lifecycle.addObserver(observer)
@@ -124,6 +129,27 @@ internal class PermissionStep : OnboardingStep {
                     context.startActivity(intent)
                 },
             )
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                PermissionCheckbox(
+                    title = stringResource(MR.strings.onboarding_permission_all_files_access),
+                    subtitle = stringResource(MR.strings.onboarding_permission_all_files_access_description),
+                    granted = allFilesAccessGranted,
+                    onButtonClick = {
+                        try {
+                            context.startActivity(
+                                Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                                    data = "package:${context.packageName}".toUri()
+                                },
+                            )
+                        } catch (_: ActivityNotFoundException) {
+                            context.startActivity(
+                                Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION),
+                            )
+                        }
+                    },
+                )
+            }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 val permissionRequester = rememberLauncherForActivityResult(
