@@ -34,9 +34,6 @@ object SettingsDownloadScreen : SearchableSettings {
         val allCategories by getCategories.subscribe().collectAsState(initial = emptyList())
 
         val downloadPreferences = remember { Injekt.get<DownloadPreferences>() }
-        val parallelSourceLimit by downloadPreferences.parallelSourceLimit.collectAsState()
-        val parallelChapterLimit by downloadPreferences.parallelChapterLimit.collectAsState()
-        val parallelPageLimit by downloadPreferences.parallelPageLimit.collectAsState()
         return listOf(
             Preference.PreferenceItem.SwitchPreference(
                 preference = downloadPreferences.downloadOnlyOverWifi,
@@ -57,24 +54,21 @@ object SettingsDownloadScreen : SearchableSettings {
                 subtitle = stringResource(MR.strings.split_tall_images_summary),
             ),
             Preference.PreferenceItem.SliderPreference(
-                value = parallelSourceLimit,
+                preference = downloadPreferences.parallelSourceLimit,
                 valueRange = 1..20,
                 title = stringResource(MR.strings.pref_download_concurrent_sources),
-                onValueChanged = { downloadPreferences.parallelSourceLimit.set(it) },
             ),
             Preference.PreferenceItem.SliderPreference(
-                value = parallelChapterLimit,
+                preference = downloadPreferences.parallelChapterLimit,
                 valueRange = 1..20,
                 title = stringResource(MR.strings.pref_download_concurrent_chapters),
                 subtitle = stringResource(MR.strings.pref_download_concurrent_chapters_summary),
-                onValueChanged = { downloadPreferences.parallelChapterLimit.set(it) },
             ),
             Preference.PreferenceItem.SliderPreference(
-                value = parallelPageLimit,
+                preference = downloadPreferences.parallelPageLimit,
                 valueRange = 1..30,
                 title = stringResource(MR.strings.pref_download_concurrent_pages),
                 subtitle = stringResource(MR.strings.pref_download_concurrent_pages_summary),
-                onValueChanged = { downloadPreferences.parallelPageLimit.set(it) },
             ),
             getDeleteChaptersGroup(
                 downloadPreferences = downloadPreferences,
