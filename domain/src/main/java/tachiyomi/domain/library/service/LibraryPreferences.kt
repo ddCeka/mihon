@@ -215,6 +215,11 @@ class LibraryPreferences(
         false,
     )
 
+    val enableChapterNameHash: Preference<Boolean> = preferenceStore.getBoolean(
+        "pref_enable_chapter_name_hash",
+        false,
+    )
+
     val resumeLastSeenPage: Preference<Boolean> = preferenceStore.getBoolean(
         "pref_resume_last_seen_page",
         true,
