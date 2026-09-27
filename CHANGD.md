@@ -42,6 +42,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Refactor Release build into foss
 
 ### Fixed
+- Fix cache load startup race condition
 - Fix calendar to follow system locale change
 - Fix update badge overflow
 - Fix tracking date selection for all timezones
