@@ -236,8 +236,6 @@ dependencies {
     }
     implementation(libs.image.decoder)
 
-    implementation(libs.webgpuviewer)
-
     // UI libraries
     implementation(libs.material)
     implementation(libs.flexibleAdapter)
