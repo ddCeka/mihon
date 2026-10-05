@@ -3,6 +3,8 @@ package eu.kanade.presentation.reader.appbars
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,6 +25,8 @@ fun ReaderBottomBar(
     onClickReadingMode: () -> Unit,
     orientation: ReaderOrientation,
     onClickOrientation: () -> Unit,
+    bookmarked: Boolean,
+    onToggleBookmarked: () -> Unit,
     cropEnabled: Boolean,
     onClickCropBorder: () -> Unit,
     onClickSettings: () -> Unit,
@@ -45,6 +49,23 @@ fun ReaderBottomBar(
             Icon(
                 imageVector = orientation.icon,
                 contentDescription = stringResource(MR.strings.rotation_type),
+            )
+        }
+
+        IconButton(onClick = onToggleBookmarked) {
+            Icon(
+                imageVector = if (bookmarked) {
+                    Icons.Outlined.Bookmark
+                } else {
+                    Icons.Outlined.BookmarkBorder
+                },
+                contentDescription = stringResource(
+                    if (bookmarked) {
+                        MR.strings.action_remove_bookmark
+                    } else {
+                        MR.strings.action_bookmark
+                    },
+                ),
             )
         }
 
