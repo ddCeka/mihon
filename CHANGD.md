@@ -45,6 +45,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Refactor Release build into foss
 
 ### Fixed
+- Fix blank image on oversized webtoon images
 - Fix missing start date when manually start track
 - Fix cache load startup race condition
 - Fix calendar to follow system locale change
