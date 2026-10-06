@@ -64,6 +64,7 @@ fun ReaderAppBars(
     enabledPrevious: Boolean,
     currentPage: Int,
     totalPages: Int,
+    onClickCurrentPage: () -> Unit,
     onPageIndexChange: (Int) -> Unit,
     onPageIndexChangeFinished: () -> Unit,
 
@@ -126,6 +127,7 @@ fun ReaderAppBars(
                                     enabledPrevious = enabledPrevious,
                                     currentPage = currentPage,
                                     totalPages = totalPages,
+                                    onClickCurrentPage = onClickCurrentPage,
                                     onPageIndexChange = onPageIndexChange,
                                     onPageIndexChangeFinished = onPageIndexChangeFinished,
                                 )
@@ -154,6 +156,7 @@ fun ReaderAppBars(
                         enabledPrevious = enabledPrevious,
                         currentPage = currentPage,
                         totalPages = totalPages,
+                        onClickCurrentPage = onClickCurrentPage,
                         onPageIndexChange = onPageIndexChange,
                         onPageIndexChangeFinished = onPageIndexChangeFinished,
                     )

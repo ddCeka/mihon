@@ -18,6 +18,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 ## [0.20.4] - 2026-10-06
 
 ### Added
+- Add jump to page action from reader navigator
 - Add direct filesystem storage bypassing SAF picker
 - Add onboarding permissions request for external storage
 - Add temp files delete action to download queue

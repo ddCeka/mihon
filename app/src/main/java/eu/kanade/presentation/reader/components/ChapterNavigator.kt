@@ -1,6 +1,7 @@
 package eu.kanade.presentation.reader.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -40,6 +41,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -69,6 +72,7 @@ fun ChapterNavigator(
     enabledPrevious: Boolean,
     currentPage: Int,
     totalPages: Int,
+    onClickCurrentPage: () -> Unit,
     onPageIndexChange: (Int) -> Unit,
     onPageIndexChangeFinished: () -> Unit,
     modifier: Modifier = Modifier,
@@ -116,6 +120,7 @@ fun ChapterNavigator(
             enabledPrevious = enabledPrevious,
             currentPage = currentPage,
             totalPages = totalPages,
+            onClickCurrentPage = onClickCurrentPage,
             interactionSource = interactionSource,
             mainAxisPadding = mainAxisPadding,
             backgroundColor = backgroundColor,
@@ -131,6 +136,7 @@ fun ChapterNavigator(
             enabledPrevious = enabledPrevious,
             currentPage = currentPage,
             totalPages = totalPages,
+            onClickCurrentPage = onClickCurrentPage,
             interactionSource = interactionSource,
             mainAxisPadding = mainAxisPadding,
             backgroundColor = backgroundColor,
@@ -150,6 +156,7 @@ fun HorizontalChapterNavigator(
     enabledPrevious: Boolean,
     currentPage: Int,
     totalPages: Int,
+    onClickCurrentPage: () -> Unit,
     interactionSource: MutableInteractionSource,
     mainAxisPadding: Dp,
     backgroundColor: Color,
@@ -189,10 +196,25 @@ fun HorizontalChapterNavigator(
                             .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Box(contentAlignment = Alignment.CenterEnd) {
-                            Text(text = currentPage.toString())
+                        Box(
+                            modifier = Modifier
+                                .clickable(
+                                    enabled = currentPage in 1..totalPages,
+                                    role = Role.Button,
+                                    onClickLabel = stringResource(MR.strings.jump_to_page),
+                                    onClick = onClickCurrentPage,
+                                ),
+                            contentAlignment = Alignment.CenterEnd,
+                        ) {
+                            if (currentPage in 1..totalPages) {
+                                Text(text = currentPage.toString())
+                            }
                             // Taking up full length so the slider doesn't shift when 'currentPage' length changes
-                            Text(text = totalPages.toString(), color = Color.Transparent)
+                            Text(
+                                text = totalPages.toString(),
+                                color = Color.Transparent,
+                                modifier = Modifier.clearAndSetSemantics {},
+                            )
                         }
 
                         Slider(
@@ -235,6 +257,7 @@ fun VerticalChapterNavigator(
     enabledPrevious: Boolean,
     currentPage: Int,
     totalPages: Int,
+    onClickCurrentPage: () -> Unit,
     interactionSource: MutableInteractionSource,
     mainAxisPadding: Dp,
     backgroundColor: Color,
@@ -268,7 +291,20 @@ fun VerticalChapterNavigator(
                     .padding(vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(text = currentPage.toString())
+                Box(
+                    modifier = Modifier
+                        .clickable(
+                            enabled = currentPage in 1..totalPages,
+                            role = Role.Button,
+                            onClickLabel = stringResource(MR.strings.jump_to_page),
+                            onClick = onClickCurrentPage,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (currentPage in 1..totalPages) {
+                        Text(text = currentPage.toString())
+                    }
+                }
 
                 VerticalSlider(
                     state = state,
@@ -311,6 +347,7 @@ private fun ChapterNavigatorPreview() {
             enabledPrevious = true,
             currentPage = currentPage,
             totalPages = 10,
+            onClickCurrentPage = {},
             onPageIndexChange = { currentPage = (it + 1) },
             onPageIndexChangeFinished = {},
         )
