@@ -31,6 +31,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add setting to hide Last Used sources section
 
 ### Changed
+- Revert add high quality webgpu renderer
 - Moved bookmark from reader top bar to bottom bar
 - Refactor Pinned Only toggle for global search
 - Change author and artist name lines limited to 1 with ellipsis

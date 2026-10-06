@@ -28,7 +28,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -36,11 +35,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.updatePadding
-import ca.mpreg.webgpuviewer.renderer.GainmapInput
-import ca.mpreg.webgpuviewer.renderer.Image
-import ca.mpreg.webgpuviewer.viewer.ImagePage
-import ca.mpreg.webgpuviewer.viewer.ImageViewer
-import ca.mpreg.webgpuviewer.viewer.ImageViewerState
 import coil3.asDrawable
 import coil3.imageLoader
 import coil3.request.CachePolicy
@@ -51,12 +45,7 @@ import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.DropdownMenu
 import eu.kanade.presentation.manga.EditCoverAction
-import eu.kanade.tachiyomi.data.coil.ImageDecoder
-import eu.kanade.tachiyomi.data.coil.newDecoder
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import mihon.app.di.appGraph
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Close
 import mihon.icons.materialsymbols.rounded.Edit
@@ -79,9 +68,6 @@ fun MangaCoverDialog(
     onEditClick: ((EditCoverAction) -> Unit)?,
     onDismissRequest: () -> Unit,
 ) {
-    val useNewRenderer = LocalContext.current.appGraph.basePreferences.highQualityRenderer.get()
-    val view = LocalView.current
-
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(
@@ -168,59 +154,6 @@ fun MangaCoverDialog(
                 }
             },
         ) { contentPadding ->
-            if (useNewRenderer) {
-                val state = remember(manga) { ImageViewerState() }
-                LaunchedEffect(manga) {
-                    val request = ImageRequest.Builder(view.context)
-                        .data(manga)
-                        .size(Size.ORIGINAL)
-                        .memoryCachePolicy(CachePolicy.DISABLED)
-                        .newDecoder(true)
-                        .build()
-                    val result = view.context.imageLoader.execute(request) as? SuccessResult ?: return@LaunchedEffect
-                    val res = result.image as? ImageDecoder.DecodeResultImage ?: return@LaunchedEffect
-                    // Held, then freed, around the upload: its buffer alone doesn't keep
-                    // the frame's native pixels alive.
-                    val page = res.frame.use {
-                        withContext(Dispatchers.Default) {
-                            ImagePage.ImageSingle(
-                                Image(
-                                    res.image,
-                                    res.width,
-                                    res.height,
-                                    createMipMaps = true,
-                                    backgroundColor = 0,
-                                    hdr = res.isHdr,
-                                    hdrHeadroom = res.hdrHeadroom,
-                                    gainmap = res.gainmap?.let {
-                                        GainmapInput(
-                                            pixels = it.pixels,
-                                            width = it.width,
-                                            height = it.height,
-                                            channels = it.channels,
-                                            gamma = it.gamma,
-                                            minContentBoost = it.minContentBoost,
-                                            maxContentBoost = it.maxContentBoost,
-                                            offsetSdr = it.offsetSdr,
-                                            offsetHdr = it.offsetHdr,
-                                        )
-                                    },
-                                ),
-                            )
-                        }
-                    }
-                    state.apply {
-                        fetchPage = { index ->
-                            if (index == 0) page else null
-                        }
-                        invalidate()
-                    }
-                }
-
-                ImageViewer(state = state)
-                return@Scaffold
-            }
-
             val statusBarPaddingPx = with(LocalDensity.current) { contentPadding.calculateTopPadding().roundToPx() }
             val bottomPaddingPx = with(LocalDensity.current) { contentPadding.calculateBottomPadding().roundToPx() }
 
