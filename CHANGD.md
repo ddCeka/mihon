@@ -64,6 +64,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Feat save one-shot as pdf
 
 ### Other
+- Ensure tachiyomix public API is not removed by R8
 - Moved bookmark from reader top bar to bottom bar
 - Skip duplicate chapters in chapter list
 - Let SliderPreference collect its own preference
