@@ -15,7 +15,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
-## [0.20.4] - 2026-10-06
+## [0.20.4] - 2026-10-07
 
 ### Added
 - Add jump to page action from reader navigator
@@ -36,6 +36,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add setting to hide Last Used sources section
 
 ### Changed
+- Changed default user agent from 149 to 144
 - Refactor Pinned Only toggle for global search
 - Use custom decoder in wide page operations
 - Use tiled decoding for big webtoon image
