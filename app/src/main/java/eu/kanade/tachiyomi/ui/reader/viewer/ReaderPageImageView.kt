@@ -38,7 +38,9 @@ import eu.kanade.tachiyomi.data.coil.customDecoder
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonSubsamplingImageView
 import eu.kanade.tachiyomi.util.system.animatorDurationScale
 import eu.kanade.tachiyomi.util.view.isVisibleOnScreen
+import mihon.app.di.appGraph
 import okio.BufferedSource
+import tachiyomi.core.common.util.system.ImageUtil
 
 /**
  * A wrapper view for showing page image.
@@ -55,6 +57,10 @@ open class ReaderPageImageView @JvmOverloads constructor(
     @StyleRes defStyleRes: Int = 0,
     private val isWebtoon: Boolean = false,
 ) : FrameLayout(context, attrs, defStyleAttrs, defStyleRes) {
+
+    private val alwaysDecodeLongStripWithSSIV by lazy {
+        context.appGraph.basePreferences.alwaysDecodeLongStripWithSSIV.get()
+    }
 
     private var pageView: View? = null
 
@@ -232,6 +238,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
         } else {
             SubsamplingScaleImageView(context)
         }.apply {
+            setMaxTileSize(ImageUtil.hardwareBitmapThreshold)
             setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_CENTER)
             setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
             setMinimumTileDpi(180)
@@ -301,7 +308,8 @@ open class ReaderPageImageView @JvmOverloads constructor(
                 isVisible = true
             }
             is BufferedSource -> {
-                if (!isWebtoon) {
+                if (!isWebtoon || alwaysDecodeLongStripWithSSIV) {
+                    setHardwareConfig(ImageUtil.canUseHardwareBitmap(data))
                     setImage(ImageSource.inputStream(data.inputStream()))
                     isVisible = true
                     return@apply
