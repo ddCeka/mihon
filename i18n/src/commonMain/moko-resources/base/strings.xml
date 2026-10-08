@@ -1092,6 +1092,10 @@
     <!-- Notes screen -->
     <string name="notes_placeholder">Enjoyed the part where…</string>
 
+    <!-- Per-manga missing chapters -->
+    <string name="action_hide_missing_chapters">Hide missing chapters</string>
+    <string name="action_show_missing_chapters">Show missing chapters</string>
+
     <string name="migrationConfigScreen.selectedHeader">Selected</string>
     <string name="migrationConfigScreen.availableHeader">Available</string>
     <string name="migrationConfigScreen.selectAllLabel">Select all</string>
