@@ -880,6 +880,14 @@ class MangaViewModel(
      * Sets the bookmark filter and requests an UI update.
      * @param state whether to display only bookmarked chapters or all chapters.
      */
+    fun toggleHideMissingChapters() {
+        val manga = successState?.manga ?: return
+
+        viewModelScope.launchNonCancellable {
+            setMangaChapterFlags.awaitSetHideMissingChapters(manga, !manga.hideMissingChapters)
+        }
+    }
+
     fun setBookmarkedFilter(state: TriState) {
         val manga = successState?.manga ?: return
 
@@ -1081,7 +1089,7 @@ class MangaViewModel(
             }
 
             val chapterListItems by lazy {
-                if (hideMissingChapters) {
+                if (hideMissingChapters || manga.hideMissingChapters) {
                     return@lazy processedChapters
                 }
 
