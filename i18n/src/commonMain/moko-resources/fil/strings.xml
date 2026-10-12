@@ -949,4 +949,12 @@
     <string name="transition_animation_stack_left">Pa-stack (kaliwa)</string>
     <string name="pref_cutout_mode_dual">Modo ng display cutout (pa-doble)</string>
     <string name="cutout_mode_shift">Pag-usog</string>
+    <string name="action_web_view" translatable="false"></string>
+    <string name="ext_installer_private" translatable="false"></string>
+    <string name="refresh_tracker_error"></string>
+    <string name="ext_installer_shizuku" translatable="false"></string>
+    <string name="refresh_tracker_profile"></string>
+    <string name="refresh_tracker_success"></string>
+    <string name="ext_installer_packageinstaller" translatable="false"></string>
+    <string name="app_name" translatable="false"></string>
 </resources>
