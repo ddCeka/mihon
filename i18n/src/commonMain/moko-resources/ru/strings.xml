@@ -949,4 +949,12 @@
     <string name="pref_continuous_minwidth">Минимальная ширина</string>
     <string name="pref_continuous_gap">Зазор</string>
     <string name="pref_allowed_content_warnings">Разрешенное предупреждение об контенте</string>
+    <string name="action_web_view" translatable="false"></string>
+    <string name="ext_installer_private" translatable="false"></string>
+    <string name="refresh_tracker_error"></string>
+    <string name="ext_installer_shizuku" translatable="false"></string>
+    <string name="refresh_tracker_profile"></string>
+    <string name="refresh_tracker_success"></string>
+    <string name="ext_installer_packageinstaller" translatable="false"></string>
+    <string name="app_name" translatable="false"></string>
 </resources>
