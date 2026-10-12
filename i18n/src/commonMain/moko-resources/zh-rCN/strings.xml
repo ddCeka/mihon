@@ -952,9 +952,4 @@
     <string name="refresh_tracker_profile">刷新跟踪器配置</string>
     <string name="refresh_tracker_success">刷新 %s 配置</string>
     <string name="refresh_tracker_error">%1$s 刷新错误： %2$s</string>
-    <string name="action_web_view" translatable="false"></string>
-    <string name="ext_installer_private" translatable="false"></string>
-    <string name="ext_installer_shizuku" translatable="false"></string>
-    <string name="ext_installer_packageinstaller" translatable="false"></string>
-    <string name="app_name" translatable="false"></string>
 </resources>
