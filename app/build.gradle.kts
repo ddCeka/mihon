@@ -1,6 +1,5 @@
 import com.android.build.api.variant.ApplicationVariant
 import com.android.build.api.variant.BuildConfigField
-import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import mihon.gradle.Config
 import mihon.gradle.getCurrentTime
 import mihon.gradle.getLatestCommitCount
@@ -22,13 +21,6 @@ plugins {
     alias(libs.plugins.apollo)
 }
 
-if (Config.includeTelemetry) {
-    pluginManager.apply {
-        apply(libs.plugins.google.services.get().pluginId)
-        apply(libs.plugins.firebase.crashlytics.get().pluginId)
-    }
-}
-
 val keystorePropertiesFile = layout.settingsDirectory.file("keystore.properties").asFile
 
 android {
@@ -40,7 +32,6 @@ android {
         versionCode = 37
         versionName = "0.21.1"
 
-        buildConfigField("boolean", "TELEMETRY_INCLUDED", "${Config.includeTelemetry}")
         buildConfigField("boolean", "UPDATER_ENABLED", "${Config.enableUpdater}")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -93,42 +84,14 @@ android {
 
             matchingFallbacks.addAll(commonMatchingFallbacks)
         }
-        create("nightly") {
-            initWith(release)
-
-            applicationIdSuffix = ".debug"
-
-            matchingFallbacks.addAll(commonMatchingFallbacks)
-        }
-        create("benchmark") {
-            initWith(release)
-
-            versionNameSuffix = "-benchmark"
-            applicationIdSuffix = ".benchmark"
-
-            matchingFallbacks.addAll(commonMatchingFallbacks)
-        }
-
-        if (Config.includeTelemetry) {
-            configureEach {
-                configure<CrashlyticsExtension> {
-                    mappingFileUploadEnabled = Config.uploadCrashlyticsMapping
-                }
-            }
-        }
-    }
-
-    sourceSets {
-        getByName("nightly").res.directories.add("src/debug/res")
-        getByName("benchmark").res.directories.add("src/debug/res")
     }
 
     splits {
         abi {
             isEnable = true
-            isUniversalApk = true
+            isUniversalApk = false
             reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            include("armeabi-v7a", "arm64-v8a")
         }
     }
 
@@ -218,7 +181,6 @@ dependencies {
     implementation(projects.domain)
     implementation(projects.presentationCore)
     implementation(projects.presentationWidget)
-    implementation(projects.telemetry)
 
     // Compose
     implementation(libs.androidx.activity.compose)
@@ -330,7 +292,7 @@ dependencies {
 
     // For detecting memory leaks; see https://square.github.io/leakcanary/
     // debugImplementation(libs.leakCanary.android)
-    implementation(libs.leakCanary.plumber)
+    // implementation(libs.leakCanary.plumber)
 
     testImplementation(libs.kotlinx.coroutines.test)
 }
@@ -416,7 +378,7 @@ fun ApplicationVariant.buildConfigField(type: String, name: String, value: Provi
 
 androidComponents {
     onVariants { variant ->
-        val isUnstableBuild = variant.buildType == "debug" || variant.buildType == "nightly"
+        val isUnstableBuild = variant.buildType == "debug"
         val buildTime = if (isUnstableBuild) currentTime else latestCommitTime
 
         variant.buildConfigField("String", "COMMIT_COUNT", latestCommitCount.map { "\"$it\"" })

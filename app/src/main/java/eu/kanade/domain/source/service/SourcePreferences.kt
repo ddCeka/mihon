@@ -43,6 +43,11 @@ class SourcePreferences(
         -1,
     )
 
+    val showLastUsedSource: Preference<Boolean> = preferenceStore.getBoolean(
+        "show_last_used_source",
+        true,
+    )
+
     val enabledContentWarnings: Preference<Set<ContentWarning>> = preferenceStore.getEnumSet(
         "enabled_content_warnings",
         setOf(ContentWarning.SAFE, ContentWarning.MIXED, ContentWarning.NSFW),
@@ -76,6 +81,16 @@ class SourcePreferences(
 
     val globalSearchFilterState: Preference<Boolean> = preferenceStore.getBoolean(
         Preference.appStateKey("has_filters_toggle_state"),
+        false,
+    )
+
+    val recentSearches: Preference<Set<String>> = preferenceStore.getStringSet(
+        Preference.appStateKey("recent_searches"),
+        emptySet(),
+    )
+
+    val globalSearchPinnedOnly: Preference<Boolean> = preferenceStore.getBoolean(
+        Preference.appStateKey("global_search_pinned_only"),
         false,
     )
 

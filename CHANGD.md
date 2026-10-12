@@ -1,0 +1,44 @@
+# Changelog
+
+All notable changes to this repository will be documented in this file.
+
+> [!NOTE]
+> Keep in mind that the commit SHA may changed each time I do a rebase, so the tagged release may not be accurate.
+
+The format is a modified version of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this repository don't fucking care for [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+- `Added` - for new features.
+- `Changed ` - for changes in existing functionality.
+- `Improved` - for enhancement or optimization in existing functionality.
+- `Removed` - for currently removed features.
+- `Fixed` - for any bug fixes.
+- `Other` - for technical stuff.
+
+### Added
+- Add jump to page from reader navigators
+- Add temp files delete action to download queue
+- Add onboarding permissions request for external storage
+- Add global search history
+- Add webtoon smooth scroll setting
+- Add legacy storage permission check for saving covers
+- Add parallel chapters download
+- Add dynamic theme support for older android
+- Add direct filesystem storage bypassing SAF picker
+- Add Gotham theme
+- Add setting to hide Last Used sources section
+
+### Changed
+- Change default user agent from 149 to 144
+- Change attempt to solve Cloudflare challenge when interactive
+- Moved bookmark from reader top bar to bottom bar
+- Refactor Pinned Only toggle for global search
+- Change author and artist name lines limited to 1 with ellipsis
+- Change Smart Update feature to off by default
+- Refactor Release build into foss
+
+### Fixed
+- Fix calendar to follow system locale change
+
+### Improved
+- Improve performance by reducing unnecessary media scanning

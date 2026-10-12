@@ -64,6 +64,7 @@ fun ReaderAppBars(
     enabledPrevious: Boolean,
     currentPage: Int,
     totalPages: Int,
+    onClickCurrentPage: () -> Unit,
     onPageIndexChange: (Int) -> Unit,
     onPageIndexChangeFinished: () -> Unit,
 
@@ -92,8 +93,6 @@ fun ReaderAppBars(
                 mangaTitle = mangaTitle,
                 chapterTitle = chapterTitle,
                 navigateUp = navigateUp,
-                bookmarked = bookmarked,
-                onToggleBookmarked = onToggleBookmarked,
                 onOpenInWebView = onOpenInWebView,
                 onOpenInBrowser = onOpenInBrowser,
                 onShare = onShare,
@@ -128,6 +127,7 @@ fun ReaderAppBars(
                                     enabledPrevious = enabledPrevious,
                                     currentPage = currentPage,
                                     totalPages = totalPages,
+                                    onClickCurrentPage = onClickCurrentPage,
                                     onPageIndexChange = onPageIndexChange,
                                     onPageIndexChangeFinished = onPageIndexChangeFinished,
                                 )
@@ -156,6 +156,7 @@ fun ReaderAppBars(
                         enabledPrevious = enabledPrevious,
                         currentPage = currentPage,
                         totalPages = totalPages,
+                        onClickCurrentPage = onClickCurrentPage,
                         onPageIndexChange = onPageIndexChange,
                         onPageIndexChangeFinished = onPageIndexChangeFinished,
                     )
@@ -170,6 +171,8 @@ fun ReaderAppBars(
                     onClickReadingMode = onClickReadingMode,
                     orientation = orientation,
                     onClickOrientation = onClickOrientation,
+                    bookmarked = bookmarked,
+                    onToggleBookmarked = onToggleBookmarked,
                     cropEnabled = cropEnabled,
                     onClickCropBorder = onClickCropBorder,
                     onClickSettings = onClickSettings,

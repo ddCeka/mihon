@@ -18,7 +18,9 @@ import android.view.View
 import android.view.View.LAYER_TYPE_HARDWARE
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,6 +31,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -48,6 +51,7 @@ import dev.zacsweers.metro.Inject
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.presentation.reader.DisplayRefreshHost
 import eu.kanade.presentation.reader.OrientationSelectDialog
+import eu.kanade.presentation.reader.PageJumpDialog
 import eu.kanade.presentation.reader.ReaderContentOverlay
 import eu.kanade.presentation.reader.ReaderPageActionsDialog
 import eu.kanade.presentation.reader.ReaderPageIndicator
@@ -55,6 +59,8 @@ import eu.kanade.presentation.reader.ReadingModeSelectDialog
 import eu.kanade.presentation.reader.appbars.ReaderAppBars
 import eu.kanade.presentation.reader.components.ChapterNavigatorType
 import eu.kanade.presentation.reader.settings.ReaderSettingsDialog
+import eu.kanade.presentation.util.LEGACY_STORAGE_PERMISSION
+import eu.kanade.presentation.util.rememberLegacyStoragePermissionState
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -256,6 +262,15 @@ class ReaderActivity : BaseActivity() {
                 preferences = readerPreferences,
             )
         }
+        val hasStoragePermission = rememberLegacyStoragePermissionState()
+        val requestStoragePermission =
+            rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+                if (granted) {
+                    viewModel.saveImage()
+                } else {
+                    toast(MR.strings.missing_storage_permission)
+                }
+            }
 
         Box(modifier = Modifier.fillMaxSize()) {
             if (!state.menuVisible && showPageNumber) {
@@ -274,7 +289,7 @@ class ReaderActivity : BaseActivity() {
         }
 
         val onDismissRequest = viewModel::closeDialog
-        when (state.dialog) {
+        when (val dialog = state.dialog) {
             is ReaderViewModel.Dialog.Loading -> {
                 AlertDialog(
                     onDismissRequest = {},
@@ -325,8 +340,38 @@ class ReaderActivity : BaseActivity() {
                     onDismissRequest = onDismissRequest,
                     onSetAsCover = viewModel::setAsCover,
                     onShare = viewModel::shareImage,
-                    onSave = viewModel::saveImage,
+                    onSave = {
+                        if (hasStoragePermission) {
+                            viewModel.saveImage()
+                        } else {
+                            requestStoragePermission.launch(LEGACY_STORAGE_PERMISSION)
+                        }
+                    },
                 )
+            }
+            is ReaderViewModel.Dialog.PageJump -> {
+                if (state.currentChapter === dialog.chapter && state.totalPages == dialog.totalPages) {
+                    PageJumpDialog(
+                        currentPage = dialog.currentPage,
+                        totalPages = dialog.totalPages,
+                        onConfirm = { pageIndex ->
+                            val activeState = viewModel.state.value
+                            if (activeState.dialog == dialog) {
+                                viewModel.closeDialog()
+                                if (
+                                    activeState.currentChapter === dialog.chapter &&
+                                    activeState.totalPages == dialog.totalPages &&
+                                    pageIndex in 0 until activeState.totalPages
+                                ) {
+                                    moveToPageIndex(pageIndex)
+                                }
+                            }
+                        },
+                        onDismissRequest = onDismissRequest,
+                    )
+                } else {
+                    LaunchedEffect(dialog) { viewModel.closeDialog() }
+                }
             }
             null -> {}
         }
@@ -492,6 +537,7 @@ class ReaderActivity : BaseActivity() {
             enabledPrevious = state.viewerChapters?.prevChapter != null,
             currentPage = state.currentPage,
             totalPages = state.totalPages,
+            onClickCurrentPage = viewModel::openPageJumpDialog,
             onPageIndexChange = {
                 isScrollingThroughPages = true
                 moveToPageIndex(it)

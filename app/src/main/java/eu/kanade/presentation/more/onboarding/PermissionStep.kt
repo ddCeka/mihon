@@ -2,9 +2,11 @@ package eu.kanade.presentation.more.onboarding
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -17,7 +19,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -36,26 +37,24 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import eu.kanade.presentation.util.rememberRequestPackageInstallsPermissionState
 import eu.kanade.tachiyomi.util.system.launchRequestPackageInstallsPermission
-import eu.kanade.tachiyomi.util.system.telemetryIncluded
-import mihon.app.di.appGraph
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Check
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.util.collectAsState
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
 internal class PermissionStep : OnboardingStep {
 
     private var notificationGranted by mutableStateOf(false)
     private var batteryGranted by mutableStateOf(false)
+    private var storageGranted by mutableStateOf(false)
+    private var allFilesAccessGranted by mutableStateOf(false)
 
     override val isComplete: Boolean = true
 
     @Composable
     override fun Content() {
         val context = LocalContext.current
-        val privacyPreferences = remember { context.appGraph.privacyPreferences }
         val lifecycleOwner = LocalLifecycleOwner.current
 
         val installGranted = rememberRequestPackageInstallsPermissionState()
@@ -71,6 +70,18 @@ internal class PermissionStep : OnboardingStep {
                     }
                     batteryGranted = context.getSystemService<PowerManager>()!!
                         .isIgnoringBatteryOptimizations(context.packageName)
+                    storageGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        context.checkSelfPermission(Manifest.permission.READ_MEDIA_IMAGES) ==
+                            PackageManager.PERMISSION_GRANTED
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                            PackageManager.PERMISSION_GRANTED
+                    } else {
+                        context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                            PackageManager.PERMISSION_GRANTED
+                    }
+                    allFilesAccessGranted = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                        Environment.isExternalStorageManager()
                 }
             }
             lifecycleOwner.lifecycle.addObserver(observer)
@@ -117,30 +128,72 @@ internal class PermissionStep : OnboardingStep {
                 },
             )
 
-            if (!telemetryIncluded) return@Column
-
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
 
-            val crashlyticsPref = privacyPreferences.crashlytics
-            val crashlytics by crashlyticsPref.collectAsState()
-            PermissionSwitch(
-                title = stringResource(MR.strings.onboarding_permission_crashlytics),
-                subtitle = stringResource(MR.strings.onboarding_permission_crashlytics_description),
-                granted = crashlytics,
-                onToggleChange = crashlyticsPref::set,
-            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                PermissionCheckbox(
+                    title = stringResource(MR.strings.onboarding_permission_all_files_access),
+                    subtitle = stringResource(MR.strings.onboarding_permission_all_files_access_description),
+                    granted = allFilesAccessGranted,
+                    onButtonClick = {
+                        try {
+                            context.startActivity(
+                                Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                                    data = "package:${context.packageName}".toUri()
+                                },
+                            )
+                        } catch (_: ActivityNotFoundException) {
+                            context.startActivity(
+                                Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION),
+                            )
+                        }
+                    },
+                )
+            }
 
-            val analyticsPref = privacyPreferences.analytics
-            val analytics by analyticsPref.collectAsState()
-            PermissionSwitch(
-                title = stringResource(MR.strings.onboarding_permission_analytics),
-                subtitle = stringResource(MR.strings.onboarding_permission_analytics_description),
-                granted = analytics,
-                onToggleChange = analyticsPref::set,
-            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val permissionRequester = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.RequestPermission(),
+                    onResult = {
+                        // no-op. resulting checks is being done on resume
+                    },
+                )
+                PermissionCheckbox(
+                    title = stringResource(MR.strings.onboarding_permission_external_storage),
+                    subtitle = stringResource(MR.strings.onboarding_permission_external_storage_description),
+                    granted = storageGranted,
+                    onButtonClick = { permissionRequester.launch(Manifest.permission.READ_MEDIA_IMAGES) },
+                )
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val permissionRequester = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.RequestPermission(),
+                    onResult = {
+                        // no-op. resulting checks is being done on resume
+                    },
+                )
+                PermissionCheckbox(
+                    title = stringResource(MR.strings.onboarding_permission_external_storage),
+                    subtitle = stringResource(MR.strings.onboarding_permission_external_storage_description),
+                    granted = storageGranted,
+                    onButtonClick = { permissionRequester.launch(Manifest.permission.READ_EXTERNAL_STORAGE) },
+                )
+            } else {
+                val permissionRequester = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.RequestPermission(),
+                    onResult = {
+                        // no-op. resulting checks is being done on resume
+                    },
+                )
+                PermissionCheckbox(
+                    title = stringResource(MR.strings.onboarding_permission_external_storage),
+                    subtitle = stringResource(MR.strings.onboarding_permission_writing_external_storage_description),
+                    granted = storageGranted,
+                    onButtonClick = { permissionRequester.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE) },
+                )
+            }
         }
     }
 
@@ -183,28 +236,6 @@ internal class PermissionStep : OnboardingStep {
                         Text(stringResource(MR.strings.onboarding_permission_action_grant))
                     }
                 }
-            },
-            supportingContent = { Text(text = subtitle) },
-            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-            content = { Text(text = title) },
-        )
-    }
-
-    @Composable
-    private fun PermissionSwitch(
-        title: String,
-        subtitle: String,
-        granted: Boolean,
-        modifier: Modifier = Modifier,
-        onToggleChange: (Boolean) -> Unit,
-    ) {
-        ListItem(
-            modifier = modifier,
-            trailingContent = {
-                Switch(
-                    checked = granted,
-                    onCheckedChange = onToggleChange,
-                )
             },
             supportingContent = { Text(text = subtitle) },
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),

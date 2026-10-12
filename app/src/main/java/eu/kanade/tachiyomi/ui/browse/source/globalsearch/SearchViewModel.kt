@@ -28,6 +28,8 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.source.local.isLocal
 
+private const val RECENT_SEARCHES_LIMIT = 10
+
 abstract class SearchViewModel(
     initialState: State = State(),
     sourcePreferences: SourcePreferences,
@@ -55,22 +57,34 @@ abstract class SearchViewModel(
     protected val pinnedSources = sourcePreferences.pinnedSources.get()
 
     private var lastQuery: String? = null
-    private var lastSourceFilter: SourceFilter? = null
+    private var lastPinnedOnly: Boolean? = null
 
     protected var extensionFilter: String? = null
 
     open val sortComparator = { map: Map<Source, SearchItemResult> ->
         compareBy<Source>(
             { (map[it] as? SearchItemResult.Success)?.isEmpty ?: true },
-            { "${it.id}" !in pinnedSources },
+            { it.id.toString() !in pinnedSources },
             { "${it.name.lowercase()} (${it.lang})" },
         )
     }
 
     init {
+        state.update { it.copy(hasPinnedSources = pinnedSources.isNotEmpty()) }
         viewModelScope.launch {
             preferences.globalSearchFilterState.changes().collectLatest { onlyShowHasResults ->
                 state.update { it.copy(onlyShowHasResults = onlyShowHasResults) }
+            }
+        }
+        viewModelScope.launch {
+            preferences.globalSearchPinnedOnly.changes().collectLatest { pinned ->
+                state.update { it.copy(pinnedOnly = pinned && it.hasPinnedSources) }
+                search()
+            }
+        }
+        viewModelScope.launch {
+            preferences.recentSearches.changes().collectLatest { recents ->
+                state.update { it.copy(recentSearches = recents.toList()) }
             }
         }
     }
@@ -115,9 +129,8 @@ abstract class SearchViewModel(
         state.update { it.copy(searchQuery = query) }
     }
 
-    fun setSourceFilter(filter: SourceFilter) {
-        state.update { it.copy(sourceFilter = filter) }
-        search()
+    fun togglePinnedOnly() {
+        preferences.globalSearchPinnedOnly.toggle()
     }
 
     fun toggleFilterResults() {
@@ -126,15 +139,21 @@ abstract class SearchViewModel(
 
     fun search() {
         val query = state.value.searchQuery
-        val sourceFilter = state.value.sourceFilter
+        val pinnedOnly = state.value.pinnedOnly
 
         if (query.isNullOrBlank()) return
 
+        preferences.recentSearches.set(
+            (listOf(query) + preferences.recentSearches.get().filter { it != query })
+                .take(RECENT_SEARCHES_LIMIT)
+                .toSet(),
+        )
+
         val sameQuery = this.lastQuery == query
-        if (sameQuery && this.lastSourceFilter == sourceFilter) return
+        if (sameQuery && this.lastPinnedOnly == pinnedOnly) return
 
         this.lastQuery = query
-        this.lastSourceFilter = sourceFilter
+        this.lastPinnedOnly = pinnedOnly
 
         searchJob?.cancel()
 
@@ -218,10 +237,12 @@ abstract class SearchViewModel(
     data class State(
         val from: Manga? = null,
         val searchQuery: String? = null,
-        val sourceFilter: SourceFilter = SourceFilter.PinnedOnly,
+        val pinnedOnly: Boolean = false,
+        val hasPinnedSources: Boolean = false,
         val onlyShowHasResults: Boolean = false,
         val items: Map<Source, SearchItemResult> = mapOf(),
         val dialog: Dialog? = null,
+        val recentSearches: List<String> = emptyList(),
     ) {
         val progress: Int = items.count { it.value !is SearchItemResult.Loading }
         val total: Int = items.size
@@ -231,11 +252,6 @@ abstract class SearchViewModel(
     sealed interface Dialog {
         data class Migrate(val target: Manga, val current: Manga) : Dialog
     }
-}
-
-enum class SourceFilter {
-    All,
-    PinnedOnly,
 }
 
 sealed interface SearchItemResult {
