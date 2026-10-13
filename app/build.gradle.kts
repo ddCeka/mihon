@@ -226,7 +226,7 @@ dependencies {
     // Networking
     implementation(libs.bundles.okhttp)
     implementation(libs.okio)
-    implementation(libs.conscrypt) // TLS 1.3 support for Android < 10
+    // implementation(libs.conscrypt) // TLS 1.3 support for Android < 10
 
     // Data serialization (JSON, protobuf, xml)
     implementation(libs.bundles.serialization)
