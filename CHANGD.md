@@ -41,3 +41,6 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 
 ### Improved
 - Improve performance by reducing unnecessary media scanning
+
+### Removed
+- Remove Conscrypt bloat and enable R8 optimization passes
