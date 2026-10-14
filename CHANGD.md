@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add resume History from last seen page instead of next chapter
 - Add jump to page from reader navigators
 - Add temp files delete action to download queue
 - Add onboarding permissions request for external storage
