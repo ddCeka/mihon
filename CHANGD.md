@@ -29,6 +29,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add setting to hide Last Used sources section
 
 ### Changed
+- Revert "Show a wavy progress ring while a chapter downloads"
 - Change default user agent from 149 to 144
 - Moved bookmark from reader top bar to bottom bar
 - Refactor Pinned Only toggle for global search
