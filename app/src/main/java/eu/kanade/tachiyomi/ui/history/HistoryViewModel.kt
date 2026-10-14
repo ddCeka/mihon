@@ -41,6 +41,7 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.category.interactor.SetMangaCategories
 import tachiyomi.domain.category.model.Category
+import tachiyomi.domain.chapter.interactor.GetChapter
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.history.interactor.GetHistory
 import tachiyomi.domain.history.interactor.GetNextChapters
@@ -61,6 +62,7 @@ class HistoryViewModel(
     @AppCoroutineScope private val appScope: CoroutineScope,
     private val addTracks: AddTracks,
     private val getCategories: GetCategories,
+    private val getChapter: GetChapter,
     private val getDuplicateLibraryManga: GetDuplicateLibraryManga,
     private val getHistory: GetHistory,
     private val getManga: GetManga,
@@ -122,15 +124,17 @@ class HistoryViewModel(
         return getNextChapters.await(onlyUnread = false).firstOrNull()
     }
 
-    fun getNextChapterForManga(mangaId: Long, chapterId: Long) {
+    fun resume(mangaId: Long, chapterId: Long) {
         viewModelScope.launch {
-            sendNextChapterEvent(getNextChapters.await(mangaId, chapterId, onlyUnread = false))
+            if (libraryPreferences.historyResumeLastPage.get()) {
+                getChapter.await(chapterId)?.let {
+                    _events.send(Event.OpenChapter(it, it.lastPageRead.toInt()))
+                }
+            } else {
+                val chapter = getNextChapters.await(mangaId, chapterId, onlyUnread = false).firstOrNull()
+                _events.send(Event.OpenChapter(chapter))
+            }
         }
-    }
-
-    private suspend fun sendNextChapterEvent(chapters: List<Chapter>) {
-        val chapter = chapters.firstOrNull()
-        _events.send(Event.OpenChapter(chapter))
     }
 
     fun removeFromHistory(history: HistoryWithRelations) {
@@ -276,7 +280,7 @@ class HistoryViewModel(
     }
 
     sealed interface Event {
-        data class OpenChapter(val chapter: Chapter?) : Event
+        data class OpenChapter(val chapter: Chapter?, val page: Int? = null) : Event
         data object InternalError : Event
         data object HistoryCleared : Event
     }

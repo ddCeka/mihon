@@ -66,6 +66,11 @@ class LibraryPreferences(
         emptySet(),
     )
 
+    val historyResumeLastPage: Preference<Boolean> = preferenceStore.getBoolean(
+        "pref_history_resume_last_page",
+        true,
+    )
+
     // region Filter
 
     val filterDownloaded: Preference<TriState> = preferenceStore.getEnum(
