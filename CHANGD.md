@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add the Keiyoushi extension store by default
 - Add a custom brightness toggle to the reader bottom bar
 - Add retry on throttled GET requests with backoff
 - Add resume History from last seen page instead of next chapter
