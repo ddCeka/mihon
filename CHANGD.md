@@ -42,6 +42,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Fix calendar to follow system locale change
 
 ### Improved
+- Improve download and storage directory access performance
 - Improve performance by reducing unnecessary media scanning
 
 ### Removed

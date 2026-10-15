@@ -36,6 +36,10 @@ class StorageManager(
     // is reused while it's under the current base directory and still exists; it can be deleted outside the app
     private val childDirectories = ConcurrentHashMap<String, Pair<UniFile, UniFile>>()
 
+    private var downloadsDir: UniFile? = null
+    private var backupsDir: UniFile? = null
+    private var localSourceDir: UniFile? = null
+
     private val _changes: Channel<Unit> = Channel(Channel.UNLIMITED)
     val changes = _changes.receiveAsFlow()
         .shareIn(scope, SharingStarted.Lazily, 1)
@@ -46,10 +50,13 @@ class StorageManager(
             .distinctUntilChanged()
             .onEach { uri ->
                 baseDirLazy = lazyOf(getBaseDir(uri))
+                downloadsDir = null
+                backupsDir = null
+                localSourceDir = null
                 baseDir?.let { parent ->
-                    parent.createDirectory(AUTOMATIC_BACKUPS_PATH)
-                    parent.createDirectory(LOCAL_SOURCE_PATH)
-                    parent.createDirectory(DOWNLOADS_PATH).also {
+                    backupsDir = parent.createDirectory(AUTOMATIC_BACKUPS_PATH)
+                    localSourceDir = parent.createDirectory(LOCAL_SOURCE_PATH)
+                    downloadsDir = parent.createDirectory(DOWNLOADS_PATH).also {
                         DiskUtil.createNoMediaFile(it, context)
                     }
                 }
@@ -63,16 +70,23 @@ class StorageManager(
             .takeIf { it?.exists() == true }
     }
 
+    @Synchronized
     fun getAutomaticBackupsDirectory(): UniFile? {
-        return getChildDirectory(AUTOMATIC_BACKUPS_PATH)
+        return backupsDir ?: if (baseDir?.name == AUTOMATIC_BACKUPS_PATH) {
+            baseDir
+        } else {
+            getChildDirectory(AUTOMATIC_BACKUPS_PATH)
+        }?.also { backupsDir = it }
     }
 
+    @Synchronized
     fun getDownloadsDirectory(): UniFile? {
-        return getChildDirectory(DOWNLOADS_PATH)
+        return downloadsDir ?: getChildDirectory(DOWNLOADS_PATH).also { downloadsDir = it }
     }
 
+    @Synchronized
     fun getLocalSourceDirectory(): UniFile? {
-        return getChildDirectory(LOCAL_SOURCE_PATH)
+        return localSourceDir ?: getChildDirectory(LOCAL_SOURCE_PATH).also { localSourceDir = it }
     }
 
     private fun getChildDirectory(name: String): UniFile? {
