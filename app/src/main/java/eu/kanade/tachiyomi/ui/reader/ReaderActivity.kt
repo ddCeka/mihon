@@ -525,6 +525,7 @@ class ReaderActivity : BaseActivity() {
             onOpenInWebView = ::openChapterInWebView.takeIf { isHttpSource },
             onOpenInBrowser = ::openChapterInBrowser.takeIf { isHttpSource },
             onShare = ::shareChapter.takeIf { isHttpSource },
+            onClickSearch = { openMangaScreen(searchFromChapterId = state.currentChapter?.chapter?.id) },
 
             chapterNavigatorType = if (!verticalNavigator) {
                 if (state.viewer is R2LPagerViewer) {
@@ -626,12 +627,13 @@ class ReaderActivity : BaseActivity() {
         startPostponedEnterTransition()
     }
 
-    private fun openMangaScreen() {
+    private fun openMangaScreen(searchFromChapterId: Long? = null) {
         viewModel.manga?.id?.let { id ->
             startActivity(
                 Intent(this, MainActivity::class.java).apply {
                     action = Constants.SHORTCUT_MANGA
                     putExtra(Constants.MANGA_EXTRA, id)
+                    searchFromChapterId?.let { putExtra(Constants.CHAPTER_SEARCH_FROM_CHAPTER_EXTRA, it) }
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 },
             )
