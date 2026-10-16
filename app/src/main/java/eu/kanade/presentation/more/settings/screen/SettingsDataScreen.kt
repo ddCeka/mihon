@@ -431,6 +431,8 @@ object SettingsDataScreen : SearchableSettings {
         val scope = rememberCoroutineScope()
 
         val lastAutoBackup by backupPreferences.lastAutoBackupTimestamp.collectAsState()
+        val backupRetention by backupPreferences.backupRetention.collectAsState()
+        val backupInterval by backupPreferences.backupInterval.collectAsState()
 
         val chooseBackup = rememberLauncherForActivityResult(
             ActivityResultContracts.OpenDocument(),
@@ -515,6 +517,14 @@ object SettingsDataScreen : SearchableSettings {
                         BackupCreateWorker.setupTask(context, it)
                         true
                     },
+                ),
+                Preference.PreferenceItem.SliderPreference(
+                    preference = backupPreferences.backupRetention,
+                    valueRange = 4..10,
+                    steps = 0,
+                    title = stringResource(MR.strings.pref_backup_retention),
+                    subtitle = stringResource(MR.strings.pref_backup_retention_info),
+                    visible = backupInterval > 0,
                 ),
                 Preference.PreferenceItem.InfoPreference(
                     stringResource(MR.strings.backup_info) + "\n\n" +
