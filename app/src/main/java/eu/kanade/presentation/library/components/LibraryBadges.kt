@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Folder
@@ -43,6 +44,25 @@ internal fun LanguageBadge(
             text = sourceLanguage.uppercase(),
             color = MaterialTheme.colorScheme.tertiary,
             textColor = MaterialTheme.colorScheme.onTertiary,
+        )
+    }
+}
+
+@Composable
+internal fun SourceNameBadge(sourceName: String) {
+    if (sourceName.isNotEmpty()) {
+        val displayName = if (sourceName.length > 14) {
+            "${sourceName.take(11)}..."
+        } else {
+            sourceName
+        }
+
+        Badge(
+            text = displayName,
+            color = MaterialTheme.colorScheme.tertiary,
+            textColor = MaterialTheme.colorScheme.onTertiary,
+            shape = MaterialTheme.shapes.extraSmall,
+            textStyle = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
         )
     }
 }

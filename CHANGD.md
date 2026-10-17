@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add source name badge to library covers
 - Add backup retention setting
 - Add chapter search functionality in manga screen
 - Add the Keiyoushi extension store by default
