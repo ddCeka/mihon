@@ -35,6 +35,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add setting to hide Last Used sources section
 
 ### Changed
+- Change trustExtension default to trusted
 - Change check for app updates every 6 hours to weekly
 - Change custom brightness value watcher behaviour when disabled
 - Revert "Show a wavy progress ring while a chapter downloads"
