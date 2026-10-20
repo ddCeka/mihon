@@ -15,6 +15,9 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+### Added
+- Add onboarding permissions request on permissions step
+
 ### Changed
 - Change Smart Update feature default to off
 - Rebrand fork
