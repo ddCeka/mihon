@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.DiskUtil.NOMEDIA_FILE
 import eu.kanade.tachiyomi.util.storage.saveTo
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -219,15 +218,21 @@ class Downloader(
             val activeDownloadsFlow = combine(
                 queueState,
                 downloadPreferences.parallelSourceLimit.changes(),
-            ) { a, b -> a to b }.transformLatest { (queue, parallelCount) ->
+                downloadPreferences.parallelChapterLimit.changes(),
+            ) { queue, sourceLimit, chapterLimit ->
+                Triple(queue, sourceLimit, chapterLimit)
+            }.transformLatest { (queue, sourceLimit, chapterLimit) ->
                 while (true) {
                     val activeDownloads = queue.asSequence()
                         // Ignore completed downloads, leave them in the queue
                         .filter { it.status.value <= Download.State.DOWNLOADING.value }
                         .groupBy { it.source }
                         .toList()
-                        .take(parallelCount)
-                        .map { (_, downloads) -> downloads.first() }
+                        .take(sourceLimit)
+                        .flatMap { (_, downloads) ->
+                            downloads.take(chapterLimit)
+                        }
+                        .toList()
                     emit(activeDownloads)
 
                     if (activeDownloads.isEmpty()) break
@@ -271,51 +276,55 @@ class Downloader(
     }
 
     /**
-     * Downloads the queued chapters of [source] in queue order. They share the source's page slots, and the next
-     * chapter starts once every page of the current one has a slot, so slots don't sit idle while a chapter's last
-     * pages finish and it's archived.
+     * Downloads the queued chapters of [source] in queue order, bounded by [parallelChapterLimit] and sharing
+     * the source's page slots.
      */
     private fun CoroutineScope.launchSourceJob(
         source: HttpSource,
         downloadJobs: MutableMap<Download, Job>,
         owner: Job,
     ) = launch(Dispatchers.IO) {
-        val slots = Semaphore(downloadPreferences.parallelPageLimit.get())
-        while (true) {
-            // A canceled job can mark a chapter as downloading after it's been reset, so that counts as waiting too
-            val download = queueState
-                .map { queue ->
-                    queue.firstOrNull {
-                        it.source == source &&
-                            (it.status == Download.State.QUEUE || it.status == Download.State.DOWNLOADING) &&
-                            it !in downloadJobs
-                    }
+        val pageSlots = Semaphore(downloadPreferences.parallelPageLimit.get())
+        val activeSourceDownloads = MutableStateFlow(0)
+
+        combine(
+            queueState,
+            downloadPreferences.parallelChapterLimit.changes(),
+            activeSourceDownloads,
+        ) { queue, chapterLimit, activeCount ->
+            if (activeCount >= chapterLimit) {
+                null
+            } else {
+                // A canceled job can mark a chapter as downloading after it's been reset, so that counts as waiting too
+                queue.firstOrNull {
+                    it.source == source &&
+                        (it.status == Download.State.QUEUE || it.status == Download.State.DOWNLOADING) &&
+                        it !in downloadJobs
                 }
-                .filterNotNull()
-                .first()
-            val pagesStarted = CompletableDeferred<Unit>()
-            val job = launchDownloadJob(download, slots, pagesStarted, owner)
-            downloadJobs[download] = job
-            job.invokeOnCompletion {
-                downloadJobs.remove(download, job)
-                // A job canceled before it starts never reaches its finally block
-                pagesStarted.complete(Unit)
             }
-            pagesStarted.await()
         }
+            .filterNotNull()
+            .collect { download ->
+                activeSourceDownloads.update { it + 1 }
+                val job = launchDownloadJob(download, pageSlots, owner)
+                downloadJobs[download] = job
+                job.invokeOnCompletion {
+                    downloadJobs.remove(download, job)
+                    activeSourceDownloads.update { it - 1 }
+                }
+            }
     }
 
     private fun CoroutineScope.launchDownloadJob(
         download: Download,
         slots: Semaphore,
-        pagesStarted: CompletableDeferred<Unit>,
         owner: Job,
     ) = launch(Dispatchers.IO) {
         try {
             // Removed from the queue between being picked and starting
             if (download !in queueState.value) return@launch
 
-            downloadChapter(download, slots, pagesStarted)
+            downloadChapter(download, slots)
 
             // Remove successful download from queue
             if (download.status == Download.State.DOWNLOADED) {
@@ -327,9 +336,6 @@ class Downloader(
             logcat(LogPriority.ERROR, e)
             notifier.onError(e.message)
             stopIfCurrent(owner)
-        } finally {
-            // Also when the chapter fails before its pages, so the source moves on to the next one
-            pagesStarted.complete(Unit)
         }
     }
 
@@ -385,9 +391,8 @@ class Downloader(
      *
      * @param download the chapter to be downloaded.
      * @param slots the page download slots of the chapter's source.
-     * @param pagesStarted completed once every page has a slot.
      */
-    private suspend fun downloadChapter(download: Download, slots: Semaphore, pagesStarted: CompletableDeferred<Unit>) {
+    private suspend fun downloadChapter(download: Download, slots: Semaphore) {
         val mangaDir = provider.getMangaDir(download.manga.title, download.source).getOrElse { e ->
             download.status = Download.State.ERROR
             notifier.onError(e.message, download.chapter.name, download.manga.title, download.manga.id)
@@ -460,7 +465,6 @@ class Downloader(
                         notifier.onProgressChange(download)
                     }.invokeOnCompletion { slots.release() }
                 }
-                pagesStarted.complete(Unit)
             }
 
             // Do after download completes
