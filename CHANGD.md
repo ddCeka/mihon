@@ -39,6 +39,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Improve performance by reducing unnecessary media scanning
 
 ### Removed
+- Remove Conscrypt bloat
 - Remove support us screen
 - Remove updates and downloads notification warning
 - Remove firebase dependencies
