@@ -29,6 +29,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add onboarding permissions request on permissions step
 
 ### Changed
+- Change custom brightness value watcher behaviour when disabled
 - Change bookmark from reader top bar to bottom bar
 - Refactor Pinned Only toggle for global search
 - Revert "Show a wavy progress ring while a chapter downloads"
