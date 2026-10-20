@@ -80,6 +80,11 @@ abstract class SearchViewModel(
                 search()
             }
         }
+        viewModelScope.launch {
+            preferences.recentSearches.changes().collectLatest { recents ->
+                state.update { it.copy(recentSearches = recents.toList()) }
+            }
+        }
     }
 
     @Composable
@@ -135,6 +140,12 @@ abstract class SearchViewModel(
         val pinnedOnly = state.value.pinnedOnly
 
         if (query.isNullOrBlank()) return
+
+        preferences.recentSearches.set(
+            (listOf(query) + preferences.recentSearches.get().filter { it != query })
+                .take(RECENT_SEARCHES_LIMIT)
+                .toSet(),
+        )
 
         val sameQuery = this.lastQuery == query
         if (sameQuery && this.lastPinnedOnly == pinnedOnly) return
@@ -229,6 +240,7 @@ abstract class SearchViewModel(
         val onlyShowHasResults: Boolean = false,
         val items: Map<Source, SearchItemResult> = mapOf(),
         val dialog: Dialog? = null,
+        val recentSearches: List<String> = emptyList(),
     ) {
         val progress: Int = items.count { it.value !is SearchItemResult.Loading }
         val total: Int = items.size
@@ -258,3 +270,5 @@ sealed interface SearchItemResult {
         return !onlyShowHasResults || (this is Success && !this.isEmpty)
     }
 }
+
+private const val RECENT_SEARCHES_LIMIT = 10
