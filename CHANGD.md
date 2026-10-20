@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Changed
+- Change Smart Update feature default to off
 - Rebrand fork
 - Update workflows
 
