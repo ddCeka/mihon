@@ -24,6 +24,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add onboarding permissions request on permissions step
 
 ### Changed
+- Refactor Pinned Only toggle for global search
 - Revert "Show a wavy progress ring while a chapter downloads"
 - Change Smart Update feature default to off
 - Rebrand fork
