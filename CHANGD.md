@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add retry on throttled GET requests with backoff
 - Add jump to page from reader navigators
 - Add backup retention setting
 - Add global search history
