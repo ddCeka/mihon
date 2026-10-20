@@ -15,8 +15,10 @@ import mihon.icons.custommaterialsymbols.rounded.CropOff
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Bookmark
 import mihon.icons.materialsymbols.rounded.Crop
+import mihon.icons.materialsymbols.rounded.DarkMode
 import mihon.icons.materialsymbols.rounded.Settings
 import mihon.icons.materialsymbols.roundedfilled.Bookmark
+import mihon.icons.materialsymbols.roundedfilled.DarkMode
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
@@ -26,6 +28,8 @@ fun ReaderBottomBar(
     onClickReadingMode: () -> Unit,
     orientation: ReaderOrientation,
     onClickOrientation: () -> Unit,
+    customBrightnessEnabled: Boolean,
+    onClickCustomBrightness: () -> Unit,
     bookmarked: Boolean,
     onToggleBookmarked: () -> Unit,
     cropEnabled: Boolean,
@@ -50,6 +54,17 @@ fun ReaderBottomBar(
             Icon(
                 imageVector = orientation.icon,
                 contentDescription = stringResource(MR.strings.rotation_type),
+            )
+        }
+
+        IconButton(onClick = onClickCustomBrightness) {
+            Icon(
+                imageVector = if (customBrightnessEnabled) {
+                    MaterialSymbols.RoundedFilled.DarkMode
+                } else {
+                    MaterialSymbols.Rounded.DarkMode
+                },
+                contentDescription = stringResource(MR.strings.pref_custom_brightness),
             )
         }
 
