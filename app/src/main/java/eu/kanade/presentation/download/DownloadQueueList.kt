@@ -310,7 +310,10 @@ private fun ReorderableCollectionItemScope.DownloadQueueItem(
     modifier: Modifier = Modifier,
 ) {
     val progress by remember(download) { download.pagesProgressFlow() }.collectAsState(null)
-    val animatedProgress by animateFloatAsState(progress?.fraction ?: 0f, label = "progress")
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress?.fraction ?: 0f,
+        label = "progress",
+    )
 
     Surface(
         modifier = modifier,
@@ -467,28 +470,44 @@ private fun listItemElevation(isDragging: Boolean): Dp {
     return if (isDragging) elevation.draggedElevation else elevation.elevation
 }
 
-private class PagesProgress(
+private data class ChapterDownloadProgress(
     val pageCount: Int,
     val downloadedPages: Int,
-    totalProgress: Int,
+    val totalProgress: Int,
 ) {
-    val fraction = if (pageCount == 0) 0f else totalProgress / (pageCount * 100f)
+    val fraction: Float
+        get() = if (pageCount == 0) 0f else totalProgress / (pageCount * 100f)
 }
 
 /**
- * Progress of the pages of this download, or null until its pages are known.
+ * Progress of all pages for this chapter, or null until pages are known.
+ * This is the actual "parallel chapter download" aggregation.
  */
 private fun Download.pagesProgressFlow() = pagesFlow.flatMapLatest { pages ->
     when {
         pages == null -> flowOf(null)
-        pages.isEmpty() -> flowOf(PagesProgress(pageCount = 0, downloadedPages = 0, totalProgress = 0))
-        else ->
-            combine(pages.map { page -> combine(page.statusFlow, page.progressFlow, ::Pair) }) { states ->
-                PagesProgress(
+        pages.isEmpty() -> flowOf(
+            ChapterDownloadProgress(
+                pageCount = 0,
+                downloadedPages = 0,
+                totalProgress = 0,
+            ),
+        )
+
+        else -> {
+            val pageStates = pages.map { page ->
+                combine(page.statusFlow, page.progressFlow) { status, progress ->
+                    status to progress
+                }
+            }
+
+            combine(pageStates) { states ->
+                ChapterDownloadProgress(
                     pageCount = pages.size,
                     downloadedPages = states.count { (status, _) -> status == Page.State.Ready },
                     totalProgress = states.sumOf { (_, progress) -> progress },
                 )
             }
+        }
     }
 }
