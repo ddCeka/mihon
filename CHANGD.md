@@ -26,6 +26,9 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Rebrand fork
 - Update workflows
 
+### Improved
+- Improve performance by reducing unnecessary media scanning
+
 ### Removed
 - Remove support us screen
 - Remove updates and downloads notification warning
