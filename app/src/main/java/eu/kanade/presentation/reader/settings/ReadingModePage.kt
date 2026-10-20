@@ -14,8 +14,6 @@ import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsViewModel
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
-import eu.kanade.tachiyomi.ui.reader.viewer.webgpu.WebGpuViewer
-import eu.kanade.tachiyomi.ui.reader.viewer.webgpu.WebGpuViewerSettings
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.CheckboxItem
@@ -29,11 +27,6 @@ import java.text.NumberFormat
 @Composable
 internal fun ColumnScope.ReadingModePage(viewModel: ReaderSettingsViewModel) {
     val viewer by viewModel.viewerFlow.collectAsState()
-
-    if (viewer is WebGpuViewer) {
-        WebGpuViewerSettings(viewModel)
-        return
-    }
 
     HeadingItem(MR.strings.pref_category_for_this_series)
     val manga by viewModel.mangaFlow.collectAsState()
