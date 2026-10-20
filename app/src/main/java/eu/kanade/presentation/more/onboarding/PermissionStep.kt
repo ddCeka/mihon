@@ -44,6 +44,8 @@ import tachiyomi.presentation.core.util.secondaryItemAlpha
 
 internal class PermissionStep : OnboardingStep {
 
+    private val useDirectStorageAccess: Boolean = false
+
     private var installGranted by mutableStateOf(false)
     private var notificationGranted by mutableStateOf(false)
     private var batteryGranted by mutableStateOf(false)
@@ -51,18 +53,24 @@ internal class PermissionStep : OnboardingStep {
     private var allFilesAccessGranted by mutableStateOf(false)
 
     override val isComplete: Boolean
-        get() = installGranted &&
-            notificationGranted &&
-            batteryGranted &&
-            storageGranted &&
-            (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) allFilesAccessGranted else true)
+        get() {
+            val directStorageRequired =
+                useDirectStorageAccess && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+
+            return installGranted &&
+                notificationGranted &&
+                batteryGranted &&
+                storageGranted &&
+                (!directStorageRequired || allFilesAccessGranted)
+        }
 
     @Composable
     override fun Content() {
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
 
-        installGranted = rememberRequestPackageInstallsPermissionState()
+        val installGrantedState = rememberRequestPackageInstallsPermissionState()
+        installGranted = installGrantedState
 
         DisposableEffect(lifecycleOwner.lifecycle) {
             val observer = object : DefaultLifecycleObserver {
@@ -70,9 +78,7 @@ internal class PermissionStep : OnboardingStep {
                     refreshPermissionState(context)
                 }
             }
-
             lifecycleOwner.lifecycle.addObserver(observer)
-
             onDispose {
                 lifecycleOwner.lifecycle.removeObserver(observer)
             }
@@ -92,10 +98,9 @@ internal class PermissionStep : OnboardingStep {
                 val permissionRequester = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.RequestPermission(),
                     onResult = {
-                        // state refresh happens on resume after the system permission dialog returns
+                        // refreshed on resume
                     },
                 )
-
                 PermissionCheckbox(
                     title = stringResource(MR.strings.onboarding_permission_notifications),
                     subtitle = stringResource(MR.strings.onboarding_permission_notifications_description),
@@ -119,7 +124,7 @@ internal class PermissionStep : OnboardingStep {
                 },
             )
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (useDirectStorageAccess && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 PermissionCheckbox(
                     title = stringResource(MR.strings.onboarding_permission_all_files_access),
                     subtitle = stringResource(MR.strings.onboarding_permission_all_files_access_description),
@@ -145,10 +150,9 @@ internal class PermissionStep : OnboardingStep {
                     val permissionRequester = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestPermission(),
                         onResult = {
-                            // state refresh happens on resume after the system permission dialog returns
+                            // refreshed on resume
                         },
                     )
-
                     PermissionCheckbox(
                         title = stringResource(MR.strings.onboarding_permission_external_storage),
                         subtitle = stringResource(MR.strings.onboarding_permission_external_storage_description),
@@ -163,10 +167,9 @@ internal class PermissionStep : OnboardingStep {
                     val permissionRequester = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestPermission(),
                         onResult = {
-                            // state refresh happens on resume after the system permission dialog returns
+                            // refreshed on resume
                         },
                     )
-
                     PermissionCheckbox(
                         title = stringResource(MR.strings.onboarding_permission_external_storage),
                         subtitle = stringResource(MR.strings.onboarding_permission_external_storage_description),
@@ -181,10 +184,9 @@ internal class PermissionStep : OnboardingStep {
                     val permissionRequester = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestPermission(),
                         onResult = {
-                            // state refresh happens on resume after the system permission dialog returns
+                            // refreshed on resume
                         },
                     )
-
                     PermissionCheckbox(
                         title = stringResource(MR.strings.onboarding_permission_external_storage),
                         subtitle = stringResource(
@@ -229,8 +231,11 @@ internal class PermissionStep : OnboardingStep {
             }
         }
 
-        allFilesAccessGranted = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+        allFilesAccessGranted = if (useDirectStorageAccess && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Environment.isExternalStorageManager()
+        } else {
+            true
+        }
     }
 
     @Composable
