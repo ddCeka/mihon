@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add the Keiyoushi extension store by default
 - Add parallel chapters download
 - Add Gotham theme
 - Add dynamic theme support for older android
