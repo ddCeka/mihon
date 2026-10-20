@@ -37,16 +37,12 @@ class AppUpdateChecker(
 }
 
 val GITHUB_REPO: String by lazy {
-    if (isNightlyBuildType) {
-        "mihonapp/mihon-preview"
-    } else {
-        "mihonapp/mihon"
-    }
+    "ddCeka/mihon"
 }
 
 val RELEASE_TAG: String by lazy {
     if (isNightlyBuildType) {
-        "r${BuildConfig.COMMIT_COUNT}"
+        "v${BuildConfig.COMMIT_COUNT}"
     } else {
         "v${BuildConfig.VERSION_NAME}"
     }
