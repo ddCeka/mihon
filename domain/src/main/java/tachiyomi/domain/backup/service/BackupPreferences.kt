@@ -12,6 +12,7 @@ class BackupPreferences(
     preferenceStore: PreferenceStore,
 ) {
 
+    val backupRetention: Preference<Int> = preferenceStore.getInt("backup_retention", 4)
     val backupInterval: Preference<Int> = preferenceStore.getInt("backup_interval", 12)
 
     val lastAutoBackupTimestamp: Preference<Long> = preferenceStore.getLong(
