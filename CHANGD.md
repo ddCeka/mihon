@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add a custom brightness toggle to the reader bottom bar
 - Add retry on throttled GET requests with backoff
 - Add jump to page from reader navigators
 - Add backup retention setting
