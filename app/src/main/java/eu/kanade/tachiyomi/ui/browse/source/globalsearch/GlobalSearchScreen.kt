@@ -55,7 +55,7 @@ fun GlobalSearchScreen(
             onChangeSearchQuery = viewModel::updateSearchQuery,
             onSearch = { viewModel.search() },
             getManga = { viewModel.getManga(it) },
-            onChangeSearchFilter = viewModel::setSourceFilter,
+            onTogglePinnedOnly = viewModel::togglePinnedOnly,
             onToggleResults = viewModel::toggleFilterResults,
             onClickSource = {
                 navigator.push(BrowseSourceRoute(it.id, state.searchQuery))
