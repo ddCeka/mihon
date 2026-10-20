@@ -20,4 +20,5 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Update workflows
 
 ### Removed
+- Remove updates and downloads notification warning
 - Remove firebase dependencies
