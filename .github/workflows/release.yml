@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   get_tag:
-    if: github.repository == 'mihonapp/mihon'
+    if: github.repository == 'ddCeka/mihon'
     name: Extract tag name
     runs-on: 'ubuntu-26.04'
     outputs:
@@ -25,7 +25,7 @@ jobs:
         run: echo "tag=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
 
   build:
-    if: github.repository == 'mihonapp/mihon'
+    if: github.repository == 'ddCeka/mihon'
     name: Build
     runs-on: 'ubuntu-26.04'
     needs: get_tag
@@ -51,7 +51,7 @@ jobs:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
 
       - name: Build
-        run: ./gradlew assembleRelease -Pdist=github
+        run: ./gradlew assembleRelease -Pdist=github -Penable-updater=false
         env:
           storeFile: ${{ runner.temp }}/antsy.keystore
           storePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -80,7 +80,7 @@ jobs:
             mihon-x86_64-${{ needs.get_tag.outputs.tag }}.apk
 
   build_foss:
-    if: github.repository == 'mihonapp/mihon'
+    if: github.repository == 'ddCeka/mihon'
     name: Build (FOSS)
     runs-on: ubuntu-26.04
     needs: get_tag
@@ -106,7 +106,7 @@ jobs:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
 
       - name: Build
-        run: ./gradlew assembleFoss -Pdist=foss
+        run: ./gradlew assembleFoss -Pdist=foss -Penable-updater=false
         env:
           storeFile: ${{ runner.temp }}/antsy.keystore
           storePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -126,7 +126,7 @@ jobs:
           path: mihon-${{ needs.get_tag.outputs.tag }}-foss.apk
 
   release:
-    if: github.repository == 'mihonapp/mihon'
+    if: github.repository == 'ddCeka/mihon'
     name: Create GitHub Release
     runs-on: ubuntu-26.04
     needs: [get_tag, build, build_foss]
@@ -151,10 +151,6 @@ jobs:
           tag_name: ${{ needs.get_tag.outputs.tag }}
           name: Mihon ${{ needs.get_tag.outputs.tag }}
           body: |
-            Consider supporting the development on [Patreon](https://www.patreon.com/mihon/membership) or [OpenCollective](https://opencollective.com/mihon/contribute) to keep Mihon improving!
-
-            Check out the [past release notes](https://github.com/mihonapp/mihon/releases) if you're upgrading from an earlier version.
-
             <!-->
 
 
@@ -173,4 +169,5 @@ jobs:
             mihon-x86_64-${{ needs.get_tag.outputs.tag }}.apk
           draft: true
           prerelease: false
+          generate_release_notes: true
           token: ${{ secrets.MIHON_BOT_TOKEN }}
