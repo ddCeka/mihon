@@ -2,9 +2,12 @@ package eu.kanade.presentation.more.onboarding
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -41,32 +44,35 @@ import tachiyomi.presentation.core.util.secondaryItemAlpha
 
 internal class PermissionStep : OnboardingStep {
 
+    private var installGranted by mutableStateOf(false)
     private var notificationGranted by mutableStateOf(false)
     private var batteryGranted by mutableStateOf(false)
+    private var storageGranted by mutableStateOf(false)
+    private var allFilesAccessGranted by mutableStateOf(false)
 
-    override val isComplete: Boolean = true
+    override val isComplete: Boolean
+        get() = installGranted &&
+            notificationGranted &&
+            batteryGranted &&
+            storageGranted &&
+            (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) allFilesAccessGranted else true)
 
     @Composable
     override fun Content() {
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
 
-        val installGranted = rememberRequestPackageInstallsPermissionState()
+        installGranted = rememberRequestPackageInstallsPermissionState()
 
         DisposableEffect(lifecycleOwner.lifecycle) {
             val observer = object : DefaultLifecycleObserver {
                 override fun onResume(owner: LifecycleOwner) {
-                    notificationGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
-                            PackageManager.PERMISSION_GRANTED
-                    } else {
-                        true
-                    }
-                    batteryGranted = context.getSystemService<PowerManager>()!!
-                        .isIgnoringBatteryOptimizations(context.packageName)
+                    refreshPermissionState(context)
                 }
             }
+
             lifecycleOwner.lifecycle.addObserver(observer)
+
             onDispose {
                 lifecycleOwner.lifecycle.removeObserver(observer)
             }
@@ -86,14 +92,17 @@ internal class PermissionStep : OnboardingStep {
                 val permissionRequester = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.RequestPermission(),
                     onResult = {
-                        // no-op. resulting checks is being done on resume
+                        // state refresh happens on resume after the system permission dialog returns
                     },
                 )
+
                 PermissionCheckbox(
                     title = stringResource(MR.strings.onboarding_permission_notifications),
                     subtitle = stringResource(MR.strings.onboarding_permission_notifications_description),
                     granted = notificationGranted,
-                    onButtonClick = { permissionRequester.launch(Manifest.permission.POST_NOTIFICATIONS) },
+                    onButtonClick = {
+                        permissionRequester.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    },
                 )
             }
 
@@ -109,7 +118,119 @@ internal class PermissionStep : OnboardingStep {
                     context.startActivity(intent)
                 },
             )
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                PermissionCheckbox(
+                    title = stringResource(MR.strings.onboarding_permission_all_files_access),
+                    subtitle = stringResource(MR.strings.onboarding_permission_all_files_access_description),
+                    granted = allFilesAccessGranted,
+                    onButtonClick = {
+                        try {
+                            context.startActivity(
+                                Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                                    data = "package:${context.packageName}".toUri()
+                                },
+                            )
+                        } catch (_: ActivityNotFoundException) {
+                            context.startActivity(
+                                Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION),
+                            )
+                        }
+                    },
+                )
+            }
+
+            when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                    val permissionRequester = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestPermission(),
+                        onResult = {
+                            // state refresh happens on resume after the system permission dialog returns
+                        },
+                    )
+
+                    PermissionCheckbox(
+                        title = stringResource(MR.strings.onboarding_permission_external_storage),
+                        subtitle = stringResource(MR.strings.onboarding_permission_external_storage_description),
+                        granted = storageGranted,
+                        onButtonClick = {
+                            permissionRequester.launch(Manifest.permission.READ_MEDIA_IMAGES)
+                        },
+                    )
+                }
+
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                    val permissionRequester = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestPermission(),
+                        onResult = {
+                            // state refresh happens on resume after the system permission dialog returns
+                        },
+                    )
+
+                    PermissionCheckbox(
+                        title = stringResource(MR.strings.onboarding_permission_external_storage),
+                        subtitle = stringResource(MR.strings.onboarding_permission_external_storage_description),
+                        granted = storageGranted,
+                        onButtonClick = {
+                            permissionRequester.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                        },
+                    )
+                }
+
+                else -> {
+                    val permissionRequester = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestPermission(),
+                        onResult = {
+                            // state refresh happens on resume after the system permission dialog returns
+                        },
+                    )
+
+                    PermissionCheckbox(
+                        title = stringResource(MR.strings.onboarding_permission_external_storage),
+                        subtitle = stringResource(
+                            MR.strings.onboarding_permission_writing_external_storage_description,
+                        ),
+                        granted = storageGranted,
+                        onButtonClick = {
+                            permissionRequester.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        },
+                    )
+                }
+            }
         }
+    }
+
+    private fun refreshPermissionState(context: Context) {
+        notificationGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+
+        batteryGranted = context.getSystemService<PowerManager>()
+            ?.isIgnoringBatteryOptimizations(context.packageName)
+            ?: false
+
+        storageGranted = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                context.checkSelfPermission(Manifest.permission.READ_MEDIA_IMAGES) ==
+                    PackageManager.PERMISSION_GRANTED
+            }
+
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                    PackageManager.PERMISSION_GRANTED
+            }
+
+            else -> {
+                context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                    PackageManager.PERMISSION_GRANTED
+            }
+        }
+
+        allFilesAccessGranted = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+            Environment.isExternalStorageManager()
     }
 
     @Composable
