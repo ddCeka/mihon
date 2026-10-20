@@ -26,7 +26,6 @@ import androidx.navigation3.runtime.NavKey
 import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
-import eu.kanade.presentation.more.settings.screen.about.getVersionName
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import kotlinx.serialization.Serializable
 import mihon.core.navigation.AboutRoute
@@ -39,7 +38,6 @@ import mihon.icons.materialsymbols.rounded.Code
 import mihon.icons.materialsymbols.rounded.CollectionsBookmark
 import mihon.icons.materialsymbols.rounded.Download
 import mihon.icons.materialsymbols.rounded.Explore
-import mihon.icons.materialsymbols.rounded.Info
 import mihon.icons.materialsymbols.rounded.Palette
 import mihon.icons.materialsymbols.rounded.Search
 import mihon.icons.materialsymbols.rounded.Security
@@ -227,14 +225,6 @@ data object SettingsMainScreen : NavKey {
             subtitleRes = MR.strings.pref_advanced_summary,
             icon = MaterialSymbols.Rounded.Code,
             screen = SettingsAdvancedScreen,
-        ),
-        Item(
-            titleRes = MR.strings.pref_category_about,
-            formatSubtitle = {
-                "${stringResource(MR.strings.app_name)} ${getVersionName(buildTime = null)}"
-            },
-            icon = MaterialSymbols.Rounded.Info,
-            screen = AboutRoute,
         ),
     )
 }
