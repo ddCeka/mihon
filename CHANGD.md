@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add backup retention setting
 - Add global search history
 - Add setting to hide Last Used sources section
 - Add the Keiyoushi extension store by default
