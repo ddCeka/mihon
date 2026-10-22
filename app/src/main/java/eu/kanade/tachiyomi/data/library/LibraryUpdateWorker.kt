@@ -101,6 +101,8 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
 
     private var mangaToUpdate: List<LibraryManga> = mutableListOf()
 
+    private var skippedUpdates: List<Pair<Manga, String?>> = emptyList()
+
     override suspend fun doWork(): Result {
         graph.inject(this)
 
@@ -193,6 +195,7 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
             }
             .sortedBy { it.manga.title }
 
+        this.skippedUpdates = skippedUpdates
         if (skippedUpdates.isNotEmpty()) {
             // TODO: surface skipped reasons to user?
             logcat {
@@ -298,6 +301,15 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
                 errorFile.getUriCompat(context),
             )
         }
+
+        // Only a manual update is expected to cover every entry
+        if (skippedUpdates.isNotEmpty() && tags.contains(WORK_NAME_MANUAL)) {
+            val skippedFile = writeSkippedFile(skippedUpdates)
+            notifier.showSkippedUpdatesNotification(
+                skippedUpdates.size,
+                skippedFile.getUriCompat(context),
+            )
+        }
     }
 
     private suspend fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
@@ -381,6 +393,26 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
                 }
                 return file
             }
+        } catch (_: Exception) {}
+        return File("")
+    }
+
+    /**
+     * Writes file listing the skipped entries by reason to cache dir.
+     */
+    private fun writeSkippedFile(skipped: List<Pair<Manga, String?>>): File {
+        try {
+            val file = context.createFileInCacheDir("mihon_update_skipped.txt")
+            file.bufferedWriter().use { out ->
+                out.write(context.stringResource(MR.strings.library_skipped_help) + "\n")
+                skipped.groupBy({ it.second }, { it.first }).forEach { (reason, mangas) ->
+                    out.write("\n! $reason\n")
+                    mangas.sortedBy { it.title }.forEach { manga ->
+                        out.write("  - ${manga.title}\n")
+                    }
+                }
+            }
+            return file
         } catch (_: Exception) {}
         return File("")
     }
