@@ -45,8 +45,6 @@ class BasePreferences(
         GLUtil.SAFE_TEXTURE_LIMIT,
     )
 
-    val installationId: Preference<String> = preferenceStore.getString(Preference.appStateKey("installation_id"), "")
-
     val skippedAppUpdate: Preference<String> = preferenceStore.getString(
         Preference.appStateKey("skipped_app_update"),
         "",
