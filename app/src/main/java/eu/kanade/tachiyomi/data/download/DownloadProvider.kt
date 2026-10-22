@@ -60,25 +60,23 @@ class DownloadProvider(
             )
         }
 
-        val sourceDirName = getSourceDirName(source)
-        val sourceDir = downloadsDir.createDirectory(sourceDirName)
-        if (sourceDir == null) {
-            val displayablePath = downloadsDir.displayablePath + "/$sourceDirName"
-            logcat(LogPriority.ERROR) { "Failed to create source download directory: $displayablePath" }
-            return Result.failure(
-                IOException(context.stringResource(MR.strings.storage_failed_to_create_directory, displayablePath)),
-            )
-        }
+        val sourceDir = createOrFindDirectory(downloadsDir, getSourceDirName(source), "source")
+            ?: run {
+                val displayablePath = downloadsDir.displayablePath + "/${getSourceDirName(source)}"
+                logcat(LogPriority.ERROR) { "Failed to create source download directory: $displayablePath" }
+                return Result.failure(
+                    IOException(context.stringResource(MR.strings.storage_failed_to_create_directory, displayablePath)),
+                )
+            }
 
-        val mangaDirName = getMangaDirName(mangaTitle)
-        val mangaDir = sourceDir.createDirectory(mangaDirName)
-        if (mangaDir == null) {
-            val displayablePath = sourceDir.displayablePath + "/$mangaDirName"
-            logcat(LogPriority.ERROR) { "Failed to create manga download directory: $displayablePath" }
-            return Result.failure(
-                IOException(context.stringResource(MR.strings.storage_failed_to_create_directory, displayablePath)),
-            )
-        }
+        val mangaDir = createOrFindDirectory(sourceDir, getMangaDirName(mangaTitle), "manga")
+            ?: run {
+                val displayablePath = sourceDir.displayablePath + "/${getMangaDirName(mangaTitle)}"
+                logcat(LogPriority.ERROR) { "Failed to create manga download directory: $displayablePath" }
+                return Result.failure(
+                    IOException(context.stringResource(MR.strings.storage_failed_to_create_directory, displayablePath)),
+                )
+            }
 
         return Result.success(mangaDir)
     }
@@ -107,6 +105,7 @@ class DownloadProvider(
      *
      * @param chapterName the name of the chapter to query.
      * @param chapterScanlator scanlator of the chapter to query
+     * @param chapterUrl the URL of the chapter to query.
      * @param mangaTitle the title of the manga to query.
      * @param source the source of the chapter.
      */
@@ -173,14 +172,20 @@ class DownloadProvider(
             val chapterDirs = mangaDir.listFiles().orEmpty()
                 .filter { it.name != null }
                 .associateByTo(sortedMapOf(String.CASE_INSENSITIVE_ORDER)) { it.name!! }
+
             return chapters
-                .mapNotNull { chapter -> chapter.findDir { chapterDirs[it] }?.let { chapter.id to it } }
+                .mapNotNull { chapter ->
+                    chapter.findDir { chapterDirs[it] }?.let { chapter.id to it }
+                }
                 .toMap()
         }
+
         return coroutineScope {
             chapters
                 .map { chapter ->
-                    async(chapterDirLookupDispatcher) { chapter.findDir(mangaDir::findFile)?.let { chapter.id to it } }
+                    async(chapterDirLookupDispatcher) {
+                        chapter.findDir(mangaDir::findFile)?.let { chapter.id to it }
+                    }
                 }
                 .awaitAll()
                 .filterNotNull()
@@ -190,6 +195,15 @@ class DownloadProvider(
 
     private fun Chapter.findDir(find: (String) -> UniFile?): UniFile? {
         return getValidChapterDirNames(name, scanlator, url).firstNotNullOfOrNull(find)
+    }
+
+    private fun createOrFindDirectory(parent: UniFile, name: String, kind: String): UniFile? {
+        val existing = parent.findFile(name)
+        if (existing != null && existing.isDirectory) {
+            return existing
+        }
+
+        return parent.createDirectory(name) ?: parent.findFile(name)?.takeIf { it.isDirectory }
     }
 
     /**
@@ -272,8 +286,7 @@ class DownloadProvider(
         }
 
         return buildSet {
-            // Chapter name without hash (unable to handle duplicate
-            // chapter names)
+            // Chapter name without hash (unable to handle duplicate chapter names)
             add(chapterNameV1)
             addAll(othersChapterDirNames)
             addAll(splitChapterDirNames)
@@ -315,7 +328,6 @@ class DownloadProvider(
 }
 
 private const val LIST_CHAPTER_DIRS_MIN_CHAPTERS = 50
-
 private const val CHAPTER_DIR_LOOKUP_PARALLELISM = 8
 
 private val chapterDirLookupDispatcher = Dispatchers.IO.limitedParallelism(CHAPTER_DIR_LOOKUP_PARALLELISM)
@@ -323,7 +335,11 @@ private val chapterDirLookupDispatcher = Dispatchers.IO.limitedParallelism(CHAPT
 /**
  * The parts of a chapter's directory name, each computed once however many name variations are built from them.
  */
-private class ChapterDirNameParts(chapterName: String, val chapterScanlator: String?, private val chapterUrl: String) {
+private class ChapterDirNameParts(
+    chapterName: String,
+    val chapterScanlator: String?,
+    private val chapterUrl: String,
+) {
 
     /** The chapter name, or a placeholder when it's blank. */
     val chapterName = chapterName.ifBlank { "Chapter" }
@@ -335,7 +351,6 @@ private class ChapterDirNameParts(chapterName: String, val chapterScanlator: Str
     }
 
     private val validDirNames = arrayOfNulls<String>(2)
-
     private val validChapterNames = arrayOfNulls<String>(2)
 
     fun dirName(disallowNonAscii: Boolean, enableHash: Boolean): String {
@@ -347,8 +362,8 @@ private class ChapterDirNameParts(chapterName: String, val chapterScanlator: Str
                 // Subtract 7 bytes for hash and underscore, 4 bytes for .cbz
                 DiskUtil.MAX_FILE_NAME_BYTES - 11,
                 disallowNonAscii,
-            )
-                .also { validDirNames[index] = it }
+            ).also { validDirNames[index] = it }
+
         return if (enableHash) dirName + hashSuffix else dirName
     }
 
