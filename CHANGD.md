@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add resume history from last seen page
 - Add 3 hours auto backup schedule
 - Add retry on throttled GET requests with backoff
 - Add backup retention setting
