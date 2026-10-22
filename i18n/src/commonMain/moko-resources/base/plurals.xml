@@ -114,4 +114,8 @@
         <item quantity="one">%1$d update failed</item>
         <item quantity="other">%1$d updates failed</item>
     </plurals>
+    <plurals name="notification_update_skipped">
+        <item quantity="one">%1$d entry skipped</item>
+        <item quantity="other">%1$d entries skipped</item>
+    </plurals>
 </resources>
