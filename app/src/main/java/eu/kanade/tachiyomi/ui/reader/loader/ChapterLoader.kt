@@ -33,6 +33,7 @@ class ChapterLoader(
     private val canLoadAhead: () -> Boolean,
     private val manga: Manga,
     private val source: Source,
+    private val forceResume: Boolean = false,
 ) {
 
     /**
@@ -60,7 +61,7 @@ class ChapterLoader(
 
                 // If the chapter is partially read, set the starting page to the last the user read
                 // otherwise use the requested page.
-                if (!chapter.chapter.read) {
+                if (!chapter.chapter.read || forceResume) {
                     chapter.requestedPage = chapter.chapter.lastPageRead
                 }
 
