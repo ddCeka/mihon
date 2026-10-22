@@ -306,7 +306,7 @@ class ReaderViewModel(
                 if (chapterPageIndex >= 0) {
                     // Restore from SavedState
                     currentChapter.requestedPage = chapterPageIndex
-                } else if (!currentChapter.chapter.read) {
+                } else if (!currentChapter.chapter.read || libraryPreferences.resumeLastSeenPage.get()) {
                     currentChapter.requestedPage = currentChapter.chapter.lastPageRead
                 }
                 chapterId = currentChapter.chapter.id
@@ -360,6 +360,7 @@ class ReaderViewModel(
                     ::canLoadAhead,
                     manga,
                     source,
+                    libraryPreferences.resumeLastSeenPage.get(),
                 )
 
                 chapterList = loadChapterList()
