@@ -16,6 +16,7 @@ data class LibraryItem(
     data class Badges(
         val downloadCount: Int,
         val unreadCount: Long,
+        val sourceId: Long?,
         val isLocal: Boolean,
         val sourceLanguage: String,
     )
