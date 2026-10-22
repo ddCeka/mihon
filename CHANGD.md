@@ -29,6 +29,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add onboarding permissions request on permissions step
 
 ### Changed
+- Change trustExtension default to trusted
 - Change the update logic to be more accurate
 - Change bookmark from reader top bar to bottom bar
 - Refactor Pinned Only toggle for global search
