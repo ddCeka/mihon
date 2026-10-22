@@ -1,10 +1,20 @@
 package eu.kanade.presentation.library.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
+import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.coil.InstalledSourceIcon
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Folder
 import tachiyomi.presentation.core.components.Badge
@@ -25,6 +35,24 @@ internal fun UnreadBadge(count: Long) {
     if (count > 0) {
         Badge(text = "$count")
     }
+}
+
+@Composable
+internal fun SourceIconBadge(sourceId: Long?) {
+    if (sourceId == null) return
+
+    val defaultIcon = painterResource(R.mipmap.ic_default_source)
+    val iconSize = with(LocalDensity.current) { MaterialTheme.typography.bodySmall.lineHeight.toDp() }
+    AsyncImage(
+        model = InstalledSourceIcon(sourceId),
+        contentDescription = null,
+        placeholder = defaultIcon,
+        error = defaultIcon,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.secondary)
+            .padding(1.dp)
+            .size(iconSize),
+    )
 }
 
 @Composable
