@@ -29156,9 +29156,6 @@ HSPLmihon/core/migration/migrations/ChapterNameSuffixMigration;-><init>(Ltachiyo
 Lmihon/core/migration/migrations/ContentWarningMigration;
 HSPLmihon/core/migration/migrations/ContentWarningMigration;-><clinit>()V
 HSPLmihon/core/migration/migrations/ContentWarningMigration;-><init>(Ltachiyomi/core/common/preference/PreferenceStore;Leu/kanade/domain/source/service/SourcePreferences;)V
-Lmihon/core/migration/migrations/InstallationIdMigration;
-HSPLmihon/core/migration/migrations/InstallationIdMigration;-><clinit>()V
-HSPLmihon/core/migration/migrations/InstallationIdMigration;-><init>(Leu/kanade/domain/base/BasePreferences;)V
 Lmihon/core/migration/migrations/SetupBackupCreateMigration;
 HSPLmihon/core/migration/migrations/SetupBackupCreateMigration;-><clinit>()V
 HSPLmihon/core/migration/migrations/SetupBackupCreateMigration;-><init>(Landroid/content/Context;)V
