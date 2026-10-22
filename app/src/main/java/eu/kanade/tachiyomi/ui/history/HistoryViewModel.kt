@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
 import logcat.LogPriority
 import mihon.core.metro.AppCoroutineScope
 import tachiyomi.core.common.preference.CheckboxState
@@ -41,6 +42,7 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.category.interactor.SetMangaCategories
 import tachiyomi.domain.category.model.Category
+import tachiyomi.domain.chapter.interactor.GetChapter
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.history.interactor.GetHistory
 import tachiyomi.domain.history.interactor.GetNextChapters
@@ -62,6 +64,7 @@ class HistoryViewModel(
     private val addTracks: AddTracks,
     private val getCategories: GetCategories,
     private val getDuplicateLibraryManga: GetDuplicateLibraryManga,
+    private val getChapter: GetChapter,
     private val getHistory: GetHistory,
     private val getManga: GetManga,
     private val getNextChapters: GetNextChapters,
@@ -119,18 +122,31 @@ class HistoryViewModel(
     }
 
     suspend fun getNextChapter(): Chapter? {
-        return getNextChapters.await(onlyUnread = false).firstOrNull()
+        return withContext(Dispatchers.IO) {
+            if (libraryPreferences.resumeLastSeenPage.get()) {
+                val lastHistory = state.value.list
+                    ?.filterIsInstance<HistoryUiModel.Item>()
+                    ?.firstOrNull()
+                    ?.item
+
+                if (lastHistory != null) {
+                    return@withContext getChapter.await(lastHistory.chapterId)
+                }
+            }
+
+            getNextChapters.await(onlyUnread = false).firstOrNull()
+        }
     }
 
     fun getNextChapterForManga(mangaId: Long, chapterId: Long) {
         viewModelScope.launch {
-            sendNextChapterEvent(getNextChapters.await(mangaId, chapterId, onlyUnread = false))
+            val chapter = if (libraryPreferences.resumeLastSeenPage.get()) {
+                getChapter.await(chapterId)
+            } else {
+                getNextChapters.await(mangaId, chapterId, onlyUnread = false).firstOrNull()
+            }
+            _events.send(Event.OpenChapter(chapter))
         }
-    }
-
-    private suspend fun sendNextChapterEvent(chapters: List<Chapter>) {
-        val chapter = chapters.firstOrNull()
-        _events.send(Event.OpenChapter(chapter))
     }
 
     fun removeFromHistory(history: HistoryWithRelations) {
