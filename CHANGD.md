@@ -31,6 +31,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add onboarding permissions request on permissions step
 
 ### Changed
+- Change storage root and download directory handling fallback
 - Change trustExtension default to trusted
 - Change the update logic to be more accurate
 - Change custom brightness value watcher behaviour when disabled
