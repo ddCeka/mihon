@@ -29,7 +29,6 @@ import mihon.core.navigation.AboutRoute
 import mihon.core.navigation.CategoryRoute
 import mihon.core.navigation.DownloadQueueRoute
 import mihon.core.navigation.LocalNavigator
-import mihon.core.navigation.StatsRoute
 import mihon.presentation.core.util.isTabletUi
 
 @Composable
@@ -46,7 +45,6 @@ fun MoreTab() {
         onIncognitoModeChange = { viewModel.incognitoMode = it },
         onClickDownloadQueue = { navigator.push(DownloadQueueRoute) },
         onClickCategories = { navigator.push(CategoryRoute) },
-        onClickStats = { navigator.push(StatsRoute) },
         onClickDataAndStorage = {
             navigator.openSettings(SettingsDataScreen, isTabletUi)
         },
