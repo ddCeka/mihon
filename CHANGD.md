@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add download count library sorting
 - Add notify skipped entries with manual library update
 - Add display source icon in library manga cover
 - Add resume history from last seen page
