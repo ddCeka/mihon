@@ -107,7 +107,7 @@ import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.release.interactor.GetApplicationRelease
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.util.collectAsState
-import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
 import kotlin.time.times
@@ -526,4 +526,4 @@ private const val SPLASH_MAX_DURATION = 5000 // ms
 private const val SPLASH_EXIT_ANIM_DURATION = 400L // ms
 
 private val MIGRATING_SCREEN_MIN_DURATION = 1.seconds
-private val APP_UPDATE_CHECK_INTERVAL = 6.hours
+private val APP_UPDATE_CHECK_INTERVAL = 7.days

@@ -35,6 +35,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add onboarding permissions request on permissions step
 
 ### Changed
+- Changed app update check to no more than once a week
 - Hide statistics screen from more tab
 - Change storage root and download directory handling fallback
 - Change trustExtension default to trusted
