@@ -53,6 +53,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Improve performance by reducing unnecessary media scanning
 
 ### Removed
+- Remove discord bloat
 - Remove unused Installation Id feature
 - Remove Conscrypt bloat
 - Remove support us screen
