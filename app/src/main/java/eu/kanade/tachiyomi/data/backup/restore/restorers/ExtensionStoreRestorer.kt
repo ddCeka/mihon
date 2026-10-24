@@ -21,7 +21,6 @@ class ExtensionStoreRestorer(
                 signingKey = backupStore.signingKey,
                 contact = ExtensionStore.Contact(
                     website = backupStore.contactWebsite,
-                    discord = backupStore.contactDiscord,
                 ),
                 isLegacy = backupStore.isLegacy ?: true,
                 extensionListUrl = backupStore.extensionListUrl,
