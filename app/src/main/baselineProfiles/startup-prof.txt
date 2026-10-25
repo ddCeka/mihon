@@ -24814,18 +24814,6 @@ HSPLorg/conscrypt/Platform;->isTlsV1Deprecated()Z
 HSPLorg/conscrypt/Platform;->isTlsV1Supported()Z
 Lorg/conscrypt/io/IoUtils;
 HSPLorg/conscrypt/io/IoUtils;->closeQuietly(Ljava/io/Closeable;)V
-Lrikka/shizuku/ShizukuProvider;
-HSPLrikka/shizuku/ShizukuProvider;-><clinit>()V
-HSPLrikka/shizuku/ShizukuProvider;-><init>()V
-HSPLrikka/shizuku/ShizukuProvider;->attachInfo(Landroid/content/Context;Landroid/content/pm/ProviderInfo;)V
-HSPLrikka/shizuku/ShizukuProvider;->onCreate()Z
-Lrikka/shizuku/SystemServiceHelper;
-HSPLrikka/shizuku/SystemServiceHelper;-><clinit>()V
-HSPLrikka/shizuku/SystemServiceHelper;->getSystemService(Ljava/lang/String;)Landroid/os/IBinder;
-Lrikka/sui/Sui;
-HSPLrikka/sui/Sui;->init(Ljava/lang/String;)Z
-HSPLrikka/sui/Sui;->isSui()Z
-HSPLrikka/sui/Sui;->requestBinder()Landroid/os/IBinder;
 Lsoup/compose/material/motion/MotionConstants;
 HSPLsoup/compose/material/motion/MotionConstants;-><clinit>()V
 HSPLsoup/compose/material/motion/MotionConstants;-><init>()V
@@ -25995,7 +25983,6 @@ HSPLtachiyomi/i18n/MR$strings;->getEdge_nav()Ldev/icerock/moko/resources/StringR
 HSPLtachiyomi/i18n/MR$strings;->getExt_installer_legacy()Ldev/icerock/moko/resources/StringResource;
 HSPLtachiyomi/i18n/MR$strings;->getExt_installer_packageinstaller()Ldev/icerock/moko/resources/StringResource;
 HSPLtachiyomi/i18n/MR$strings;->getExt_installer_private()Ldev/icerock/moko/resources/StringResource;
-HSPLtachiyomi/i18n/MR$strings;->getExt_installer_shizuku()Ldev/icerock/moko/resources/StringResource;
 HSPLtachiyomi/i18n/MR$strings;->getFilter_mode_darken()Ldev/icerock/moko/resources/StringResource;
 HSPLtachiyomi/i18n/MR$strings;->getFilter_mode_lighten()Ldev/icerock/moko/resources/StringResource;
 HSPLtachiyomi/i18n/MR$strings;->getFilter_mode_multiply()Ldev/icerock/moko/resources/StringResource;
