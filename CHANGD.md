@@ -59,3 +59,6 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Remove updates and downloads notification warning
 - Remove firebase dependencies
 - Remove the WebGPU reader and go back to the old image decoder
+
+### Fixed
+- Fix shizuku related installation
