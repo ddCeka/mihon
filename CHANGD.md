@@ -55,3 +55,6 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Remove support us screen
 - Remove updates and downloads notification warning
 - Remove firebase dependencies
+
+### Fixed
+- Fix shizuku related installation
