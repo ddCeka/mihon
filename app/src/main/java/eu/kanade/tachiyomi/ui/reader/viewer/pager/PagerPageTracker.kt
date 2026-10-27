@@ -26,6 +26,14 @@ class PagerPageTracker(
         private set
 
     /**
+     * Resets stale page state when a new chapter set is applied.
+     * This prevents old ChapterTransition state from leaking into the next chapter.
+     */
+    fun reset() {
+        currentPage = null
+    }
+
+    /**
      * Viewer chapters to set when the pager enters idle mode. Otherwise, if the view was settling
      * or dragging, there'd be a noticeable and annoying jump.
      */
