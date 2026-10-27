@@ -23,6 +23,14 @@ class WebtoonPageTracker(
         private set
 
     /**
+     * Resets stale page state when a new chapter set is applied.
+     * This prevents old ChapterTransition state from leaking into the next chapter.
+     */
+    fun reset() {
+        currentPage = null
+    }
+
+    /**
      * Marks the item at [position], the last one whose end is visible, as active.
      */
     fun onScrolled(position: Int) {
