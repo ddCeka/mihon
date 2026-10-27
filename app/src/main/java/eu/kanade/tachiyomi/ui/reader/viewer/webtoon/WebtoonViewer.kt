@@ -207,7 +207,8 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
      * Tells this viewer to set the given [chapters] as active.
      */
     override fun setChapters(chapters: ViewerChapters) {
-        val forceTransition = general.alwaysShowChapterTransition || tracker.currentPage is ChapterTransition
+        val forceTransition = general.alwaysShowChapterTransition
+        tracker.reset()
         adapter.setChapters(chapters, forceTransition)
 
         if (recycler.isGone) {
