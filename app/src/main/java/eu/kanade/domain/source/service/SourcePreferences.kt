@@ -77,6 +77,11 @@ class SourcePreferences(
         false,
     )
 
+    val disabledExtensionStores: Preference<Set<String>> = preferenceStore.getStringSet(
+        "disabled_extension_stores",
+        emptySet(),
+    )
+
     val extensionUpdatesCount: Preference<Int> = preferenceStore.getInt("ext_updates_count", 0)
 
     val trustedExtensions: Preference<Set<String>> = preferenceStore.getStringSet(
