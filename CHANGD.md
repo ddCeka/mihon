@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add mass uninstall orphaned extension button
 - Add extension stores toggle switch
 - Add download count library sorting
 - Add notify skipped entries with manual library update
