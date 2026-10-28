@@ -29,6 +29,7 @@ fun ExtensionStoresScreen(
     onCopy: (ExtensionStore) -> Unit,
     onOpenWebsite: (ExtensionStore) -> Unit,
     onClickDelete: (ExtensionStore) -> Unit,
+    onSetEnabled: (ExtensionStore, Boolean) -> Unit,
     onClickRefresh: () -> Unit,
     navigateUp: () -> Unit,
 ) {
@@ -72,6 +73,8 @@ fun ExtensionStoresScreen(
             onCopy = onCopy,
             onOpenWebsite = onOpenWebsite,
             onClickDelete = onClickDelete,
+            disabledStores = state.disabledStores,
+            onSetEnabled = onSetEnabled,
         )
     }
 }

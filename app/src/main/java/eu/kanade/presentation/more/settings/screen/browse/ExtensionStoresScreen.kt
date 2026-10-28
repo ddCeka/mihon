@@ -46,6 +46,7 @@ class ExtensionStoresScreen(
             onCopy = { context.copyToClipboard(it.indexUrl, it.indexUrl) },
             onOpenWebsite = { it.contact.website.let(context::openInBrowser) },
             onClickDelete = { viewModel.showDialog(ExtensionStoreDialog.Delete(it)) },
+            onSetEnabled = { store, enabled -> viewModel.setRepoEnabled(store.indexUrl, enabled) },
             onClickRefresh = { viewModel.refreshRepos() },
             navigateUp = navigator::pop,
         )
