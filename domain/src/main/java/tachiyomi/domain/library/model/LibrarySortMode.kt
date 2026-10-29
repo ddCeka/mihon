@@ -32,6 +32,7 @@ data class LibrarySort(
         data object DateAdded : Type(0b00011100)
         data object TrackerMean : Type(0b00100000)
         data object DownloadCount : Type(0b00100100)
+        data object UpdateError : Type(0b00101100)
         data object Random : Type(0b00111100)
 
         companion object {
@@ -80,6 +81,7 @@ data class LibrarySort(
                 Type.DateAdded,
                 Type.TrackerMean,
                 Type.DownloadCount,
+                Type.UpdateError,
                 Type.Random,
             )
         }
@@ -109,6 +111,7 @@ data class LibrarySort(
                     "DATE_ADDED" -> Type.DateAdded
                     "TRACKER_MEAN" -> Type.TrackerMean
                     "DOWNLOAD_COUNT" -> Type.DownloadCount
+                    "UPDATE_ERROR" -> Type.UpdateError
                     "RANDOM" -> Type.Random
                     else -> Type.Alphabetical
                 }
@@ -132,6 +135,7 @@ data class LibrarySort(
             Type.DateAdded -> "DATE_ADDED"
             Type.TrackerMean -> "TRACKER_MEAN"
             Type.DownloadCount -> "DOWNLOAD_COUNT"
+            Type.UpdateError -> "UPDATE_ERROR"
             Type.Random -> "RANDOM"
         }
         val direction = if (direction == Direction.Ascending) "ASCENDING" else "DESCENDING"
