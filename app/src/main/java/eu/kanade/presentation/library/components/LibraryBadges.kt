@@ -15,8 +15,10 @@ import coil3.compose.AsyncImage
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.coil.InstalledSourceIcon
+import eu.kanade.tachiyomi.ui.library.LibraryItem
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Folder
+import mihon.icons.materialsymbols.roundedfilled.Warning
 import tachiyomi.presentation.core.components.Badge
 
 @Composable
@@ -52,6 +54,24 @@ internal fun SourceIconBadge(sourceId: Long?) {
             .background(MaterialTheme.colorScheme.secondary)
             .padding(1.dp)
             .size(iconSize),
+    )
+}
+
+@Composable
+internal fun LibraryEndBadges(
+    item: LibraryItem,
+    showUpdateErrors: Boolean,
+) {
+    if (showUpdateErrors && item.hasUpdateError) {
+        Badge(
+            imageVector = MaterialSymbols.RoundedFilled.Warning,
+            color = MaterialTheme.colorScheme.error,
+            iconColor = MaterialTheme.colorScheme.onError,
+        )
+    }
+    LanguageBadge(
+        isLocal = item.badges.isLocal,
+        sourceLanguage = item.badges.sourceLanguage,
     )
 }
 
