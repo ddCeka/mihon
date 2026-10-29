@@ -22,6 +22,7 @@ import eu.kanade.presentation.manga.DownloadAction
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.library.LibraryUpdateErrors
 import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -94,6 +95,7 @@ class LibraryViewModel(
     private val setMangaCategories: SetMangaCategories,
     private val preferences: BasePreferences,
     private val libraryPreferences: LibraryPreferences,
+    private val libraryUpdateErrors: LibraryUpdateErrors,
     private val coverCache: CoverCache,
     private val sourceManager: SourceManager,
     private val downloadManager: DownloadManager,
@@ -150,11 +152,18 @@ class LibraryViewModel(
         searchQuery.debounce(0.25.seconds),
         getCategories.subscribe(),
         getFavoritesFlow(),
-        combine(tracks, getTrackingFiltersFlow(), ::Pair),
+        combine(tracks, getTrackingFiltersFlow(), libraryUpdateErrors.errors.changes()) { tracksMap, filters, errors ->
+            Triple(tracksMap, filters, libraryUpdateErrors.ids(errors))
+        },
         getLibraryItemPreferencesFlow(),
-    ) { searchQuery, categories, favorites, (tracksMap, trackingFilters), itemPreferences ->
+    ) { searchQuery, categories, favorites, (tracksMap, trackingFilters, errorIds), itemPreferences ->
         val showSystemCategory = favorites.any { it.libraryManga.categories.contains(0) }
-        val filteredFavorites = favorites
+        val markedFavorites = if (errorIds.isEmpty()) {
+            favorites
+        } else {
+            favorites.map { item -> item.copy(hasUpdateError = item.id in errorIds) }
+        }
+        val filteredFavorites = markedFavorites
             .applyFilters(tracksMap, trackingFilters, itemPreferences)
             .let { libraryItems ->
                 if (searchQuery.isNullOrEmpty()) {
@@ -172,6 +181,7 @@ class LibraryViewModel(
             favorites = filteredFavorites,
             tracksMap = tracksMap,
             loggedInTrackerIds = trackingFilters.keys,
+            updateErrorIds = errorIds,
         )
     }
         .distinctUntilChanged()
@@ -180,7 +190,12 @@ class LibraryViewModel(
                 data = data,
                 groupedFavorites = data.favorites
                     .applyGrouping(data.categories, data.showSystemCategory)
-                    .applySort(data.favoritesById, data.tracksMap, data.loggedInTrackerIds),
+                    .applySort(
+                        data.favoritesById,
+                        data.tracksMap,
+                        data.loggedInTrackerIds,
+                        data.updateErrorIds,
+                    ),
             )
         }
         .flowOn(Dispatchers.Default)
@@ -306,6 +321,7 @@ class LibraryViewModel(
         favoritesById: Map<Long, LibraryItem>,
         trackMap: Map<Long, List<Track>>,
         loggedInTrackerIds: Set<Long>,
+        errorIds: Set<Long>,
     ): Map<Category, List</* LibraryItem */ Long>> {
         // The collator already ignores case, and lowercasing on every comparison is slow on large libraries
         val sortAlphabetically: (LibraryItem, LibraryItem) -> Int = { manga1, manga2 ->
@@ -367,6 +383,11 @@ class LibraryViewModel(
                     val item2Score = trackerScores[manga2.id] ?: defaultTrackerScoreSortValue
                     item1Score.compareTo(item2Score)
                 }
+                LibrarySort.Type.UpdateError -> {
+                    val first = if (manga1.id in errorIds) 1 else 0
+                    val second = if (manga2.id in errorIds) 1 else 0
+                    first.compareTo(second)
+                }
                 LibrarySort.Type.Random -> {
                     error("Why Are We Still Here? Just To Suffer?")
                 }
@@ -386,6 +407,14 @@ class LibraryViewModel(
 
             manga.sortedWith(comparator).map { it.id }
         }
+    }
+
+    private fun <T : Comparable<T>> compareMissingLast(first: T?, second: T?, ascending: Boolean): Int {
+        if (first == null && second == null) return 0
+        if (first == null) return 1
+        if (second == null) return -1
+        val compared = first.compareTo(second)
+        return if (ascending) compared else -compared
     }
 
     private fun getLibraryItemPreferencesFlow(): Flow<ItemPreferences> {
@@ -798,6 +827,7 @@ class LibraryViewModel(
         val favorites: List<LibraryItem> = emptyList(),
         val tracksMap: Map</* Manga */ Long, List<Track>> = emptyMap(),
         val loggedInTrackerIds: Set<Long> = emptySet(),
+        val updateErrorIds: Set<Long> = emptySet(),
     ) {
         val favoritesById by lazy { favorites.associateBy { it.id } }
     }
