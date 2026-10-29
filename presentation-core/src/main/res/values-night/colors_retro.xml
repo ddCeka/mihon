@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Retro Dark Palette -->
+<resources>
+    <color name="retro_primary">#9BCBC3</color>
+    <color name="retro_onPrimary">#003731</color>
+    <color name="retro_primaryContainer">#174E47</color>
+    <color name="retro_onPrimaryContainer">#B8E5DC</color>
+    <color name="retro_secondary">#AFC6DF</color>
+    <color name="retro_onSecondary">#19334B</color>
+    <color name="retro_secondaryContainer">#304A63</color>
+    <color name="retro_onSecondaryContainer">#D1E4FF</color>
+    <color name="retro_tertiary">#D5C28D</color>
+    <color name="retro_onTertiary">#392F14</color>
+    <color name="retro_tertiaryContainer">#514527</color>
+    <color name="retro_onTertiaryContainer">#F2E0AA</color>
+    <color name="retro_error">#FFB4AB</color>
+    <color name="retro_onError">#690005</color>
+    <color name="retro_errorContainer">#93000A</color>
+    <color name="retro_onErrorContainer">#FFDAD6</color>
+    <color name="retro_background">#252B2C</color>
+    <color name="retro_onBackground">#E0E4E1</color>
+    <color name="retro_surface">#292F30</color>
+    <color name="retro_onSurface">#E0E4E1</color>
+    <color name="retro_surfaceVariant">#394243</color>
+    <color name="retro_onSurfaceVariant">#C3D0CE</color>
+    <color name="retro_outline">#869795</color>
+    <color name="retro_outlineVariant">#4C5A59</color>
+    <color name="retro_scrim">#000000</color>
+    <color name="retro_inverseSurface">#E0E4E1</color>
+    <color name="retro_inverseOnSurface">#252B2C</color>
+    <color name="retro_inversePrimary">#006A60</color>
+    <color name="retro_surfaceDim">#1E2425</color>
+    <color name="retro_surfaceBright">#3C4446</color>
+    <color name="retro_surfaceContainerLowest">#202526</color>
+    <color name="retro_surfaceContainerLow">#2D3435</color>
+    <color name="retro_surfaceContainer">#333A3B</color>
+    <color name="retro_surfaceContainerHigh">#3A4243</color>
+    <color name="retro_surfaceContainerHighest">#424A4B</color>
+</resources>
