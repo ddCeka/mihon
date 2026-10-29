@@ -12,13 +12,14 @@ enum class AppTheme(val titleRes: StringResource?) {
     LAVENDER(MR.strings.theme_lavender),
     MIDNIGHT_DUSK(MR.strings.theme_midnightdusk),
     NORD(MR.strings.theme_nord),
+    RETRO(MR.strings.theme_retro),
     STRAWBERRY_DAIQUIRI(MR.strings.theme_strawberrydaiquiri),
     TAKO(MR.strings.theme_tako),
     TEALTURQUOISE(MR.strings.theme_tealturquoise),
     TIDAL_WAVE(MR.strings.theme_tidalwave),
+    TOKYONIGHT(MR.strings.theme_tokyonight),
     YINYANG(MR.strings.theme_yinyang),
     YOTSUBA(MR.strings.theme_yotsuba),
-    TOKYONIGHT(MR.strings.theme_tokyonight),
     MONOCHROME(MR.strings.theme_monochrome),
 
     // Deprecated
