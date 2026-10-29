@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add Retro theme
 - Add display failed update mark title to library
 - Add mass uninstall orphaned extension button
 - Add extension stores toggle switch
