@@ -68,6 +68,7 @@
     <string name="action_sort_chapter_fetch_date">Chapter fetch date</string>
     <string name="action_sort_date_added">Date added</string>
     <string name="action_sort_tracker_score">Tracker score</string>
+    <string name="action_sort_update_error">Update errors</string>
     <string name="action_sort_random">Random</string>
     <string name="action_search">Search</string>
     <string name="action_search_hint">Search…</string>
@@ -124,6 +125,7 @@
     <string name="action_display_local_badge">Local source</string>
     <string name="action_display_source_badge">Source icon</string>
     <string name="action_display_language_badge">Language</string>
+    <string name="action_display_update_errors">Show errors</string>
     <string name="action_display_show_tabs">Show category tabs</string>
     <string name="action_display_show_number_of_items">Show number of items</string>
     <string name="action_display_show_continue_reading_button">Continue reading button</string>

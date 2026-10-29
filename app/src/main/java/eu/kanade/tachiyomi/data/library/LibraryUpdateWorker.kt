@@ -99,6 +99,8 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
 
     @Inject private lateinit var notifier: LibraryUpdateNotifier
 
+    @Inject private lateinit var libraryUpdateErrors: LibraryUpdateErrors
+
     private var mangaToUpdate: List<LibraryManga> = mutableListOf()
 
     private var skippedUpdates: List<Pair<Manga, String?>> = emptyList()
@@ -221,6 +223,7 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
         val currentlyUpdatingManga = CopyOnWriteArrayList<Manga>()
         val newUpdates = CopyOnWriteArrayList<Pair<Manga, Array<Chapter>>>()
         val failedUpdates = CopyOnWriteArrayList<Pair<Manga, String?>>()
+        val succeededUpdates = CopyOnWriteArrayList<Long>()
         val hasDownloads = AtomicBoolean(false)
         val timeZone = TimeZone.currentSystemDefault()
         val fetchWindow = fetchInterval.getWindow(Clock.System.now().toLocalDateTime(timeZone).date, timeZone)
@@ -248,6 +251,7 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
                                     try {
                                         val newChapters = updateManga(manga, fetchWindow)
                                             .sortedByDescending { it.sourceOrder }
+                                        succeededUpdates.add(manga.id)
 
                                         if (newChapters.isNotEmpty()) {
                                             val chaptersToDownload = filterChaptersForDownload.await(manga, newChapters)
@@ -266,6 +270,7 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
                                             newUpdates.add(manga to newChapters.toTypedArray())
                                         }
                                     } catch (e: Throwable) {
+                                        if (e is CancellationException) throw e
                                         val errorMessage = when (e) {
                                             is NoChaptersException -> context.stringResource(
                                                 MR.strings.no_chapters_error,
@@ -302,6 +307,11 @@ class LibraryUpdateWorker(private val context: Context, workerParams: WorkerPara
                 errorFile.getUriCompat(context),
             )
         }
+
+        libraryUpdateErrors.applyResults(
+            succeeded = succeededUpdates,
+            failed = failedUpdates.map { (manga, message) -> manga.id to message },
+        )
 
         // Only a manual update is expected to cover every entry
         if (skippedUpdates.isNotEmpty() && tags.contains(WORK_NAME_MANUAL)) {
