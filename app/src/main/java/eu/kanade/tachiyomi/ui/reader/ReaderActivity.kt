@@ -49,7 +49,6 @@ import com.google.android.material.transition.platform.MaterialContainerTransfor
 import com.hippo.unifile.UniFile
 import dev.zacsweers.metro.Inject
 import eu.kanade.domain.base.BasePreferences
-import eu.kanade.presentation.reader.DisplayRefreshHost
 import eu.kanade.presentation.reader.OrientationSelectDialog
 import eu.kanade.presentation.reader.PageJumpDialog
 import eu.kanade.presentation.reader.ReaderContentOverlay
@@ -139,7 +138,6 @@ class ReaderActivity : BaseActivity() {
 
     private var menuToggleToast: Toast? = null
     private var readingModeToast: Toast? = null
-    private val displayRefreshHost = DisplayRefreshHost()
 
     private val windowInsetsController by lazy { WindowInsetsControllerCompat(window, window.decorView) }
 
@@ -231,7 +229,7 @@ class ReaderActivity : BaseActivity() {
                         viewModel.state.value.viewerChapters?.let(::setChapters)
                     }
                     ReaderViewModel.Event.PageChanged -> {
-                        displayRefreshHost.flash()
+                        // no-op for now
                     }
                     is ReaderViewModel.Event.SetOrientation -> {
                         setOrientation(event.orientation)
@@ -455,8 +453,6 @@ class ReaderActivity : BaseActivity() {
 
     @Composable
     private fun ContentOverlay(state: ReaderViewModel.State) {
-        val flashOnPageChange by readerPreferences.flashOnPageChange.collectAsState()
-
         val colorOverlayEnabled by readerPreferences.colorFilter.collectAsState()
         val colorOverlay by readerPreferences.colorFilterValue.collectAsState()
         val colorOverlayMode by readerPreferences.colorFilterMode.collectAsState()
@@ -469,10 +465,6 @@ class ReaderActivity : BaseActivity() {
             color = colorOverlay.takeIf { colorOverlayEnabled },
             colorBlendMode = colorOverlayBlendMode,
         )
-
-        if (flashOnPageChange) {
-            DisplayRefreshHost(hostState = displayRefreshHost)
-        }
     }
 
     @Composable
