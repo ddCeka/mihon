@@ -62,9 +62,6 @@ class WebtoonRecyclerView @JvmOverloads constructor(
     var tapListener: ((MotionEvent) -> Unit)? = null
     var longTapListener: ((MotionEvent) -> Boolean)? = null
 
-    private var isManuallyScrolling = false
-    private var tapDuringManualScroll = false
-
     override fun onMeasure(widthSpec: Int, heightSpec: Int) {
         halfWidth = MeasureSpec.getSize(widthSpec) / 2
         halfHeight = MeasureSpec.getSize(heightSpec) / 2
@@ -77,10 +74,6 @@ class WebtoonRecyclerView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(e: MotionEvent): Boolean {
-        if (e.actionMasked == MotionEvent.ACTION_DOWN) {
-            tapDuringManualScroll = isManuallyScrolling
-        }
-
         detector.onTouchEvent(e)
         return super.onTouchEvent(e)
     }
@@ -100,10 +93,6 @@ class WebtoonRecyclerView @JvmOverloads constructor(
         val totalItemCount = layoutManager?.itemCount ?: 0
         atLastPosition = visibleItemCount > 0 && lastVisibleItemPosition == totalItemCount - 1
         atFirstPosition = firstVisibleItemPosition == 0
-
-        if (state == SCROLL_STATE_IDLE) {
-            isManuallyScrolling = false
-        }
     }
 
     private fun getPositionX(positionX: Float): Float {
@@ -236,16 +225,12 @@ class WebtoonRecyclerView @JvmOverloads constructor(
         }
     }
 
-    fun onManualScroll() {
-        isManuallyScrolling = true
-    }
-
     inner class GestureListener : GestureDetectorWithLongTap.Listener() {
 
         override fun onSingleTapConfirmed(ev: MotionEvent): Boolean {
             // A tap is confirmed after a delay, by when the reader can be gone, and scrolling a detached list
             // lays out pages that can't compose
-            if (!tapDuringManualScroll && isAttachedToWindow) {
+            if (isAttachedToWindow) {
                 tapListener?.invoke(ev)
             }
             return false
