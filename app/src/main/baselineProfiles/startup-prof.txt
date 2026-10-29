@@ -19977,10 +19977,6 @@ HSPLeu/kanade/tachiyomi/ui/reader/setting/ReaderPreferences;-><init>(Ltachiyomi/
 Leu/kanade/tachiyomi/ui/reader/setting/ReaderPreferences$Companion;
 HSPLeu/kanade/tachiyomi/ui/reader/setting/ReaderPreferences$Companion;-><init>()V
 HSPLeu/kanade/tachiyomi/ui/reader/setting/ReaderPreferences$Companion;-><init>(Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-Leu/kanade/tachiyomi/ui/reader/setting/ReaderPreferences$FlashColor;
-HSPLeu/kanade/tachiyomi/ui/reader/setting/ReaderPreferences$FlashColor;->$values()[Leu/kanade/tachiyomi/ui/reader/setting/ReaderPreferences$FlashColor;
-HSPLeu/kanade/tachiyomi/ui/reader/setting/ReaderPreferences$FlashColor;-><clinit>()V
-HSPLeu/kanade/tachiyomi/ui/reader/setting/ReaderPreferences$FlashColor;-><init>(Ljava/lang/String;I)V
 Leu/kanade/tachiyomi/ui/reader/setting/ReaderPreferences$MetroFactory;
 HSPLeu/kanade/tachiyomi/ui/reader/setting/ReaderPreferences$MetroFactory;-><clinit>()V
 HSPLeu/kanade/tachiyomi/ui/reader/setting/ReaderPreferences$MetroFactory;-><init>(Ldev/zacsweers/metro/Provider;)V
