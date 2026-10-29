@@ -65,7 +65,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.zacsweers.metro.Inject
 import eu.kanade.domain.base.BasePreferences
-import eu.kanade.presentation.reader.DisplayRefreshHost
 import eu.kanade.presentation.reader.OrientationSelectDialog
 import eu.kanade.presentation.reader.ReaderContentOverlay
 import eu.kanade.presentation.reader.ReaderNavigationOverlay
@@ -147,7 +146,6 @@ class ReaderActivity : BaseActivity() {
 
     private var menuToggleToast: Toast? = null
     private var readingModeToast: Toast? = null
-    private val displayRefreshHost = DisplayRefreshHost()
     private val navigationOverlayState = ReaderNavigationOverlayState()
 
     private val windowInsetsController by lazy { WindowInsetsControllerCompat(window, window.decorView) }
@@ -192,7 +190,6 @@ class ReaderActivity : BaseActivity() {
             val state by viewModel.state.collectAsState()
             val general by settingsViewModel.general.collectAsState()
             val showPageNumber by readerPreferences.showPageNumber.collectAsState()
-            val flashOnPageChange by readerPreferences.flashOnPageChange.collectAsState()
             val colorOverlayEnabled by readerPreferences.colorFilter.collectAsState()
             val colorOverlay by readerPreferences.colorFilterValue.collectAsState()
             val colorOverlayMode by readerPreferences.colorFilterMode.collectAsState()
@@ -252,10 +249,6 @@ class ReaderActivity : BaseActivity() {
                             .align(Alignment.BottomCenter)
                             .navigationBarsPadding(),
                     )
-                }
-
-                if (flashOnPageChange) {
-                    DisplayRefreshHost(hostState = displayRefreshHost)
                 }
 
                 ReaderNavigationOverlay(state = navigationOverlayState)
@@ -370,7 +363,7 @@ class ReaderActivity : BaseActivity() {
                         viewModel.state.value.viewerChapters?.let(::setChapters)
                     }
                     ReaderViewModel.Event.PageChanged -> {
-                        displayRefreshHost.flash()
+                        // no-op for now
                     }
                     is ReaderViewModel.Event.SetOrientation -> {
                         setOrientation(event.orientation)
