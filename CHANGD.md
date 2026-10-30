@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add a custom DNS over HTTPS provider
 - Add Retro theme
 - Add display failed update mark title to library
 - Add reading window for new-chapter downloads

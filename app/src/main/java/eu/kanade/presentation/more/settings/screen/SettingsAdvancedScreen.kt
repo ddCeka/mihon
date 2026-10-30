@@ -26,6 +26,7 @@ import eu.kanade.domain.base.BasePreferences
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.screen.advanced.ClearDatabaseScreen
 import eu.kanade.presentation.more.settings.screen.debug.DebugInfoScreen
+import eu.kanade.presentation.more.settings.widget.ListPreferenceInput
 import eu.kanade.tachiyomi.data.library.MetadataUpdateWorker
 import eu.kanade.tachiyomi.network.NetworkPreferences
 import eu.kanade.tachiyomi.network.PREF_DOH_360
@@ -33,6 +34,7 @@ import eu.kanade.tachiyomi.network.PREF_DOH_ADGUARD
 import eu.kanade.tachiyomi.network.PREF_DOH_ALIDNS
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.network.PREF_DOH_CONTROLD
+import eu.kanade.tachiyomi.network.PREF_DOH_CUSTOM
 import eu.kanade.tachiyomi.network.PREF_DOH_DNSPOD
 import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
 import eu.kanade.tachiyomi.network.PREF_DOH_MULLVAD
@@ -40,6 +42,7 @@ import eu.kanade.tachiyomi.network.PREF_DOH_NJALLA
 import eu.kanade.tachiyomi.network.PREF_DOH_QUAD101
 import eu.kanade.tachiyomi.network.PREF_DOH_QUAD9
 import eu.kanade.tachiyomi.network.PREF_DOH_SHECAN
+import eu.kanade.tachiyomi.network.parseDohCustomUrl
 import eu.kanade.tachiyomi.ui.more.OnboardingScreen
 import eu.kanade.tachiyomi.util.system.isDebugBuildType
 import eu.kanade.tachiyomi.util.system.powerManager
@@ -203,6 +206,8 @@ object SettingsAdvancedScreen : SearchableSettings {
         val networkHelper = remember { context.appGraph.networkHelper }
         val scope = rememberCoroutineScope()
 
+        val dohProviderCustom by networkPreferences.dohProviderCustom.collectAsState()
+
         val userAgentPref = networkPreferences.defaultUserAgent
         val userAgent by userAgentPref.collectAsState()
 
@@ -242,6 +247,7 @@ object SettingsAdvancedScreen : SearchableSettings {
                     preference = networkPreferences.dohProvider,
                     entries = mapOf(
                         -1 to stringResource(MR.strings.disabled),
+                        PREF_DOH_CUSTOM to stringResource(MR.strings.pref_dns_over_https_custom),
                         PREF_DOH_CLOUDFLARE to "Cloudflare",
                         PREF_DOH_GOOGLE to "Google",
                         PREF_DOH_ADGUARD to "AdGuard",
@@ -260,6 +266,14 @@ object SettingsAdvancedScreen : SearchableSettings {
                         context.toast(MR.strings.requires_app_restart)
                         true
                     },
+                    input = ListPreferenceInput(
+                        key = PREF_DOH_CUSTOM,
+                        value = dohProviderCustom,
+                        label = stringResource(MR.strings.pref_doh_provider_custom),
+                        error = stringResource(MR.strings.error_doh_provider_custom_invalid),
+                        isValid = { parseDohCustomUrl(it) != null },
+                        onValueChange = { networkPreferences.dohProviderCustom.set(it) },
+                    ),
                 ),
                 Preference.PreferenceItem.EditTextPreference(
                     preference = userAgentPref,
