@@ -65,5 +65,6 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Remove firebase dependencies
 
 ### Fixed
+- Fix default category download exclusion
 - Fix chapter transition preference
 - Fix shizuku related installation
