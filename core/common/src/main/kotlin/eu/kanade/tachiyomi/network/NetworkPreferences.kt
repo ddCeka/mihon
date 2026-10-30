@@ -25,6 +25,7 @@ class NetworkPreferences(
     )
 
     val dohProvider: Preference<Int> = preferenceStore.getInt("doh_provider", -1)
+    val dohProviderCustom: Preference<String> = preferenceStore.getString("doh_provider_custom", "")
 
     val defaultUserAgent: Preference<String> = preferenceStore.getString(
         "default_user_agent",
