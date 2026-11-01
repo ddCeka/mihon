@@ -72,6 +72,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Remove the WebGPU reader and go back to the old image decoder
 
 ### Fixed
+- Fix splash lag on Android 12 and below
 - Fix default category download exclusion
 - Fix chapter transition preference
 - Fix shizuku related installation
