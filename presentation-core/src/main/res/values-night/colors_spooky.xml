@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spooky Dark Palette -->
+<resources>
+    <color name="spooky_primary">#CF7F42</color>
+    <color name="spooky_onPrimary">#140D09</color>
+    <color name="spooky_primaryContainer">#5B2E1A</color>
+    <color name="spooky_onPrimaryContainer">#F7D8B3</color>
+    <color name="spooky_secondary">#9A6CC4</color>
+    <color name="spooky_onSecondary">#120C1C</color>
+    <color name="spooky_secondaryContainer">#341F43</color>
+    <color name="spooky_onSecondaryContainer">#E9D9FF</color>
+    <color name="spooky_tertiary">#6B8F67</color>
+    <color name="spooky_onTertiary">#07120A</color>
+    <color name="spooky_tertiaryContainer">#22432D</color>
+    <color name="spooky_onTertiaryContainer">#DFF5D9</color>
+    <color name="spooky_error">#CF6679</color>
+    <color name="spooky_onError">#140D09</color>
+    <color name="spooky_errorContainer">#5A202A</color>
+    <color name="spooky_onErrorContainer">#FFD6DC</color>
+    <color name="spooky_background">#111111</color>
+    <color name="spooky_onBackground">#EDE0D2</color>
+    <color name="spooky_surface">#191614</color>
+    <color name="spooky_onSurface">#EDE0D2</color>
+    <color name="spooky_surfaceVariant">#2A241F</color>
+    <color name="spooky_onSurfaceVariant">#D8C9B6</color>
+    <color name="spooky_outline">#8E7F70</color>
+    <color name="spooky_outlineVariant">#3A312F</color>
+    <color name="spooky_scrim">#000000</color>
+    <color name="spooky_inverseSurface">#F1E4D7</color>
+    <color name="spooky_inverseOnSurface">#171311</color>
+    <color name="spooky_inversePrimary">#B86A33</color>
+    <color name="spooky_surfaceDim">#121111</color>
+    <color name="spooky_surfaceBright">#352D2A</color>
+    <color name="spooky_surfaceContainerLowest">#0E0E0E</color>
+    <color name="spooky_surfaceContainerLow">#171412</color>
+    <color name="spooky_surfaceContainer">#1D1A18</color>
+    <color name="spooky_surfaceContainerHigh">#292321</color>
+    <color name="spooky_surfaceContainerHighest">#332D2A</color>
+</resources>
