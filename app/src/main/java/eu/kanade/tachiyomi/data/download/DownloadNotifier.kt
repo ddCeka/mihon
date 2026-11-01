@@ -183,6 +183,15 @@ class DownloadNotifier(
      * Only works on Android 8+.
      */
     fun onWarning(reason: String, timeout: Long? = null, contentIntent: PendingIntent? = null, mangaId: Long? = null) {
+        // Temporary workaround: suppress the raw NPE from a null javaClass dereference
+        val isNullClassWarning =
+            reason.contains("NullPointerException") ||
+                (reason.contains("getClass()") && reason.contains("null object reference"))
+
+        if (isNullClassWarning) {
+            return
+        }
+
         context.notify(
             Notifications.ID_DOWNLOAD_CHAPTER_ERROR,
             Notifications.CHANNEL_DOWNLOADER_ERROR,
@@ -216,6 +225,15 @@ class DownloadNotifier(
      * @param mangaId the id of the entry that the error occurred on
      */
     fun onError(error: String? = null, chapter: String? = null, mangaTitle: String? = null, mangaId: Long? = null) {
+        // Temporary workaround: suppress the raw NPE from a null javaClass dereference
+        val isNullClassError =
+            error?.contains("NullPointerException") == true ||
+                (error?.contains("getClass()") == true && error.contains("null object reference"))
+
+        if (isNullClassError) {
+            return
+        }
+
         // Create notification
         context.notify(
             Notifications.ID_DOWNLOAD_CHAPTER_ERROR,
