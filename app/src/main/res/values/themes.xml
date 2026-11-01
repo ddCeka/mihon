@@ -400,6 +400,46 @@
         <item name="colorSurfaceContainerLowest">@color/retro_surfaceContainerLowest</item>
     </style>
 
+    <!--== Spooky Theme ==-->
+    <style name="Theme.Tachiyomi.Spooky">
+        <!-- Theme Colors -->
+        <item name="colorPrimary">@color/spooky_primary</item>
+        <item name="colorOnPrimary">@color/spooky_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/spooky_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/spooky_onPrimaryContainer</item>
+        <item name="colorPrimaryInverse">@color/spooky_inversePrimary</item>
+        <item name="colorSecondary">@color/spooky_secondary</item>
+        <item name="colorOnSecondary">@color/spooky_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/spooky_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/spooky_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/spooky_tertiary</item>
+        <item name="colorOnTertiary">@color/spooky_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/spooky_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/spooky_onTertiaryContainer</item>
+        <item name="android:colorBackground">@color/spooky_background</item>
+        <item name="colorOnBackground">@color/spooky_onBackground</item>
+        <item name="colorSurface">@color/spooky_surface</item>
+        <item name="colorOnSurface">@color/spooky_onSurface</item>
+        <item name="colorSurfaceVariant">@color/spooky_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/spooky_onSurfaceVariant</item>
+        <item name="colorSurfaceInverse">@color/spooky_inverseSurface</item>
+        <item name="colorOnSurfaceInverse">@color/spooky_inverseOnSurface</item>
+        <item name="colorError">@color/spooky_error</item>
+        <item name="colorOnError">@color/spooky_onError</item>
+        <item name="colorErrorContainer">@color/spooky_errorContainer</item>
+        <item name="colorOnErrorContainer">@color/spooky_onErrorContainer</item>
+        <item name="colorOutline">@color/spooky_outline</item>
+        <item name="colorOutlineVariant">@color/spooky_outlineVariant</item>
+        <item name="scrimBackground">@color/spooky_scrim</item>
+        <item name="colorSurfaceBright">@color/spooky_surfaceBright</item>
+        <item name="colorSurfaceDim">@color/spooky_surfaceDim</item>
+        <item name="colorSurfaceContainer">@color/spooky_surfaceContainer</item>
+        <item name="colorSurfaceContainerHigh">@color/spooky_surfaceContainerHigh</item>
+        <item name="colorSurfaceContainerHighest">@color/spooky_surfaceContainerHighest</item>
+        <item name="colorSurfaceContainerLow">@color/spooky_surfaceContainerLow</item>
+        <item name="colorSurfaceContainerLowest">@color/spooky_surfaceContainerLowest</item>
+    </style>
+
     <!--== Strawberry Daiquiri Theme ==-->
     <style name="Theme.Tachiyomi.StrawberryDaiquiri">
         <!-- Theme Colors -->
