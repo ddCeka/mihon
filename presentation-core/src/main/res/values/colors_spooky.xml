@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spooky Light Palette -->
+<resources>
+    <color name="spooky_primary">#9A4D1E</color>
+    <color name="spooky_onPrimary">#FFFFFF</color>
+    <color name="spooky_primaryContainer">#F3D6B3</color>
+    <color name="spooky_onPrimaryContainer">#2A170D</color>
+    <color name="spooky_secondary">#6A4B92</color>
+    <color name="spooky_onSecondary">#FFFFFF</color>
+    <color name="spooky_secondaryContainer">#E6D9F5</color>
+    <color name="spooky_onSecondaryContainer">#20162E</color>
+    <color name="spooky_tertiary">#4C7558</color>
+    <color name="spooky_onTertiary">#FFFFFF</color>
+    <color name="spooky_tertiaryContainer">#D9EAD7</color>
+    <color name="spooky_onTertiaryContainer">#12261A</color>
+    <color name="spooky_error">#B63946</color>
+    <color name="spooky_onError">#FFFFFF</color>
+    <color name="spooky_errorContainer">#FFE4E8</color>
+    <color name="spooky_onErrorContainer">#3F1015</color>
+    <color name="spooky_background">#F6F0E9</color>
+    <color name="spooky_onBackground">#1E1A17</color>
+    <color name="spooky_surface">#F9F4EE</color>
+    <color name="spooky_onSurface">#1E1A17</color>
+    <color name="spooky_surfaceVariant">#EAE0D6</color>
+    <color name="spooky_onSurfaceVariant">#4F433B</color>
+    <color name="spooky_outline">#8A776C</color>
+    <color name="spooky_outlineVariant">#D3C3B7</color>
+    <color name="spooky_scrim">#000000</color>
+    <color name="spooky_inverseSurface">#2C2624</color>
+    <color name="spooky_inverseOnSurface">#F6F1EA</color>
+    <color name="spooky_inversePrimary">#CF7F42</color>
+    <color name="spooky_surfaceDim">#E8DFD4</color>
+    <color name="spooky_surfaceBright">#FFF9F4</color>
+    <color name="spooky_surfaceContainerLowest">#FFFFFF</color>
+    <color name="spooky_surfaceContainerLow">#F9F3EE</color>
+    <color name="spooky_surfaceContainer">#F4EDE5</color>
+    <color name="spooky_surfaceContainerHigh">#EDE6DE</color>
+    <color name="spooky_surfaceContainerHighest">#E5DDD4</color>
+</resources>
