@@ -257,6 +257,29 @@ class ReaderPreferences(
 
     // endregion
 
+    // region Auto-scroll
+
+    val autoscrollInterval: Preference<Float> = preferenceStore.getFloat("eh_util_autoscroll_interval", 3f)
+
+    val smoothAutoScroll: Preference<Boolean> = preferenceStore.getBoolean("smooth_auto_scroll", true)
+
+    val autoscrollGesturesEnabled: Preference<Boolean> =
+        preferenceStore.getBoolean("pref_util_autoscroll_gestures", false)
+
+    val autoscrollGestureToastsEnabled: Preference<Boolean> =
+        preferenceStore.getBoolean("pref_util_autoscroll_gesture_toasts", false)
+
+    val autoscrollVolumeKeys: Preference<Boolean> =
+        preferenceStore.getBoolean("pref_autoscroll_volume_keys", true)
+
+    val autoscrollTapToPause: Preference<Boolean> =
+        preferenceStore.getBoolean("pref_autoscroll_tap_to_pause", true)
+
+    val autoscrollFloatingControls: Preference<Boolean> =
+        preferenceStore.getBoolean("pref_autoscroll_floating_controls", true)
+
+    // endregion
+
     enum class TappingInvertMode(
         val titleRes: StringResource,
         val shouldInvertHorizontal: Boolean = false,

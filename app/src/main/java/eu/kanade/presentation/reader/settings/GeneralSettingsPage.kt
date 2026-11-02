@@ -30,6 +30,48 @@ private val themes = listOf(
 internal fun ColumnScope.GeneralPage(viewModel: ReaderSettingsViewModel) {
     val readerTheme by viewModel.preferences.readerTheme.collectAsState()
 
+    val autoscrollIntervalPref = viewModel.preferences.autoscrollInterval
+    val autoscrollInterval by autoscrollIntervalPref.collectAsState()
+
+    SliderItem(
+        value = autoscrollInterval.toInt().coerceIn(1, 30),
+        valueRange = 1..30,
+        label = stringResource(MR.strings.pref_autoscroll_interval),
+        valueString = stringResource(MR.strings.pref_autoscroll_interval_summary, autoscrollInterval.toInt()),
+        onChange = { autoscrollIntervalPref.set(it.toFloat()) },
+        pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+    )
+
+    CheckboxItem(
+        label = stringResource(MR.strings.pref_smooth_scroll),
+        pref = viewModel.preferences.smoothAutoScroll,
+    )
+
+    CheckboxItem(
+        label = stringResource(MR.strings.pref_autoscroll_gestures),
+        pref = viewModel.preferences.autoscrollGesturesEnabled,
+    )
+
+    CheckboxItem(
+        label = stringResource(MR.strings.pref_autoscroll_gesture_toasts),
+        pref = viewModel.preferences.autoscrollGestureToastsEnabled,
+    )
+
+    CheckboxItem(
+        label = stringResource(MR.strings.pref_autoscroll_volume_keys),
+        pref = viewModel.preferences.autoscrollVolumeKeys,
+    )
+
+    CheckboxItem(
+        label = stringResource(MR.strings.pref_autoscroll_tap_to_pause),
+        pref = viewModel.preferences.autoscrollTapToPause,
+    )
+
+    CheckboxItem(
+        label = stringResource(MR.strings.pref_autoscroll_floating_controls),
+        pref = viewModel.preferences.autoscrollFloatingControls,
+    )
+
     SettingsChipRow(MR.strings.pref_reader_theme) {
         themes.map { (labelRes, value) ->
             FilterChip(
