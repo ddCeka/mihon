@@ -62,10 +62,11 @@ class DownloadManager(
     /**
      * Starts the download worker, which runs the downloader.
      */
-    fun startDownloads() {
-        if (downloader.isRunning) return
+    fun startDownloads(force: Boolean = false) {
+        if (!force && downloader.isRunning) return
+        if (!force && downloader.queueState.value.isEmpty()) return
 
-        DownloadWorker.start(context)
+        DownloadWorker.start(context, force = force)
     }
 
     /**
@@ -107,7 +108,7 @@ class DownloadManager(
             val (existing, others) = queue.partition { it.chapter.id == chapterId }
             listOf(existing.firstOrNull() ?: toAdd) + others
         }
-        startDownloads()
+        startDownloads(force = true)
     }
 
     private suspend fun downloadFromChapterId(chapterId: Long): Download? {
@@ -140,8 +141,9 @@ class DownloadManager(
      * @param autoStart whether to start the downloader after enqueing the chapters.
      */
     suspend fun downloadChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean = true) {
-        if (downloader.queueChapters(manga, chapters, autoStart)) {
-            startDownloads()
+        val queued = downloader.queueChapters(manga, chapters, autoStart)
+        if (queued || (autoStart && !downloader.isRunning && downloader.queueState.value.isNotEmpty())) {
+            startDownloads(force = true)
         }
     }
 
@@ -156,7 +158,7 @@ class DownloadManager(
             val chapterIds = downloads.mapTo(HashSet()) { it.chapter.id }
             downloads + queue.filter { it.chapter.id !in chapterIds }
         }
-        startDownloads()
+        startDownloads(force = true)
     }
 
     /**
