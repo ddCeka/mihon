@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.lifecycle.asFlow
+import androidx.work.BackoffPolicy
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
@@ -25,6 +26,7 @@ import mihon.app.di.AppGraph
 import mihon.core.metro.metroGraph
 import tachiyomi.domain.download.service.DownloadPreferences
 import tachiyomi.i18n.R
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -60,29 +62,46 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
     }
 
     override suspend fun doWork(): Result {
+        if (downloader.queueState.value.isEmpty()) {
+            return Result.success()
+        }
+
         var networkIssue = networkIssue()
         if (networkIssue != null) {
             downloader.stop(networkIssue)
             return Result.failure()
         }
 
-        if (!downloader.start()) return Result.failure()
-
-        try {
-            setForegroundSafely()
-
-            while (networkIssue == null && downloader.isRunning) {
-                delay(1.seconds)
-                networkIssue = networkIssue()
-            }
-        } finally {
-            // Stopped by WorkManager means already canceled, and taking the lock would then throw instead of stopping
-            if (downloader.isRunning && (networkIssue != null || isStopped)) {
-                withContext(NonCancellable) { downloader.stop(networkIssue) }
-            }
+        if (downloader.isRunning) {
+            return Result.success()
         }
 
-        return Result.success()
+        repeat(3) { attempt ->
+            if (downloader.start()) {
+                try {
+                    setForegroundSafely()
+
+                    while (networkIssue == null && downloader.isRunning) {
+                        delay(1.seconds)
+                        networkIssue = networkIssue()
+                    }
+                    return Result.success()
+                } finally {
+                    // Stopped by WorkManager means already canceled, and taking the lock would then throw instead of stopping
+                    if (downloader.isRunning && (networkIssue != null || isStopped)) {
+                        withContext(NonCancellable) { downloader.stop(networkIssue) }
+                    }
+                }
+            }
+
+            if (downloader.isRunning) {
+                return Result.success()
+            }
+
+            delay((attempt + 1).seconds)
+        }
+
+        return Result.retry()
     }
 
     private fun networkIssue(): String? {
@@ -98,12 +117,17 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
     companion object {
         private const val TAG = "Downloader"
 
-        fun start(context: Context) {
+        fun start(context: Context, force: Boolean = false) {
             val request = OneTimeWorkRequestBuilder<DownloadWorker>()
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.SECONDS)
                 .addTag(TAG)
                 .build()
             WorkManager.getInstance(context)
-                .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)
+                .enqueueUniqueWork(
+                    TAG,
+                    if (force) ExistingWorkPolicy.REPLACE else ExistingWorkPolicy.KEEP,
+                    request,
+                )
         }
 
         fun isRunningFlow(context: Context): Flow<Boolean> {
