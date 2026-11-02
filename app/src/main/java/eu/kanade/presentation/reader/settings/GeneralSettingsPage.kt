@@ -114,4 +114,31 @@ internal fun ColumnScope.GeneralPage(viewModel: ReaderSettingsViewModel) {
         label = stringResource(MR.strings.pref_page_transitions),
         pref = viewModel.preferences.pageTransitions,
     )
+
+    val autoscrollIntervalPref = viewModel.preferences.autoscrollInterval
+    val autoscrollInterval by autoscrollIntervalPref.collectAsState()
+
+    SliderItem(
+        value = autoscrollInterval.toInt().coerceIn(1, 30),
+        valueRange = 1..30,
+        label = stringResource(MR.strings.pref_autoscroll_interval),
+        valueString = stringResource(MR.strings.pref_autoscroll_interval_summary, autoscrollInterval.toInt()),
+        onChange = { autoscrollIntervalPref.set(it.toFloat()) },
+        pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+    )
+
+    CheckboxItem(
+        label = stringResource(MR.strings.pref_smooth_scroll),
+        pref = viewModel.preferences.smoothAutoScroll,
+    )
+
+    CheckboxItem(
+        label = stringResource(MR.strings.pref_autoscroll_gestures),
+        pref = viewModel.preferences.autoscrollGesturesEnabled,
+    )
+
+    CheckboxItem(
+        label = stringResource(MR.strings.pref_autoscroll_gesture_toasts),
+        pref = viewModel.preferences.autoscrollGestureToastsEnabled,
+    )
 }
