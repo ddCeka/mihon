@@ -933,6 +933,10 @@ class ReaderViewModel(
         mutableState.update { it.copy(dialog = null) }
     }
 
+    fun toggleAutoScroll(enabled: Boolean) {
+        mutableState.update { it.copy(autoScroll = enabled) }
+    }
+
     /**
      * Saves the image of the selected page on the pictures directory and notifies the UI of the result.
      * There's also a notification to allow sharing the image somewhere else or deleting it.
@@ -1097,6 +1101,7 @@ class ReaderViewModel(
         val currentPage: Int = -1,
         val dialog: Dialog? = null,
         val menuVisible: Boolean = false,
+        val autoScroll: Boolean = false,
     ) {
         val currentChapter: ReaderChapter?
             get() = viewerChapters?.currChapter
