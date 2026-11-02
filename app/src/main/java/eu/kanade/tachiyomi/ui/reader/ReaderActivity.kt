@@ -60,7 +60,9 @@ import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.zacsweers.metro.Inject
@@ -95,6 +97,8 @@ import eu.kanade.tachiyomi.ui.reader.viewer.LocalPageColorFilter
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.Action
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.readerBackgroundColor
@@ -102,12 +106,15 @@ import eu.kanade.tachiyomi.util.system.toShareIntent
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import logcat.LogPriority
@@ -119,6 +126,7 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.collectAsState
+import kotlin.time.Duration.Companion.seconds
 
 class ReaderActivity : BaseActivity() {
 
@@ -328,6 +336,7 @@ class ReaderActivity : BaseActivity() {
         )
 
         setMenuVisibility(viewModel.state.value.menuVisible)
+        enableAutoScroll()
 
         // Finish when incognito mode is disabled
         preferences.incognitoMode.changes()
@@ -603,6 +612,8 @@ class ReaderActivity : BaseActivity() {
                 menuToggleToast = toast(if (enabled) MR.strings.on else MR.strings.off)
             },
             onClickSettings = viewModel::openSettingsDialog,
+            isAutoScroll = state.autoScroll,
+            onToggleAutoScroll = { viewModel.toggleAutoScroll(!state.autoScroll) },
         )
     }
 
@@ -631,6 +642,15 @@ class ReaderActivity : BaseActivity() {
 
         // Destroy previous viewer if there was one
         prevViewer?.destroy()
+        (newViewer as? WebtoonViewer)?.let { webtoon ->
+            webtoon.setAutoScrollGesturesEnabled(readerPreferences.autoscrollGesturesEnabled.get())
+            webtoon.setAutoScrollGestureToastsEnabled(readerPreferences.autoscrollGestureToastsEnabled.get())
+            webtoon.syncAutoScrollSettings(
+                enabled = viewModel.state.value.autoScroll,
+                interval = readerPreferences.autoscrollInterval.get().toDouble().seconds,
+                forceInterval = true,
+            )
+        }
         viewerFlow.value = newViewer
 
         if (readerPreferences.showReadingMode.get()) {
@@ -870,6 +890,73 @@ class ReaderActivity : BaseActivity() {
             else -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
         }
         window.attributes = window.attributes.apply { screenBrightness = readerBrightness }
+    }
+
+    private fun enableAutoScroll() {
+        readerPreferences.autoscrollGesturesEnabled.changes()
+            .distinctUntilChanged()
+            .onEach { enabled ->
+                (viewer as? WebtoonViewer)?.setAutoScrollGesturesEnabled(enabled)
+            }
+            .launchIn(lifecycleScope)
+
+        readerPreferences.autoscrollGestureToastsEnabled.changes()
+            .distinctUntilChanged()
+            .onEach { enabled ->
+                (viewer as? WebtoonViewer)?.setAutoScrollGestureToastsEnabled(enabled)
+            }
+            .launchIn(lifecycleScope)
+
+        readerPreferences.autoscrollInterval.changes()
+            .combine(viewModel.state.map { it.autoScroll }.distinctUntilChanged()) { interval, enabled ->
+                interval.toDouble() to enabled
+            }
+            .mapLatest { (intervalFloat, enabled) ->
+                val interval = intervalFloat.seconds
+                (viewer as? WebtoonViewer)?.syncAutoScrollSettings(
+                    enabled = enabled,
+                    interval = interval,
+                    forceInterval = true,
+                )
+
+                if (!enabled) return@mapLatest
+
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    while (true) {
+                        if (!viewModel.state.value.menuVisible) {
+                            viewer?.let { v ->
+                                when (v) {
+                                    is PagerViewer -> {
+                                        v.moveForward()
+                                        delay(interval)
+                                    }
+                                    is WebtoonViewer -> {
+                                        v.syncAutoScrollSettings(enabled = true, interval = interval)
+                                        v.performAutoScrollStep(readerPreferences.smoothAutoScroll.get())
+                                        delayAutoScroll(v.autoScrollDelayMillis(), v)
+                                    }
+                                    else -> delay(100)
+                                }
+                            } ?: delay(100)
+                        } else {
+                            delay(100)
+                        }
+                    }
+                }
+            }
+            .launchIn(lifecycleScope)
+    }
+
+    private suspend fun delayAutoScroll(durationMillis: Long, viewer: WebtoonViewer) {
+        var remaining = durationMillis
+        while (remaining > 0) {
+            val slice = remaining.coerceAtMost(100L)
+            delay(slice)
+            remaining -= slice
+            if (viewer.consumeAutoScrollDelayInterrupt()) {
+                break
+            }
+        }
     }
 }
 
