@@ -67,6 +67,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Remove firebase dependencies
 
 ### Fixed
+- Fix queued downloads and retry stalled worker starts
 - Fix java lock usage warning
 - Fix rich text and glance widget compiler warning
 - Fix splash lag on Android 12 and below
