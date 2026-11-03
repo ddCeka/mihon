@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add delete temporary files action to download queue
 - Add Automatic scroll in reader
 - Add Spooky theme
 - Add a custom DNS over HTTPS provider
