@@ -93,6 +93,12 @@ class DownloadQueueViewModel(
         }
     }
 
+    fun deleteTemporaryFiles(download: Download) {
+        viewModelScope.launch {
+            downloadManager.deleteTemporaryFiles(download)
+        }
+    }
+
     /**
      * Sorts the downloads of every section by [selector].
      */
