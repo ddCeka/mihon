@@ -1,9 +1,13 @@
 package eu.kanade.presentation.history.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -11,8 +15,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
+import tachiyomi.domain.history.model.HistoryDeletionRange
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.LabeledCheckbox
 import tachiyomi.presentation.core.components.material.padding
@@ -62,22 +69,45 @@ fun HistoryDeleteDialog(
 @Composable
 fun HistoryDeleteAllDialog(
     onDismissRequest: () -> Unit,
-    onDelete: () -> Unit,
+    onDelete: (HistoryDeletionRange) -> Unit,
 ) {
+    var selectedRange by remember { mutableStateOf(HistoryDeletionRange.LAST_HOUR) }
+    val ranges = listOf(
+        HistoryDeletionRange.LAST_HOUR to MR.strings.history_delete_last_hour,
+        HistoryDeletionRange.TODAY_AND_YESTERDAY to MR.strings.history_delete_today_and_yesterday,
+        HistoryDeletionRange.EVERYTHING to MR.strings.history_delete_everything,
+    )
+
     AlertDialog(
         title = {
-            Text(text = stringResource(MR.strings.action_remove_everything))
+            Text(text = stringResource(MR.strings.pref_clear_history))
         },
         text = {
-            Text(text = stringResource(MR.strings.clear_history_confirmation))
+            Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small)) {
+                Text(text = stringResource(MR.strings.history_delete_range_description))
+                ranges.forEach { (range, label) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedRange = range },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = selectedRange == range,
+                            onClick = { selectedRange = range },
+                        )
+                        Text(text = stringResource(label))
+                    }
+                }
+            }
         },
         onDismissRequest = onDismissRequest,
         confirmButton = {
             TextButton(onClick = {
-                onDelete()
+                onDelete(selectedRange)
                 onDismissRequest()
             }) {
-                Text(text = stringResource(MR.strings.action_ok))
+                Text(text = stringResource(MR.strings.action_remove))
             }
         },
         dismissButton = {
