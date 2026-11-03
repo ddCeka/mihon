@@ -261,6 +261,10 @@ class DownloadManager(
         downloader.dequeue(downloads.map { it.chapter })
     }
 
+    suspend fun deleteTemporaryFiles(download: Download) {
+        downloader.deleteTemporaryFiles(download)
+    }
+
     /**
      * Deletes the directories of a list of downloaded chapters.
      *

@@ -72,6 +72,7 @@ fun DownloadQueueList(
     onMoveSeries: (Download, toTop: Boolean) -> Unit,
     onCancel: (Download) -> Unit,
     onCancelSeries: (Download) -> Unit,
+    onDeleteTemporaryFiles: (Download) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val sectionsState = remember { sections.toMutableStateList() }
@@ -190,6 +191,7 @@ fun DownloadQueueList(
                             onMoveSeries = { toTop -> onMoveSeries(download, toTop) },
                             onCancel = { onCancel(download) },
                             onCancelSeries = { onCancelSeries(download) },
+                            onDeleteTemporaryFiles = { onDeleteTemporaryFiles(download) },
                         )
                     }
                 }
@@ -307,6 +309,7 @@ private fun ReorderableCollectionItemScope.DownloadQueueItem(
     onMoveSeries: (toTop: Boolean) -> Unit,
     onCancel: () -> Unit,
     onCancelSeries: () -> Unit,
+    onDeleteTemporaryFiles: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val progress by remember(download) { download.pagesProgressFlow() }.collectAsState(null)
@@ -370,6 +373,7 @@ private fun ReorderableCollectionItemScope.DownloadQueueItem(
                 onMoveSeries = onMoveSeries,
                 onCancel = onCancel,
                 onCancelSeries = onCancelSeries,
+                onDeleteTemporaryFiles = onDeleteTemporaryFiles,
             )
         }
     }
@@ -397,6 +401,7 @@ private fun DownloadQueueItemMenu(
     onMoveSeries: (toTop: Boolean) -> Unit,
     onCancel: () -> Unit,
     onCancelSeries: () -> Unit,
+    onDeleteTemporaryFiles: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val closeMenu = { expanded = false }
@@ -438,6 +443,13 @@ private fun DownloadQueueItemMenu(
                 onClick = {
                     closeMenu()
                     onMoveSeries(false)
+                },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(MR.strings.action_delete_temporary_files)) },
+                onClick = {
+                    closeMenu()
+                    onDeleteTemporaryFiles()
                 },
             )
             DropdownMenuItem(
