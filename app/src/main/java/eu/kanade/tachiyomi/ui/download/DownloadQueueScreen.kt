@@ -58,7 +58,7 @@ fun DownloadQueueScreen() {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     var fabExpanded by remember { mutableStateOf(true) }
     val nestedScrollConnection = remember {
-        // All this lines just for fab state :/
+        // All this lines just for fab state :/ yeah fuck that
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 fabExpanded = available.y >= 0
@@ -232,6 +232,7 @@ fun DownloadQueueScreen() {
             onMoveSeries = viewModel::moveSeries,
             onCancel = { viewModel.cancel(listOf(it)) },
             onCancelSeries = viewModel::cancelSeries,
+            onDeleteTemporaryFiles = viewModel::deleteTemporaryFiles,
             modifier = Modifier.nestedScroll(nestedScrollConnection),
         )
     }
