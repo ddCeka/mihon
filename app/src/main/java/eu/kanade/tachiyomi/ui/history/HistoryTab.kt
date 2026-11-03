@@ -25,6 +25,7 @@ import mihon.core.navigation.MangaRoute
 import mihon.feature.migration.dialog.MigrateMangaDialog
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.domain.chapter.model.Chapter
+import tachiyomi.domain.history.model.HistoryDeletionRange
 import tachiyomi.i18n.MR
 
 @Composable
