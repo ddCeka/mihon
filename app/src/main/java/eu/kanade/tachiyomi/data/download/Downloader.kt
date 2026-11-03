@@ -834,6 +834,37 @@ class Downloader(
         removeFromQueue(chapters)
     }
 
+    /**
+     * Deletes only the temporary files associated with [download].
+     * Pauses and waits for the downloader first so it cannot still be writing to those files.
+     */
+    suspend fun deleteTemporaryFiles(download: Download) = lock.withLock {
+        val wasRunning = isRunning
+        if (wasRunning) pauseLocked()
+
+        val previousJob = downloaderJob
+        try {
+            withContext(NonCancellable) { previousJob?.join() }
+
+            withContext(Dispatchers.IO) {
+                val mangaDir = provider.findMangaDir(download.manga.title, download.source)
+                    ?: return@withContext
+                val chapterDirName = provider.getChapterDirName(
+                    download.chapter.name,
+                    download.chapter.scanlator,
+                    download.chapter.url,
+                )
+
+                mangaDir.findFile(chapterDirName + TMP_DIR_SUFFIX)?.delete()
+                mangaDir.findFile("$chapterDirName.cbz$TMP_DIR_SUFFIX")?.delete()
+            }
+        } finally {
+            if (wasRunning) {
+                if (queueState.value.isEmpty()) stopLocked() else startLocked()
+            }
+        }
+    }
+
     private suspend inline fun editQueue(edit: () -> Unit) = lock.withLock {
         val wasRunning = isRunning
         if (wasRunning) pauseLocked()
