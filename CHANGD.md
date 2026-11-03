@@ -42,6 +42,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add onboarding permissions request on permissions step
 
 ### Changed
+- Refactor floating bottom navigation
 - Revert Remove the option to split tall images when downloading
 - Suppress null-object warning in download notifications
 - Changed app update check to no more than once a week
