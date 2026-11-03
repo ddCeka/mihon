@@ -39,6 +39,11 @@ WHERE manga_id = :mangaId;
 removeAllHistory:
 DELETE FROM history;
 
+removeHistoryInRange:
+DELETE FROM history
+WHERE read_at >= :startInclusive
+  AND read_at < :endExclusive;
+
 removeResettedHistory:
 DELETE FROM history
 WHERE read_at IS NULL;

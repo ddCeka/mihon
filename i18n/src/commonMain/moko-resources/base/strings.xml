@@ -933,6 +933,10 @@
     <string name="pref_clear_history">Clear history</string>
     <string name="clear_history_completed">History deleted</string>
     <string name="clear_history_confirmation">Are you sure? All history will be lost.</string>
+    <string name="history_delete_range_description">Choose which read history to permanently delete:</string>
+    <string name="history_delete_last_hour">Last hour</string>
+    <string name="history_delete_today_and_yesterday">Today and yesterday</string>
+    <string name="history_delete_everything">Everything</string>
 
     <!-- Source Screen -->
     <string name="source_empty_screen">No source found</string>

@@ -47,6 +47,7 @@ import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.history.interactor.GetHistory
 import tachiyomi.domain.history.interactor.GetNextChapters
 import tachiyomi.domain.history.interactor.RemoveHistory
+import tachiyomi.domain.history.model.HistoryDeletionRange
 import tachiyomi.domain.history.model.HistoryWithRelations
 import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.manga.interactor.GetDuplicateLibraryManga
@@ -161,9 +162,9 @@ class HistoryViewModel(
         }
     }
 
-    fun removeAllHistory() {
+    fun removeAllHistory(range: HistoryDeletionRange) {
         viewModelScope.launch {
-            val result = removeHistory.awaitAll()
+            val result = removeHistory.await(range)
             if (!result) return@launch
             _events.send(Event.HistoryCleared)
         }

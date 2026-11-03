@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import mihon.feature.migration.dialog.MigrateMangaDialog
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.domain.chapter.model.Chapter
+import tachiyomi.domain.history.model.HistoryDeletionRange
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 

@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import tachiyomi.domain.history.model.History
 import tachiyomi.domain.history.model.HistoryUpdate
 import tachiyomi.domain.history.model.HistoryWithRelations
+import kotlin.time.Instant
 
 interface HistoryRepository {
 
@@ -24,6 +25,8 @@ interface HistoryRepository {
     suspend fun deleteAllHistory(): Boolean
 
     suspend fun deleteResetHistory()
+
+    suspend fun deleteHistoryInRange(startInclusive: Instant, endExclusive: Instant): Boolean
 
     suspend fun upsertHistory(historyUpdate: HistoryUpdate)
 }
