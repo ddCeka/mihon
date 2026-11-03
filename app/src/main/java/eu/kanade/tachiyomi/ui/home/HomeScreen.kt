@@ -2,8 +2,17 @@ package eu.kanade.tachiyomi.ui.home
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -18,8 +27,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
@@ -31,6 +43,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
+import eu.kanade.presentation.components.FloatingNavBar
+import eu.kanade.presentation.components.FloatingNavItem
 import eu.kanade.presentation.util.Screen
 import eu.kanade.presentation.util.isTabletUi
 import eu.kanade.tachiyomi.ui.browse.BrowseTab
@@ -84,12 +98,14 @@ object HomeScreen : Screen() {
                 val navigationSuiteType = if (tabletUi) {
                     NavigationSuiteType.NavigationRail
                 } else {
-                    NavigationSuiteType.NavigationBar
+                    NavigationSuiteType.None
                 }
                 val navigationSuiteState = rememberNavigationSuiteScaffoldState()
+                var floatingBarVisible by remember { mutableStateOf(true) }
                 LaunchedEffect(navigationSuiteState, tabletUi) {
                     if (tabletUi) navigationSuiteState.show()
                     showBottomNavEvent.receiveAsFlow().collectLatest { show ->
+                        floatingBarVisible = tabletUi || show
                         if (tabletUi || show) {
                             navigationSuiteState.show()
                         } else {
@@ -110,18 +126,32 @@ object HomeScreen : Screen() {
                         TABS.fastForEach { NavigationSuiteItem(it, navigationSuiteType) }
                     },
                 ) {
-                    AnimatedContent(
-                        targetState = tabNavigator.current,
-                        transitionSpec = {
-                            materialFadeThroughIn(
-                                initialScale = 1f,
-                                durationMillis = TabFadeDuration,
-                            ) togetherWith materialFadeThroughOut(durationMillis = TabFadeDuration)
-                        },
-                        label = "tabContent",
-                    ) {
-                        tabNavigator.saveableState(key = "currentTab", it) {
-                            it.Content()
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        AnimatedContent(
+                            targetState = tabNavigator.current,
+                            modifier = Modifier.weight(1f),
+                            transitionSpec = {
+                                materialFadeThroughIn(
+                                    initialScale = 1f,
+                                    durationMillis = TabFadeDuration,
+                                ) togetherWith materialFadeThroughOut(durationMillis = TabFadeDuration)
+                            },
+                            label = "tabContent",
+                        ) {
+                            tabNavigator.saveableState(key = "currentTab", it) {
+                                it.Content()
+                            }
+                        }
+                        if (!tabletUi) {
+                            AnimatedVisibility(
+                                visible = floatingBarVisible,
+                                enter = expandVertically() + fadeIn(),
+                                exit = shrinkVertically() + fadeOut(),
+                            ) {
+                                FloatingNavBar(modifier = Modifier.fillMaxWidth()) {
+                                    TABS.fastForEach { FloatingNavigationItem(it) }
+                                }
+                            }
                         }
                     }
                 }
@@ -163,6 +193,32 @@ object HomeScreen : Screen() {
                 }
             }
         }
+    }
+
+    @Composable
+    private fun RowScope.FloatingNavigationItem(tab: eu.kanade.presentation.util.Tab) {
+        val tabNavigator = LocalTabNavigator.current
+        val navigator = LocalNavigator.currentOrThrow
+        val scope = rememberCoroutineScope()
+        val selected = tabNavigator.current::class == tab::class
+        FloatingNavItem(
+            selected = selected,
+            onClick = {
+                if (!selected) {
+                    tabNavigator.current = tab
+                } else {
+                    scope.launch { tab.onReselect(navigator) }
+                }
+            },
+            icon = {
+                Icon(
+                    painter = tab.options.icon!!,
+                    contentDescription = tab.options.title,
+                )
+            },
+            label = tab.options.title,
+            badge = tabBadge(tab),
+        )
     }
 
     @Composable
