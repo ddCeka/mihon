@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add options to delete history in time range
 - Add delete temporary files action to download queue
 - Add Spooky theme
 - Add display chapter number in the continue reading button
