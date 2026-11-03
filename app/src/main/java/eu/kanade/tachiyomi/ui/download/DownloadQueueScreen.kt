@@ -236,6 +236,7 @@ object DownloadQueueScreen : Screen() {
                 onMoveSeries = viewModel::moveSeries,
                 onCancel = { viewModel.cancel(listOf(it)) },
                 onCancelSeries = viewModel::cancelSeries,
+                onDeleteTemporaryFiles = viewModel::deleteTemporaryFiles,
                 modifier = Modifier.nestedScroll(nestedScrollConnection),
             )
         }
