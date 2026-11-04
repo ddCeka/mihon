@@ -14,6 +14,7 @@ data class UpdatesWithRelations(
     val bookmark: Boolean,
     val lastPageRead: Int,
     val sourceId: Long,
+    val dateUpload: Instant?,
     val dateFetch: Instant,
     val coverData: MangaCover,
 )
