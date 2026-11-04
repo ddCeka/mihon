@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add Automatic scroll in reader
 - Add a custom DNS over HTTPS provider
 - Add option to group multiple chapters of an entry
 - Add options to delete history in time range
