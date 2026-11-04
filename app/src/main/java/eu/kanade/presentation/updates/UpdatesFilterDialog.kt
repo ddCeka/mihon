@@ -47,6 +47,7 @@ fun UpdatesFilterDialog(
         tabTitles = listOf(
             stringResource(MR.strings.action_filter),
             stringResource(MR.strings.categories),
+            stringResource(MR.strings.action_display),
         ),
     ) { page ->
         Column(
@@ -57,6 +58,7 @@ fun UpdatesFilterDialog(
             when (page) {
                 0 -> FilterSheet(viewModel = viewModel)
                 1 -> CategoryFilterSheet(viewModel = viewModel)
+                2 -> DisplayPage(viewModel = viewModel)
             }
         }
     }
@@ -170,5 +172,33 @@ private fun ColumnScope.CategoryFilterSheet(
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun ColumnScope.DisplayPage(
+    viewModel: UpdatesSettingsViewModel,
+) {
+    val groupChapters by viewModel.updatesPreferences.groupChapters.collectAsState()
+    fun toggleChapterGrouping() = viewModel.updatesPreferences.groupChapters.getAndSet { !it }
+
+    Row(
+        modifier = Modifier
+            .clickable { toggleChapterGrouping() }
+            .fillMaxWidth()
+            .padding(horizontal = SettingsItemsPaddings.Horizontal),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = stringResource(MR.strings.action_group_chapter_updates),
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+
+        Switch(
+            checked = groupChapters,
+            onCheckedChange = { toggleChapterGrouping() },
+        )
     }
 }
