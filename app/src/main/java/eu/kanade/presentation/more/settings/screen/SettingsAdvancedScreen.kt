@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.network.PREF_DOH_ADGUARD
 import eu.kanade.tachiyomi.network.PREF_DOH_ALIDNS
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.network.PREF_DOH_CONTROLD
+import eu.kanade.tachiyomi.network.PREF_DOH_CUSTOM
 import eu.kanade.tachiyomi.network.PREF_DOH_DNSPOD
 import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
 import eu.kanade.tachiyomi.network.PREF_DOH_MULLVAD
@@ -42,6 +43,7 @@ import eu.kanade.tachiyomi.network.PREF_DOH_NJALLA
 import eu.kanade.tachiyomi.network.PREF_DOH_QUAD101
 import eu.kanade.tachiyomi.network.PREF_DOH_QUAD9
 import eu.kanade.tachiyomi.network.PREF_DOH_SHECAN
+import eu.kanade.tachiyomi.network.parseDohCustomUrl
 import eu.kanade.tachiyomi.ui.more.OnboardingScreen
 import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.isDebugBuildType
@@ -209,6 +211,7 @@ object SettingsAdvancedScreen : SearchableSettings {
 
         val userAgentPref = networkPreferences.defaultUserAgent
         val userAgent by userAgentPref.collectAsState()
+        val dohProvider by networkPreferences.dohProvider.collectAsState()
 
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.label_network),
@@ -246,6 +249,7 @@ object SettingsAdvancedScreen : SearchableSettings {
                     preference = networkPreferences.dohProvider,
                     entries = mapOf(
                         -1 to stringResource(MR.strings.disabled),
+                        PREF_DOH_CUSTOM to stringResource(MR.strings.pref_dns_over_https_custom),
                         PREF_DOH_CLOUDFLARE to "Cloudflare",
                         PREF_DOH_GOOGLE to "Google",
                         PREF_DOH_ADGUARD to "AdGuard",
@@ -263,6 +267,20 @@ object SettingsAdvancedScreen : SearchableSettings {
                     onValueChanged = {
                         context.toast(MR.strings.requires_app_restart)
                         true
+                    },
+                ),
+                Preference.PreferenceItem.EditTextPreference(
+                    preference = networkPreferences.dohProviderCustom,
+                    title = stringResource(MR.strings.pref_doh_provider_custom),
+                    visible = dohProvider == PREF_DOH_CUSTOM,
+                    onValueChanged = { value ->
+                        if (parseDohCustomUrl(value) == null) {
+                            context.toast(MR.strings.error_doh_provider_custom_invalid)
+                            false
+                        } else {
+                            context.toast(MR.strings.requires_app_restart)
+                            true
+                        }
                     },
                 ),
                 Preference.PreferenceItem.EditTextPreference(
