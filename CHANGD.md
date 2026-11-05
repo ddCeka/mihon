@@ -62,6 +62,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Improve performance by reducing unnecessary media scanning
 
 ### Removed
+- Remove unread dot indicator from chapter and updates lists
 - Remove configuration options to e-ink page flashes
 - Revert reader tap-zone scroll suppression
 - Remove discord bloat
