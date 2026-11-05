@@ -259,6 +259,8 @@ class Downloader(
                 }
 
                 activeDownloadsFlow.collectLatest { activeDownloads ->
+                    notifier.setActiveDownloads(activeDownloads)
+
                     val activeSources = activeDownloads.map { it.source }
                     val sourceJobsToStop = sourceJobs.filter { it.key !in activeSources }
                     sourceJobsToStop.forEach { (source, job) ->
