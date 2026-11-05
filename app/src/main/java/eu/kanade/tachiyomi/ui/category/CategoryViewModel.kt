@@ -28,6 +28,7 @@ import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.category.interactor.RenameCategory
 import tachiyomi.domain.category.interactor.ReorderCategory
 import tachiyomi.domain.category.model.Category
+import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.i18n.MR
 import kotlin.time.Duration.Companion.seconds
 
@@ -41,6 +42,7 @@ class CategoryViewModel(
     private val deleteCategory: DeleteCategory,
     private val reorderCategory: ReorderCategory,
     private val renameCategory: RenameCategory,
+    private val libraryPreferences: LibraryPreferences,
 ) : ViewModel() {
 
     private val _events: Channel<CategoryEvent> = Channel()
@@ -50,10 +52,12 @@ class CategoryViewModel(
 
     val state: StateFlow<CategoryScreenState> = combine(
         getCategories.subscribe(),
+        libraryPreferences.hiddenLibraryCategories.changes(),
         dialog,
-    ) { categories, dialog ->
+    ) { categories, hiddenCategoryIds, dialog ->
         CategoryScreenState.Success(
             categories = categories.filterNot(Category::isSystemCategory),
+            hiddenCategoryIds = hiddenCategoryIds,
             dialog = dialog,
         )
     }
@@ -96,6 +100,18 @@ class CategoryViewModel(
         }
     }
 
+    fun toggleHidden(category: Category) {
+        val categoryId = category.id.toString()
+        val hiddenCategoryIds = libraryPreferences.hiddenLibraryCategories.get()
+        libraryPreferences.hiddenLibraryCategories.set(
+            if (categoryId in hiddenCategoryIds) {
+                hiddenCategoryIds - categoryId
+            } else {
+                hiddenCategoryIds + categoryId
+            },
+        )
+    }
+
     fun showDialog(dialog: CategoryDialog) {
         this.dialog.update { dialog }
     }
@@ -124,6 +140,7 @@ sealed interface CategoryScreenState {
     @Immutable
     data class Success(
         val categories: List<Category>,
+        val hiddenCategoryIds: Set<String> = emptySet(),
         val dialog: CategoryDialog? = null,
     ) : CategoryScreenState {
 
