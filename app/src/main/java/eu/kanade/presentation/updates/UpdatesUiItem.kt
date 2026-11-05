@@ -59,7 +59,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.updates.UpdatesItem
 import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.roundedfilled.Bookmark
-import mihon.icons.materialsymbols.roundedfilled.Circle
 import tachiyomi.domain.updates.model.UpdatesWithRelations
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.ListGroupHeader
@@ -234,16 +233,6 @@ fun UpdatesUiItem(
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         var textHeight by remember { mutableIntStateOf(0) }
-                        if (!update.read) {
-                            Icon(
-                                imageVector = MaterialSymbols.RoundedFilled.Circle,
-                                contentDescription = stringResource(MR.strings.unread),
-                                modifier = Modifier
-                                    .height(8.dp)
-                                    .padding(end = 4.dp),
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        }
                         if (update.bookmark) {
                             Icon(
                                 imageVector = MaterialSymbols.RoundedFilled.Bookmark,
@@ -545,16 +534,6 @@ private fun GroupedChapterItem(
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     var textHeight by remember { mutableIntStateOf(0) }
-                    if (!update.read) {
-                        Icon(
-                            imageVector = MaterialSymbols.RoundedFilled.Circle,
-                            contentDescription = stringResource(MR.strings.unread),
-                            modifier = Modifier
-                                .height(8.dp)
-                                .padding(end = 4.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
                     if (update.bookmark) {
                         Icon(
                             imageVector = MaterialSymbols.RoundedFilled.Bookmark,
