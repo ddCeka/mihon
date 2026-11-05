@@ -8,13 +8,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
 import eu.kanade.presentation.more.settings.Preference
-import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.authenticate
 import kotlinx.serialization.Serializable
 import mihon.app.di.appGraph
 import mihon.core.navigation.ExtensionStoresRoute
 import mihon.core.navigation.LocalNavigator
 import mihon.domain.extension.model.ContentWarning
-import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
@@ -75,32 +73,11 @@ data object SettingsBrowseScreen : SearchableSettings {
                                 .takeUnless { it.isBlank() }
                                 ?: stringResource(MR.strings.none)
                         },
-                        onValueChanged = { newValue ->
-                            val added = newValue - sourcePreferences.enabledContentWarnings.get()
-                            if (added.any { it != ContentWarning.SAFE }) {
-                                (context as FragmentActivity).authenticate(
-                                    title = context.stringResource(MR.strings.pref_allowed_content_warnings),
-                                )
-                            } else {
-                                true
-                            }
-                        },
                     ),
                     Preference.PreferenceItem.SwitchPreference(
                         preference = sourcePreferences.applyContentWarningsToInstalled,
                         title = stringResource(MR.strings.pref_apply_content_warnings_to_installed),
                         subtitle = stringResource(MR.strings.pref_apply_content_warnings_to_installed_summary),
-                        onValueChanged = { newValue ->
-                            if (newValue) {
-                                true
-                            } else {
-                                (context as FragmentActivity).authenticate(
-                                    title = context.stringResource(
-                                        MR.strings.pref_apply_content_warnings_to_installed,
-                                    ),
-                                )
-                            }
-                        },
                     ),
                     Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.content_warnings_info)),
                 ),
