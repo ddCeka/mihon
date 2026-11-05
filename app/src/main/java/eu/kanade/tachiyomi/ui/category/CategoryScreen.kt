@@ -35,6 +35,7 @@ fun CategoryScreen() {
         state = successState,
         onClickCreate = { viewModel.showDialog(CategoryDialog.Create) },
         onClickRename = { viewModel.showDialog(CategoryDialog.Rename(it)) },
+        onToggleHidden = viewModel::toggleHidden,
         onClickDelete = { viewModel.showDialog(CategoryDialog.Delete(it)) },
         onChangeOrder = viewModel::changeOrder,
         navigateUp = navigator::pop,
