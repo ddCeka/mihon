@@ -40,6 +40,10 @@ object Notifications {
     const val ID_DOWNLOAD_CHAPTER_PAUSED = -203
     const val CHANNEL_DOWNLOADER_ERROR = "downloader_error_channel"
     const val ID_DOWNLOAD_CHAPTER_ERROR = -202
+    const val GROUP_DOWNLOADER_PROGRESS = "group_downloader_progress"
+
+    // Child progress notifications for individual chapters
+    const val CHILD_PROGRESS_NOTIFICATION_OFFSET = 1000
 
     /**
      * Notification channel and ids used by the library updater.
