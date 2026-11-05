@@ -35,6 +35,7 @@ fun CategoryScreen(
     onClickCreate: () -> Unit,
     onClickRename: (Category) -> Unit,
     onClickDelete: (Category) -> Unit,
+    onToggleHidden: (Category) -> Unit,
     onChangeOrder: (Category, Int) -> Unit,
     navigateUp: () -> Unit,
 ) {
@@ -68,6 +69,8 @@ fun CategoryScreen(
             paddingValues = paddingValues,
             onClickRename = onClickRename,
             onClickDelete = onClickDelete,
+            hiddenCategoryIds = state.hiddenCategoryIds,
+            onToggleHidden = onToggleHidden,
             onChangeOrder = onChangeOrder,
         )
     }
@@ -80,6 +83,8 @@ private fun CategoryContent(
     paddingValues: PaddingValues,
     onClickRename: (Category) -> Unit,
     onClickDelete: (Category) -> Unit,
+    hiddenCategoryIds: Set<String>,
+    onToggleHidden: (Category) -> Unit,
     onChangeOrder: (Category, Int) -> Unit,
 ) {
     val categoriesState = remember { categories.toMutableStateList() }
@@ -114,6 +119,8 @@ private fun CategoryContent(
                     category = category,
                     onRename = { onClickRename(category) },
                     onDelete = { onClickDelete(category) },
+                    isHidden = category.id.toString() in hiddenCategoryIds,
+                    onToggleHidden = { onToggleHidden(category) },
                 )
             }
         }

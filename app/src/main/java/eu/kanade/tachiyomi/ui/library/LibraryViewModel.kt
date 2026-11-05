@@ -146,17 +146,27 @@ class LibraryViewModel(
         .distinctUntilChanged()
         .flatMapLatest { needsTracks -> if (needsTracks) getTracksPerManga.subscribe() else flowOf(emptyMap()) }
 
+    private val categoryPreferences = combine(
+        getCategories.subscribe(),
+        libraryPreferences.hiddenLibraryCategories.changes(),
+    ) { categories, hiddenCategoryIds ->
+        CategoryPreferences(
+            categories = categories,
+            hiddenCategoryIds = hiddenCategoryIds,
+        )
+    }
+
     // Shared separately so search, selection and dialog changes still reach [state] before the
     // first query result
     private val library = combine(
         searchQuery.debounce(0.25.seconds),
-        getCategories.subscribe(),
+        categoryPreferences,
         getFavoritesFlow(),
         combine(tracks, getTrackingFiltersFlow(), libraryUpdateErrors.errors.changes()) { tracksMap, filters, errors ->
             Triple(tracksMap, filters, libraryUpdateErrors.ids(errors))
         },
         getLibraryItemPreferencesFlow(),
-    ) { searchQuery, categories, favorites, (tracksMap, trackingFilters, errorIds), itemPreferences ->
+    ) { searchQuery, categoryPreferences, favorites, (tracksMap, trackingFilters, errorIds), itemPreferences ->
         val showSystemCategory = favorites.any { it.libraryManga.categories.contains(0) }
         val markedFavorites = if (errorIds.isEmpty()) {
             favorites
@@ -177,7 +187,8 @@ class LibraryViewModel(
         LibraryData(
             isInitialized = true,
             showSystemCategory = showSystemCategory,
-            categories = categories,
+            categories = categoryPreferences.categories,
+            hiddenCategoryIds = categoryPreferences.hiddenCategoryIds,
             favorites = filteredFavorites,
             tracksMap = tracksMap,
             loggedInTrackerIds = trackingFilters.keys,
@@ -189,7 +200,11 @@ class LibraryViewModel(
             Library(
                 data = data,
                 groupedFavorites = data.favorites
-                    .applyGrouping(data.categories, data.showSystemCategory)
+                    .applyGrouping(
+                        categories = data.categories,
+                        showSystemCategory = data.showSystemCategory,
+                        hiddenCategoryIds = data.hiddenCategoryIds,
+                    )
                     .applySort(
                         data.favoritesById,
                         data.tracksMap,
@@ -226,6 +241,11 @@ class LibraryViewModel(
         val showCategoryTabs: Boolean,
         val showMangaCount: Boolean,
         val showMangaContinueButton: Boolean,
+    )
+
+    private data class CategoryPreferences(
+        val categories: List<Category>,
+        val hiddenCategoryIds: Set<String>,
     )
 
     private data class Library(
@@ -306,6 +326,7 @@ class LibraryViewModel(
     private fun List<LibraryItem>.applyGrouping(
         categories: List<Category>,
         showSystemCategory: Boolean,
+        hiddenCategoryIds: Set<String>,
     ): Map<Category, List</* LibraryItem */ Long>> {
         val groupCache = mutableMapOf</* Category */ Long, MutableList</* LibraryItem */ Long>>()
         forEach { item ->
@@ -313,7 +334,10 @@ class LibraryViewModel(
                 groupCache.getOrPut(categoryId) { mutableListOf() }.add(item.id)
             }
         }
-        return categories.filter { showSystemCategory || !it.isSystemCategory }
+        return categories.filter {
+            (showSystemCategory || !it.isSystemCategory) &&
+                (it.isSystemCategory || it.id.toString() !in hiddenCategoryIds)
+        }
             .associateWith { groupCache[it.id]?.toList().orEmpty() }
     }
 
@@ -826,6 +850,7 @@ class LibraryViewModel(
         val isInitialized: Boolean = false,
         val showSystemCategory: Boolean = false,
         val categories: List<Category> = emptyList(),
+        val hiddenCategoryIds: Set<String> = emptySet(),
         val favorites: List<LibraryItem> = emptyList(),
         val tracksMap: Map</* Manga */ Long, List<Track>> = emptyMap(),
         val loggedInTrackerIds: Set<Long> = emptySet(),
