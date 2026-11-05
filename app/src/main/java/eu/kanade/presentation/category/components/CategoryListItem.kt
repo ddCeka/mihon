@@ -16,6 +16,8 @@ import mihon.icons.materialsymbols.MaterialSymbols
 import mihon.icons.materialsymbols.rounded.Delete
 import mihon.icons.materialsymbols.rounded.DragHandle
 import mihon.icons.materialsymbols.rounded.Edit
+import mihon.icons.materialsymbols.roundedfilled.Visibility
+import mihon.icons.materialsymbols.roundedfilled.VisibilityOff
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import tachiyomi.domain.category.model.Category
 import tachiyomi.i18n.MR
@@ -27,6 +29,8 @@ fun ReorderableCollectionItemScope.CategoryListItem(
     category: Category,
     onRename: () -> Unit,
     onDelete: () -> Unit,
+    isHidden: Boolean,
+    onToggleHidden: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ElevatedCard(modifier = modifier) {
@@ -56,6 +60,22 @@ fun ReorderableCollectionItemScope.CategoryListItem(
                 Icon(
                     imageVector = MaterialSymbols.Rounded.Edit,
                     contentDescription = stringResource(MR.strings.action_rename_category),
+                )
+            }
+            IconButton(onClick = onToggleHidden) {
+                Icon(
+                    imageVector = if (isHidden) {
+                        MaterialSymbols.RoundedFilled.VisibilityOff
+                    } else {
+                        MaterialSymbols.RoundedFilled.Visibility
+                    },
+                    contentDescription = stringResource(
+                        if (isHidden) {
+                            MR.strings.action_show_category
+                        } else {
+                            MR.strings.action_hide_category
+                        },
+                    ),
                 )
             }
             IconButton(onClick = onDelete) {

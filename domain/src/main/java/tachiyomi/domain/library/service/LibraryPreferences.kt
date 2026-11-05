@@ -128,6 +128,11 @@ class LibraryPreferences(
 
     val defaultCategory: Preference<Int> = preferenceStore.getInt(DEFAULT_CATEGORY_PREF_KEY, -1)
 
+    val hiddenLibraryCategories: Preference<Set<String>> = preferenceStore.getStringSet(
+        "library_hidden_categories",
+        emptySet(),
+    )
+
     val lastUsedCategory: Preference<Int> = preferenceStore.getInt(Preference.appStateKey("last_used_category"), 0)
 
     val categoryTabs: Preference<Boolean> = preferenceStore.getBoolean("display_category_tabs", true)
