@@ -74,6 +74,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Remove firebase dependencies
 
 ### Fixed
+- Fix preference search highlighting when groups are hidden
 - Fix queued downloads and retry stalled worker starts
 - Fix java lock usage warning
 - Fix rich text and glance widget compiler warning
