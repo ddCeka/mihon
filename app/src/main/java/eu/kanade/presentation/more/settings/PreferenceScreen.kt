@@ -86,15 +86,20 @@ fun PreferenceScreen(
 }
 
 private fun List<Preference>.findHighlightedIndex(highlightKey: String): Int {
-    return flatMap {
-        if (it is Preference.PreferenceGroup) {
-            buildList<String?> {
-                add(it.title) // Header
-                addAll(it.preferenceItems.map { groupItem -> groupItem.title })
-                add(null) // Spacer
+    return flatMap { preference ->
+        when (preference) {
+            is Preference.PreferenceGroup -> {
+                if (!preference.visible) {
+                    emptyList()
+                } else {
+                    buildList<String?> {
+                        add(preference.title) // Header
+                        addAll(preference.preferenceItems.map { it.title })
+                        add(null) // Spacer
+                    }
+                }
             }
-        } else {
-            listOf(it.title)
+            is Preference.PreferenceItem<*, *> -> listOf(preference.title)
         }
     }.indexOfFirst { it == highlightKey }
 }
