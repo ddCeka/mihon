@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add grouped multi-chapter download notifications
 - Add option to group multiple chapters of an entry
 - Add options to delete history in time range
 - Add delete temporary files action to download queue
