@@ -147,7 +147,8 @@ class SettingsSearchScreen : Screen() {
                 listState = listState,
                 contentPadding = contentPadding,
             ) { result ->
-                SearchableSettings.highlightKey = result.highlightKey
+                SearchableSettings.highlightKey = null
+                SearchableSettings.highlightTarget = result.highlightTarget
                 navigator.replace(result.route)
             }
         }
@@ -223,7 +224,11 @@ private fun SearchResult(
 private fun search(index: List<SettingsData>, searchKey: String, isLtr: Boolean): List<SearchResultItem> {
     return index.asSequence()
         .flatMap { settingsData ->
-            fun result(title: String, categoryTitle: String?) = SearchResultItem(
+            fun result(
+                title: String,
+                categoryTitle: String?,
+                highlightTarget: PreferenceHighlightTarget,
+            ) = SearchResultItem(
                 route = settingsData.route,
                 title = title,
                 breadcrumbs = getLocalizedBreadcrumb(
@@ -231,7 +236,7 @@ private fun search(index: List<SettingsData>, searchKey: String, isLtr: Boolean)
                     node = categoryTitle,
                     isLtr = isLtr,
                 ),
-                highlightKey = title,
+                highlightTarget = highlightTarget,
             )
 
             fun Preference.PreferenceItem<*, *>.matches(): Boolean {
@@ -243,24 +248,54 @@ private fun search(index: List<SettingsData>, searchKey: String, isLtr: Boolean)
             }
 
             settingsData.contents.asSequence()
+                .withIndex()
                 // Only search from enabled prefs and one with valid title
-                .filter { it.visible && it.title.isNotBlank() }
-                .flatMap { p ->
+                .filter { (_, preference) -> preference.visible && preference.title.isNotBlank() }
+                .flatMap { (preferenceIndex, p) ->
                     when (p) {
                         is Preference.PreferenceGroup -> {
                             // A matching heading leads to the group itself, not to one of its items
                             val heading = if (p.title.contains(searchKey, true)) {
-                                sequenceOf(result(p.title, null))
+                                sequenceOf(
+                                    result(
+                                        p.title,
+                                        null,
+                                        PreferenceHighlightTarget(
+                                            preferenceIndex = preferenceIndex,
+                                            isGroupHeader = true,
+                                        ),
+                                    ),
+                                )
                             } else {
                                 emptySequence()
                             }
                             val items = p.preferenceItems.asSequence()
-                                .filter { it.visible && it.title.isNotBlank() && it.matches() }
-                                .map { result(it.title, p.title) }
+                                .withIndex()
+                                .filter { (_, item) -> item.visible && item.title.isNotBlank() && item.matches() }
+                                .map { (childIndex, item) ->
+                                    result(
+                                        item.title,
+                                        p.title,
+                                        PreferenceHighlightTarget(
+                                            preferenceIndex = preferenceIndex,
+                                            childIndex = childIndex,
+                                        ),
+                                    )
+                                }
                             heading + items
                         }
                         is Preference.PreferenceItem<*, *> -> {
-                            if (p.matches()) sequenceOf(result(p.title, null)) else emptySequence()
+                            if (p.matches()) {
+                                sequenceOf(
+                                    result(
+                                        p.title,
+                                        null,
+                                        PreferenceHighlightTarget(preferenceIndex = preferenceIndex),
+                                    ),
+                                )
+                            } else {
+                                emptySequence()
+                            }
                         }
                     }
                 }
@@ -316,5 +351,5 @@ private data class SearchResultItem(
     val route: VoyagerScreen,
     val title: String,
     val breadcrumbs: String,
-    val highlightKey: String,
+    val highlightTarget: PreferenceHighlightTarget,
 )
