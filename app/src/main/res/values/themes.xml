@@ -205,6 +205,46 @@
         <item name="colorSurfaceContainerLowest">@color/greenapple_surfaceContainerLowest</item>
     </style>
 
+    <!--== Gruvbox Theme ==-->
+    <style name="Theme.Tachiyomi.Gruvbox">
+        <!-- Theme Colors -->
+        <item name="colorPrimary">@color/gruvbox_primary</item>
+        <item name="colorOnPrimary">@color/gruvbox_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/gruvbox_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/gruvbox_onPrimaryContainer</item>
+        <item name="colorPrimaryInverse">@color/gruvbox_inversePrimary</item>
+        <item name="colorSecondary">@color/gruvbox_secondary</item>
+        <item name="colorOnSecondary">@color/gruvbox_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/gruvbox_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/gruvbox_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/gruvbox_tertiary</item>
+        <item name="colorOnTertiary">@color/gruvbox_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/gruvbox_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/gruvbox_onTertiaryContainer</item>
+        <item name="android:colorBackground">@color/gruvbox_background</item>
+        <item name="colorOnBackground">@color/gruvbox_onBackground</item>
+        <item name="colorSurface">@color/gruvbox_surface</item>
+        <item name="colorOnSurface">@color/gruvbox_onSurface</item>
+        <item name="colorSurfaceVariant">@color/gruvbox_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/gruvbox_onSurfaceVariant</item>
+        <item name="colorSurfaceInverse">@color/gruvbox_inverseSurface</item>
+        <item name="colorOnSurfaceInverse">@color/gruvbox_inverseOnSurface</item>
+        <item name="colorError">@color/gruvbox_error</item>
+        <item name="colorOnError">@color/gruvbox_onError</item>
+        <item name="colorErrorContainer">@color/gruvbox_errorContainer</item>
+        <item name="colorOnErrorContainer">@color/gruvbox_onErrorContainer</item>
+        <item name="colorOutline">@color/gruvbox_outline</item>
+        <item name="colorOutlineVariant">@color/gruvbox_outlineVariant</item>
+        <item name="scrimBackground">@color/gruvbox_scrim</item>
+        <item name="colorSurfaceBright">@color/gruvbox_surfaceBright</item>
+        <item name="colorSurfaceDim">@color/gruvbox_surfaceDim</item>
+        <item name="colorSurfaceContainer">@color/gruvbox_surfaceContainer</item>
+        <item name="colorSurfaceContainerHigh">@color/gruvbox_surfaceContainerHigh</item>
+        <item name="colorSurfaceContainerHighest">@color/gruvbox_surfaceContainerHighest</item>
+        <item name="colorSurfaceContainerLow">@color/gruvbox_surfaceContainerLow</item>
+        <item name="colorSurfaceContainerLowest">@color/gruvbox_surfaceContainerLowest</item>
+    </style>
+
     <!--== Lavender Theme ==-->
     <style name="Theme.Tachiyomi.Lavender">
         <!-- Theme Colors -->
