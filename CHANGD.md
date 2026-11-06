@@ -82,6 +82,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Remove the WebGPU reader and go back to the old image decoder
 
 ### Fixed
+- Fix settings search highlighting for duplicate preference titles
 - Fix preference search highlighting when groups are hidden
 - Fix queued downloads and retry stalled worker starts
 - Fix rich text and glance widget compiler warning
