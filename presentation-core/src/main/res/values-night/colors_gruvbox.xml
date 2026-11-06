@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gruvbox Dark Palette -->
+<resources>
+    <color name="gruvbox_primary">#E0A458</color>
+    <color name="gruvbox_onPrimary">#282828</color>
+    <color name="gruvbox_primaryContainer">#5A4630</color>
+    <color name="gruvbox_onPrimaryContainer">#FFE6BE</color>
+    <color name="gruvbox_secondary">#83A598</color>
+    <color name="gruvbox_onSecondary">#1D2021</color>
+    <color name="gruvbox_secondaryContainer">#354844</color>
+    <color name="gruvbox_onSecondaryContainer">#D8E8DE</color>
+    <color name="gruvbox_tertiary">#B8BB6A</color>
+    <color name="gruvbox_onTertiary">#282828</color>
+    <color name="gruvbox_tertiaryContainer">#45482C</color>
+    <color name="gruvbox_onTertiaryContainer">#E9EABF</color>
+    <color name="gruvbox_error">#FB6C5A</color>
+    <color name="gruvbox_onError">#282828</color>
+    <color name="gruvbox_errorContainer">#5C302B</color>
+    <color name="gruvbox_onErrorContainer">#FFDAD2</color>
+    <color name="gruvbox_background">#1D2021</color>
+    <color name="gruvbox_onBackground">#EBDBB2</color>
+    <color name="gruvbox_surface">#282828</color>
+    <color name="gruvbox_onSurface">#EBDBB2</color>
+    <color name="gruvbox_surfaceVariant">#3C3836</color>
+    <color name="gruvbox_onSurfaceVariant">#D5C4A1</color>
+    <color name="gruvbox_outline">#A89984</color>
+    <color name="gruvbox_outlineVariant">#504945</color>
+    <color name="gruvbox_scrim">#000000</color>
+    <color name="gruvbox_inverseSurface">#F2E5BC</color>
+    <color name="gruvbox_inverseOnSurface">#282828</color>
+    <color name="gruvbox_inversePrimary">#B86F32</color>
+    <color name="gruvbox_surfaceDim">#191B1C</color>
+    <color name="gruvbox_surfaceBright">#3A3634</color>
+    <color name="gruvbox_surfaceContainerLowest">#171819</color>
+    <color name="gruvbox_surfaceContainerLow">#222424</color>
+    <color name="gruvbox_surfaceContainer">#282828</color>
+    <color name="gruvbox_surfaceContainerHigh">#32302F</color>
+    <color name="gruvbox_surfaceContainerHighest">#3C3836</color>
+</resources>
