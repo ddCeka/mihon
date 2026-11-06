@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
+import eu.kanade.presentation.more.settings.screen.PreferenceHighlightTarget
 import eu.kanade.presentation.more.settings.screen.SearchableSettings
 import eu.kanade.presentation.more.settings.widget.PreferenceGroupHeader
 import kotlinx.coroutines.delay
@@ -29,15 +31,22 @@ fun PreferenceScreen(
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val state = rememberLazyListState()
-    val highlightKey = SearchableSettings.highlightKey
-    if (highlightKey != null) {
-        LaunchedEffect(Unit) {
-            val i = items.findHighlightedIndex(highlightKey)
+    val highlightTarget = SearchableSettings.highlightTarget
+    // Keep the title-based path for onboarding. Structural search targets take priority.
+    val highlightKey = if (highlightTarget == null) SearchableSettings.highlightKey else null
+    if (highlightTarget != null || highlightKey != null) {
+        LaunchedEffect(highlightTarget, highlightKey) {
+            val i = if (highlightTarget != null) {
+                items.findHighlightedIndex(highlightTarget)
+            } else {
+                items.findHighlightedIndex(highlightKey!!)
+            }
             if (i >= 0) {
                 delay(0.5.seconds)
                 state.animateScrollToItem(i)
             }
             SearchableSettings.highlightKey = null
+            SearchableSettings.highlightTarget = null
         }
     }
 
@@ -56,14 +65,24 @@ fun PreferenceScreen(
                         Column {
                             PreferenceGroupHeader(
                                 title = preference.title,
-                                highlighted = preference.title == highlightKey,
+                                highlighted = if (highlightTarget != null) {
+                                    highlightTarget.isGroupHeader &&
+                                        highlightTarget.preferenceIndex == i
+                                } else {
+                                    preference.title == highlightKey
+                                },
                             )
                         }
                     }
-                    items(preference.preferenceItems) { item ->
+                    itemsIndexed(preference.preferenceItems) { childIndex, item ->
                         PreferenceItem(
                             item = item,
                             highlightKey = highlightKey,
+                            highlighted = highlightTarget?.let {
+                                !it.isGroupHeader &&
+                                    it.preferenceIndex == i &&
+                                    it.childIndex == childIndex
+                            } == true,
                         )
                     }
                     item {
@@ -78,11 +97,58 @@ fun PreferenceScreen(
                     PreferenceItem(
                         item = preference,
                         highlightKey = highlightKey,
+                        highlighted = highlightTarget?.let {
+                            !it.isGroupHeader &&
+                                it.preferenceIndex == i &&
+                                it.childIndex == null
+                        } == true,
                     )
                 }
             }
         }
     }
+}
+
+private fun List<Preference>.findHighlightedIndex(target: PreferenceHighlightTarget): Int {
+    var lazyIndex = 0
+
+    forEachIndexed { preferenceIndex, preference ->
+        when (preference) {
+            is Preference.PreferenceGroup -> {
+                if (!preference.visible) return@forEachIndexed
+
+                if (target.preferenceIndex == preferenceIndex && target.isGroupHeader) {
+                    return lazyIndex
+                }
+                lazyIndex++ // Group header
+
+                preference.preferenceItems.forEachIndexed { childIndex, _ ->
+                    if (
+                        target.preferenceIndex == preferenceIndex &&
+                        !target.isGroupHeader &&
+                        target.childIndex == childIndex
+                    ) {
+                        return lazyIndex
+                    }
+                    lazyIndex++
+                }
+
+                if (preferenceIndex < lastIndex) lazyIndex++ // Spacer
+            }
+            is Preference.PreferenceItem<*, *> -> {
+                if (
+                    target.preferenceIndex == preferenceIndex &&
+                    !target.isGroupHeader &&
+                    target.childIndex == null
+                ) {
+                    return lazyIndex
+                }
+                lazyIndex++
+            }
+        }
+    }
+
+    return -1
 }
 
 private fun List<Preference>.findHighlightedIndex(highlightKey: String): Int {

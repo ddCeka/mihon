@@ -9,6 +9,15 @@ import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.PreferenceScaffold
 import eu.kanade.presentation.util.LocalBackPress
 
+/**
+ * Identifies a preference by its position in the settings structure, not by its localized title.
+ */
+data class PreferenceHighlightTarget(
+    val preferenceIndex: Int,
+    val childIndex: Int? = null,
+    val isGroupHeader: Boolean = false,
+)
+
 interface SearchableSettings : Screen {
 
     @Composable
@@ -39,5 +48,8 @@ interface SearchableSettings : Screen {
         // Set before showing the destination screen and reset after
         // See BasePreferenceWidget.highlightBackground
         var highlightKey: String? = null
+
+        // Search uses a structural target so duplicate localized titles remain unambiguous.
+        var highlightTarget: PreferenceHighlightTarget? = null
     }
 }

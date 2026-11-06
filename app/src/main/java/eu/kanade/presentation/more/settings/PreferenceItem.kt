@@ -43,17 +43,18 @@ val LocalPreferenceMinHeight = compositionLocalOf(structuralEqualityPolicy()) { 
 fun StatusWrapper(
     item: Preference.PreferenceItem<*, *>,
     highlightKey: String?,
+    highlighted: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val enabled = item.visible
-    val highlighted = item.title == highlightKey
+    val isHighlighted = highlighted || item.title == highlightKey
     AnimatedVisibility(
         visible = enabled,
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut(),
         content = {
             CompositionLocalProvider(
-                LocalPreferenceHighlighted provides highlighted,
+                LocalPreferenceHighlighted provides isHighlighted,
                 content = content,
             )
         },
@@ -64,11 +65,13 @@ fun StatusWrapper(
 internal fun PreferenceItem(
     item: Preference.PreferenceItem<*, *>,
     highlightKey: String?,
+    highlighted: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
     StatusWrapper(
         item = item,
         highlightKey = highlightKey,
+        highlighted = highlighted,
     ) {
         when (item) {
             is Preference.PreferenceItem.SwitchPreference -> {
