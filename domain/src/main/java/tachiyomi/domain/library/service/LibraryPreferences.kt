@@ -61,6 +61,11 @@ class LibraryPreferences(
         false,
     )
 
+    val continueReadingButtonOnLeft: Preference<Boolean> = preferenceStore.getBoolean(
+        "continue_reading_button_on_left",
+        false,
+    )
+
     val markDuplicateReadChapterAsRead: Preference<Set<String>> = preferenceStore.getStringSet(
         "mark_duplicate_read_chapter_read",
         emptySet(),
