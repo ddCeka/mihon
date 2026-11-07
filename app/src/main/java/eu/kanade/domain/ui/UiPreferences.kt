@@ -41,7 +41,7 @@ class UiPreferences(
 
     val tabletUiMode: Preference<TabletUiMode> = preferenceStore.getEnum("tablet_ui_mode", TabletUiMode.AUTOMATIC)
 
-    val imagesInDescription: Preference<Boolean> = preferenceStore.getBoolean("pref_render_images_description", true)
+    val imagesInDescription: Preference<Boolean> = preferenceStore.getBoolean("pref_render_images_description", false)
 
     companion object {
         fun dateFormat(format: String, locale: Locale): DateTimeFormatter = when (format) {
