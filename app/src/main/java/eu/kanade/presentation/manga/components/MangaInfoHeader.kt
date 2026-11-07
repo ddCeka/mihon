@@ -105,6 +105,7 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.clickableNoIndication
+import tachiyomi.presentation.core.util.collectAsState
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 import kotlin.math.roundToInt
 import kotlin.time.Clock
@@ -627,7 +628,7 @@ private fun MangaSummary(
 ) {
     val context = LocalContext.current
     val preferences = remember { context.appGraph.uiPreferences }
-    val loadImages = remember { preferences.imagesInDescription.get() }
+    val loadImages by preferences.imagesInDescription.collectAsState()
     val animProgress by animateFloatAsState(
         targetValue = if (expanded) 1f else 0f,
         label = "summary",
