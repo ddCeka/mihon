@@ -339,6 +339,8 @@
     <string name="pref_chapter_swipe_end">Chapter on swipe to right</string>
     <!-- This should be to the right for RTL locales -->
     <string name="pref_chapter_swipe_start">Chapter on swipe to left</string>
+    <string name="pref_continue_reading_button_left">Continue reading button on the left</string>
+    <string name="pref_continue_reading_button_left_summary">Change the placement of Continue reading button</string>
     <string name="pref_mark_duplicate_read_chapter_read">Mark duplicate read chapter as read</string>
     <string name="pref_mark_duplicate_read_chapter_read_existing">After reading a chapter</string>
     <string name="pref_mark_duplicate_read_chapter_read_new">After fetching new chapter</string>
