@@ -29,7 +29,7 @@ android {
     defaultConfig {
         applicationId = "app.mihon"
 
-        versionCode = 39
+        versionCode = 40
         versionName = "0.21.3"
 
         buildConfigField("boolean", "UPDATER_ENABLED", "${Config.enableUpdater}")
