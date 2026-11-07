@@ -45,6 +45,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add onboarding permissions request on permissions step
 
 ### Changed
+- Change manga display mode default to comfortable grid
 - Suppress null-object warning in download notifications
 - Changed app update check to no more than once a week
 - Hide statistics screen from more tab
