@@ -100,6 +100,7 @@ fun MangaScreen(
     onFilterButtonClicked: () -> Unit,
     onRefresh: () -> Unit,
     onContinueReading: () -> Unit,
+    continueReadingButtonOnLeft: Boolean,
     onSearch: (query: String, global: Boolean) -> Unit,
 
     // For cover dialog
@@ -154,6 +155,7 @@ fun MangaScreen(
             onFilterClicked = onFilterButtonClicked,
             onRefresh = onRefresh,
             onContinueReading = onContinueReading,
+            continueReadingButtonOnLeft = continueReadingButtonOnLeft,
             onSearch = onSearch,
             onCoverClicked = onCoverClicked,
             onShareClicked = onShareClicked,
@@ -191,6 +193,7 @@ fun MangaScreen(
             onFilterButtonClicked = onFilterButtonClicked,
             onRefresh = onRefresh,
             onContinueReading = onContinueReading,
+            continueReadingButtonOnLeft = continueReadingButtonOnLeft,
             onSearch = onSearch,
             onCoverClicked = onCoverClicked,
             onShareClicked = onShareClicked,
@@ -234,6 +237,7 @@ private fun MangaScreenSmallImpl(
     onFilterClicked: () -> Unit,
     onRefresh: () -> Unit,
     onContinueReading: () -> Unit,
+    continueReadingButtonOnLeft: Boolean,
     onSearch: (query: String, global: Boolean) -> Unit,
 
     // For cover dialog
@@ -337,10 +341,17 @@ private fun MangaScreenSmallImpl(
                 expanded = chapterListState.shouldExpandFAB(),
                 modifier = Modifier.animateFloatingActionButton(
                     visible = isFABVisible,
-                    alignment = Alignment.BottomEnd,
+                    alignment = continueReadingAlignment(
+                        onLeft = continueReadingButtonOnLeft,
+                        layoutDirection = LocalLayoutDirection.current,
+                    ),
                 ),
             )
         },
+        floatingActionButtonAlignment = continueReadingAlignment(
+            onLeft = continueReadingButtonOnLeft,
+            layoutDirection = LocalLayoutDirection.current,
+        ),
     ) { contentPadding ->
         val topPadding = contentPadding.calculateTopPadding()
 
@@ -467,6 +478,7 @@ fun MangaScreenLargeImpl(
     onFilterButtonClicked: () -> Unit,
     onRefresh: () -> Unit,
     onContinueReading: () -> Unit,
+    continueReadingButtonOnLeft: Boolean,
     onSearch: (query: String, global: Boolean) -> Unit,
 
     // For cover dialog
@@ -568,10 +580,17 @@ fun MangaScreenLargeImpl(
                 expanded = chapterListState.shouldExpandFAB(),
                 modifier = Modifier.animateFloatingActionButton(
                     visible = isFABVisible,
-                    alignment = Alignment.BottomEnd,
+                    alignment = continueReadingAlignment(
+                        onLeft = continueReadingButtonOnLeft,
+                        layoutDirection = layoutDirection,
+                    ),
                 ),
             )
         },
+        floatingActionButtonAlignment = continueReadingAlignment(
+            onLeft = continueReadingButtonOnLeft,
+            layoutDirection = layoutDirection,
+        ),
     ) { contentPadding ->
         PullRefresh(
             refreshing = state.isRefreshingData,
@@ -670,6 +689,16 @@ fun MangaScreenLargeImpl(
             )
         }
     }
+}
+
+private fun continueReadingAlignment(
+    onLeft: Boolean,
+    layoutDirection: androidx.compose.ui.unit.LayoutDirection,
+): Alignment = when {
+    onLeft && layoutDirection == androidx.compose.ui.unit.LayoutDirection.Ltr -> Alignment.BottomStart
+    onLeft -> Alignment.BottomEnd
+    layoutDirection == androidx.compose.ui.unit.LayoutDirection.Ltr -> Alignment.BottomEnd
+    else -> Alignment.BottomStart
 }
 
 @Composable
