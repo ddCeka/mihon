@@ -48,6 +48,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add onboarding permissions request on permissions step
 
 ### Changed
+- Change render images in descriptions default to false
 - Change manga display mode default to comfortable grid
 - Refactor floating bottom navigation
 - Suppress null-object warning in download notifications
