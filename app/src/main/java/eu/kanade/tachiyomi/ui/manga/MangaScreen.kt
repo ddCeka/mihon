@@ -152,6 +152,7 @@ fun MangaScreen(
         onFilterButtonClicked = viewModel::showSettingsDialog,
         onRefresh = viewModel::fetchAllFromSource,
         onContinueReading = { continueReading(context, viewModel.getNextUnreadChapter()) },
+        continueReadingButtonOnLeft = viewModel.continueReadingButtonOnLeft,
         onSearch = { query, global -> performSearch(navigator, resultEventBus, query, global) },
         onCoverClicked = viewModel::showCoverDialog,
         onShareClicked = { shareManga(context, viewModel.manga, viewModel.source) }.takeIf { isHttpSource },
