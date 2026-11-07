@@ -172,6 +172,7 @@ class MangaViewModel(
 
     val chapterSwipeStartAction = libraryPreferences.swipeToEndAction.get()
     val chapterSwipeEndAction = libraryPreferences.swipeToStartAction.get()
+    val continueReadingButtonOnLeft by libraryPreferences.continueReadingButtonOnLeft.asState(viewModelScope)
     var autoTrackState = trackPreferences.autoUpdateTrackOnMarkRead.get()
 
     private val skipFiltered by readerPreferences.skipFiltered.asState(viewModelScope)
