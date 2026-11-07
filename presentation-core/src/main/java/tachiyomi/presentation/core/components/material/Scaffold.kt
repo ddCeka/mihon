@@ -3,6 +3,8 @@ package tachiyomi.presentation.core.components.material
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScaffoldDefaults
@@ -15,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -34,6 +37,7 @@ fun Scaffold(
     bottomBar: @Composable () -> Unit = {},
     snackbarHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
+    floatingActionButtonAlignment: Alignment = Alignment.BottomEnd,
     floatingActionButtonPosition: FabPosition = FabPosition.End,
     containerColor: Color = MaterialTheme.colorScheme.background,
     contentColor: Color = contentColorFor(containerColor),
@@ -49,11 +53,21 @@ fun Scaffold(
         bottomBar = bottomBar,
         snackbarHost = snackbarHost,
         floatingActionButton = {
-            Box(Modifier.onSizeChanged { fabHeight = it.height }) {
-                floatingActionButton()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(floatingActionButtonAlignment)
+                        .onSizeChanged { fabHeight = it.height },
+                ) {
+                    floatingActionButton()
+                }
             }
         },
-        floatingActionButtonPosition = floatingActionButtonPosition,
+        floatingActionButtonPosition = FabPosition.Center,
         containerColor = containerColor,
         contentColor = contentColor,
         contentWindowInsets = contentWindowInsets,
