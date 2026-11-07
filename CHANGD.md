@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add configurable position for continue reading FAB
 - Add Gruvbox theme
 - Add hide implementation in edit categories
 - Add option to group multiple chapters of an entry
