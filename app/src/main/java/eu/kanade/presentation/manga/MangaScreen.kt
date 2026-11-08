@@ -771,6 +771,8 @@ private fun LazyListScope.sharedChapterItems(
             }
             is ChapterList.Item -> {
                 MangaChapterListItem(
+                    id = item.chapter.id,
+                    sourceId = manga.source,
                     title = if (manga.displayMode == Manga.CHAPTER_DISPLAY_NUMBER) {
                         stringResource(
                             MR.strings.display_mode_chapter,
@@ -789,9 +791,13 @@ private fun LazyListScope.sharedChapterItems(
                             )
                         },
                     scanlator = item.chapter.scanlator.takeIf { !it.isNullOrBlank() },
+                    thumbnailUrl = item.chapter.thumbnailUrl.takeIf { manga.chapterThumbnail },
+                    thumbnailAspectRatio = item.chapter.thumbnailAspectRatio,
+                    thumbnailLastModified = item.chapter.thumbnailLastModified,
                     read = item.chapter.read,
                     bookmark = item.chapter.bookmark,
                     selected = item.selected,
+                    isMangaFavorite = manga.favorite,
                     downloadIndicatorEnabled = !isAnyChapterSelected && !manga.isLocal(),
                     downloadStateProvider = { item.downloadState },
                     downloadProgressProvider = { downloadProgressProvider(item.id) },

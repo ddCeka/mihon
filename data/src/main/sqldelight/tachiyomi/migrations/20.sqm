@@ -1,0 +1,3 @@
+ALTER TABLE chapter ADD COLUMN remote_thumbnail_url TEXT;
+ALTER TABLE chapter ADD COLUMN remote_thumbnail_aspect_ratio REAL NOT NULL DEFAULT 1.0;
+ALTER TABLE chapter ADD COLUMN remote_thumbnail_last_modified INTEGER AS Instant;

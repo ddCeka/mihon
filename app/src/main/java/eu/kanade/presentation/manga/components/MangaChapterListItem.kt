@@ -4,6 +4,9 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.Icon
@@ -19,12 +22,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import eu.kanade.presentation.util.rememberResourceBitmapPainter
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import me.saket.swipe.SwipeableActionsBox
 import mihon.icons.materialsymbols.MaterialSymbols
@@ -36,22 +45,30 @@ import mihon.icons.materialsymbols.rounded.Download
 import mihon.icons.materialsymbols.rounded.FileDownloadOff
 import mihon.icons.materialsymbols.rounded.RemoveDone
 import mihon.icons.materialsymbols.roundedfilled.Bookmark
+import tachiyomi.domain.chapter.model.ChapterThumbnail
 import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.DISABLED_ALPHA
 import tachiyomi.presentation.core.components.material.SECONDARY_ALPHA
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
+import kotlin.time.Instant
 
 @Composable
 fun MangaChapterListItem(
+    id: Long,
+    sourceId: Long,
     title: String,
     date: String?,
     readProgress: String?,
     scanlator: String?,
+    thumbnailUrl: String?,
+    thumbnailAspectRatio: Double,
+    thumbnailLastModified: Instant?,
     read: Boolean,
     bookmark: Boolean,
     selected: Boolean,
+    isMangaFavorite: Boolean,
     downloadIndicatorEnabled: Boolean,
     downloadStateProvider: () -> Download.State,
     downloadProgressProvider: () -> Int,
@@ -89,15 +106,37 @@ fun MangaChapterListItem(
     ) {
         Row(
             modifier = modifier
+                .height(68.dp)
                 .selectedBackground(selected)
                 .combinedClickable(
                     onClick = onClick,
                     onLongClick = onLongClick,
                 )
-                .padding(start = 16.dp, top = 12.dp, end = 8.dp, bottom = 12.dp),
+                .padding(start = 16.dp, top = 4.dp, end = 8.dp, bottom = 4.dp),
         ) {
+            thumbnailUrl?.let {
+                AsyncImage(
+                    model = ChapterThumbnail(
+                        chapterId = id,
+                        sourceId = sourceId,
+                        isMangaFavorite = isMangaFavorite,
+                        url = it,
+                        lastModified = thumbnailLastModified,
+                    ),
+                    placeholder = ColorPainter(Color(0x1F888888)),
+                    error = rememberResourceBitmapPainter(id = R.drawable.cover_error),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(end = 10.dp)
+                        .aspectRatio(thumbnailAspectRatio.coerceIn(0.5, 2.0).toFloat())
+                        .clip(MaterialTheme.shapes.extraSmall),
+                    contentScale = ContentScale.Crop,
+                )
+            }
+
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).padding(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Row(
@@ -161,7 +200,7 @@ fun MangaChapterListItem(
 
             ChapterDownloadIndicator(
                 enabled = downloadIndicatorEnabled,
-                modifier = Modifier.padding(start = 4.dp),
+                modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 8.dp),
                 downloadStateProvider = downloadStateProvider,
                 downloadProgressProvider = downloadProgressProvider,
                 onClick = { onDownloadClick?.invoke(it) },
