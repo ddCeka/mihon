@@ -330,11 +330,7 @@ private fun MangaScreenSmallImpl(
             val isFABVisible = state.hasUnreadChapters && !isAnySelected
             SmallExtendedFloatingActionButton(
                 text = {
-                    Text(
-                        text = stringResource(
-                            if (state.hasReadChapters) MR.strings.action_resume else MR.strings.action_start,
-                        ),
-                    )
+                    Text(text = continueReadingLabel(state))
                 },
                 icon = { Icon(imageVector = MaterialSymbols.RoundedFilled.PlayArrow, contentDescription = null) },
                 onClick = onContinueReading,
@@ -569,11 +565,7 @@ fun MangaScreenLargeImpl(
             val isFABVisible = state.hasUnreadChapters && !isAnySelected
             SmallExtendedFloatingActionButton(
                 text = {
-                    Text(
-                        text = stringResource(
-                            if (state.hasReadChapters) MR.strings.action_resume else MR.strings.action_start,
-                        ),
-                    )
+                    Text(text = continueReadingLabel(state))
                 },
                 icon = { Icon(imageVector = MaterialSymbols.RoundedFilled.PlayArrow, contentDescription = null) },
                 onClick = onContinueReading,
@@ -740,6 +732,21 @@ private fun SharedMangaBottomActionMenu(
         }.takeIf {
             selected.fastAny { it.downloadState == Download.State.DOWNLOADED }
         },
+    )
+}
+
+@Composable
+private fun continueReadingLabel(state: MangaViewModel.State.Success): String {
+    if (!state.hasReadChapters) return stringResource(MR.strings.action_start)
+
+    val chapterNumber = state.nextUnreadChapter
+        ?.chapterNumber
+        ?.takeIf { it >= 0 }
+        ?: return stringResource(MR.strings.action_resume)
+
+    return stringResource(
+        MR.strings.action_resume_chapter,
+        formatChapterNumber(chapterNumber),
     )
 }
 
