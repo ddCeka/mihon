@@ -302,6 +302,7 @@ class MangaViewModel(
             it.selectedChapters
             it.hasUnreadChapters
             it.hasReadChapters
+            it.nextUnreadChapter
             it.missingChapterCount
         }
         .flowOn(Dispatchers.IO)
@@ -1146,6 +1147,13 @@ class MangaViewModel(
 
             val hasReadChapters by lazy {
                 chapters.fastAny { it.chapter.read }
+            }
+
+            /**
+             * Keep this aligned with [MangaViewModel.getNextUnreadChapter].
+             */
+            val nextUnreadChapter by lazy {
+                chapters.getNextUnread(manga, downloadedOnly)
             }
 
             val missingChapterCount by lazy {
