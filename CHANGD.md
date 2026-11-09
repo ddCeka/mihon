@@ -68,6 +68,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Improve performance by reducing unnecessary media scanning
 
 ### Removed
+- Remove dead DoH Mullvad provider
 - Remove authentication from content-warning preferences
 - Remove unread dot indicator from chapter and updates lists
 - Remove configuration options to e-ink page flashes
