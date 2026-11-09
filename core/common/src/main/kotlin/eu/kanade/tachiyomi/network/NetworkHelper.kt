@@ -63,7 +63,6 @@ class NetworkHelper(
             PREF_DOH_DNSPOD -> builder.dohDNSPod()
             PREF_DOH_360 -> builder.doh360()
             PREF_DOH_QUAD101 -> builder.dohQuad101()
-            PREF_DOH_MULLVAD -> builder.dohMullvad()
             PREF_DOH_CONTROLD -> builder.dohControlD()
             PREF_DOH_NJALLA -> builder.dohNajalla()
             PREF_DOH_SHECAN -> builder.dohShecan()
