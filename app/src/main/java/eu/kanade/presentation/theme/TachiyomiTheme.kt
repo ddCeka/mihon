@@ -27,6 +27,7 @@ import eu.kanade.presentation.theme.colorscheme.TealTurqoiseColorScheme
 import eu.kanade.presentation.theme.colorscheme.TidalWaveColorScheme
 import eu.kanade.presentation.theme.colorscheme.TokyoNightColorScheme
 import eu.kanade.presentation.theme.colorscheme.YinYangColorScheme
+import eu.kanade.presentation.theme.colorscheme.YokaiColorScheme
 import eu.kanade.presentation.theme.colorscheme.YotsubaColorScheme
 import mihon.app.di.appGraph
 
@@ -109,5 +110,6 @@ private val colorSchemes: Map<AppTheme, BaseColorScheme> = mapOf(
     AppTheme.TIDAL_WAVE to TidalWaveColorScheme,
     AppTheme.TOKYONIGHT to TokyoNightColorScheme,
     AppTheme.YINYANG to YinYangColorScheme,
+    AppTheme.YOKAI to YokaiColorScheme,
     AppTheme.YOTSUBA to YotsubaColorScheme,
 )

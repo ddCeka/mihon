@@ -44,5 +44,6 @@ private val themeResources: Map<AppTheme, Int> = mapOf(
     AppTheme.TIDAL_WAVE to R.style.Theme_Tachiyomi_TidalWave,
     AppTheme.TOKYONIGHT to R.style.Theme_Tachiyomi_TokyoNight,
     AppTheme.YINYANG to R.style.Theme_Tachiyomi_YinYang,
+    AppTheme.YOKAI to R.style.Theme_Tachiyomi_Yokai,
     AppTheme.YOTSUBA to R.style.Theme_Tachiyomi_Yotsuba,
 )
