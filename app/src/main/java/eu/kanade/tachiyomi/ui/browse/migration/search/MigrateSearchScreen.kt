@@ -21,10 +21,12 @@ fun MigrateSearchScreen(mangaId: Long) {
     val viewModel =
         assistedMetroViewModel<MigrateSearchViewModel, MigrateSearchViewModel.Factory> { create(mangaId = mangaId) }
     val state by viewModel.state.collectAsState()
+    val migrationOrigin by viewModel.migrationOrigin.collectAsState()
 
     MigrateSearchScreen(
         state = state,
         fromSourceId = state.from?.source,
+        migrationOrigin = migrationOrigin,
         navigateUp = navigator::pop,
         onChangeSearchQuery = viewModel::updateSearchQuery,
         onSearch = { viewModel.search() },
