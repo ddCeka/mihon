@@ -4,6 +4,10 @@ import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,6 +66,8 @@ import mihon.presentation.core.util.isTabletUi
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.manga.model.Manga
+import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 
 @Composable
@@ -101,6 +107,9 @@ fun MangaScreen(
             }
         }
     }
+
+    var showScanlatorsDialog by remember { mutableStateOf(false) }
+    var showCustomTitleDialog by remember { mutableStateOf(false) }
 
     MangaScreen(
         state = successState,
@@ -165,6 +174,7 @@ fun MangaScreen(
             navigator.push(MigrationConfigRoute(successState.manga.id))
         }.takeIf { successState.manga.favorite },
         onEditNotesClicked = { navigator.push(MangaNotesRoute(mangaId = successState.manga.id)) },
+        onEditCustomTitleClicked = { showCustomTitleDialog = true },
         onMultiBookmarkClicked = viewModel::bookmarkChapters,
         onMultiMarkAsReadClicked = viewModel::markChaptersRead,
         onMarkPreviousAsReadClicked = viewModel::markPreviousChapterRead,
@@ -174,8 +184,6 @@ fun MangaScreen(
         onAllChapterSelected = viewModel::toggleAllSelection,
         onInvertSelection = viewModel::invertSelection,
     )
-
-    var showScanlatorsDialog by remember { mutableStateOf(false) }
 
     val onDismissRequest = { viewModel.dismissDialog() }
     when (val dialog = successState.dialog) {
@@ -291,6 +299,60 @@ fun MangaScreen(
             onConfirm = viewModel::setExcludedScanlators,
         )
     }
+
+    if (showCustomTitleDialog) {
+        CustomTitleDialog(
+            initialTitle = successState.manga.customTitle ?: successState.manga.title,
+            onDismissRequest = { showCustomTitleDialog = false },
+            onSave = { title ->
+                viewModel.updateCustomTitle(title.takeIf { it.isNotBlank() })
+                showCustomTitleDialog = false
+            },
+            onReset = {
+                viewModel.updateCustomTitle(null)
+                showCustomTitleDialog = false
+            },
+        )
+    }
+}
+
+@Composable
+private fun CustomTitleDialog(
+    initialTitle: String,
+    onDismissRequest: () -> Unit,
+    onSave: (String) -> Unit,
+    onReset: () -> Unit,
+) {
+    var title by remember(initialTitle) { mutableStateOf(initialTitle) }
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(text = stringResource(MR.strings.action_custom_title)) },
+        text = {
+            OutlinedTextField(
+                value = title,
+                onValueChange = { title = it.replace('\n', ' ').replace('\r', ' ') },
+                minLines = 1,
+                maxLines = 5,
+                label = { Text(text = stringResource(MR.strings.action_custom_title)) },
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(title) }) {
+                Text(text = stringResource(MR.strings.action_save))
+            }
+        },
+        dismissButton = {
+            androidx.compose.foundation.layout.Row {
+                TextButton(onClick = onDismissRequest) {
+                    Text(text = stringResource(MR.strings.action_cancel))
+                }
+                TextButton(onClick = onReset) {
+                    Text(text = stringResource(MR.strings.action_reset))
+                }
+            }
+        },
+    )
 }
 
 private fun continueReading(context: Context, unreadChapter: Chapter?) {
