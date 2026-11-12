@@ -24,7 +24,7 @@ SELECT
     manga.id, manga.source_id, manga.remote_url, manga.remote_title, manga.remote_author,
     manga.remote_artist, manga.remote_description, manga.remote_genre, manga.remote_status,
     manga.remote_cover, manga.remote_update_strategy, manga.remote_memo, manga.user_favorite_at,
-    manga.user_notes, manga.user_reader_flags, manga.user_chapter_flags,
+    manga.user_notes, manga.user_custom_title, manga.user_reader_flags, manga.user_chapter_flags,
     manga.state_chapter_last_update, manga.state_chapter_next_update, manga.state_chapter_fetch_interval,
     manga.state_cover_last_modified, manga.state_initialized
 FROM manga_update_error
