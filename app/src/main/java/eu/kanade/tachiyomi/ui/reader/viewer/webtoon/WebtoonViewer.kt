@@ -40,6 +40,7 @@ import java.util.WeakHashMap
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -119,6 +120,8 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
     private var autoScrollGesturesEnabled = true
     private var autoScrollGestureToastsEnabled = true
 
+    private var pendingPageOffset: Pair<ReaderPage, Int>? = null
+
     init {
         recycler.sidePaddingPercent = simpleLongStrip.page.sidePadding
         recycler.setItemViewCacheSize(RECYCLER_VIEW_CACHE_SIZE)
@@ -147,11 +150,13 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
             object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     onScrolled()
-                    tracker.onScrolledBy(
-                        dy = dy.toFloat(),
-                        firstVisible = layoutManager.findFirstVisibleItemPosition(),
-                        lastEndVisible = layoutManager.findLastEndVisibleItemPosition(),
-                    )
+                    val firstVisible = layoutManager.findFirstVisibleItemPosition()
+                    val lastEndVisible = layoutManager.findLastEndVisibleItemPosition()
+                    tracker.onScrolledBy(dy.toFloat(), firstVisible, lastEndVisible)
+                    val page = adapter.items.getOrNull(lastEndVisible) as? ReaderPage
+                    if (page != null) {
+                        activity.onPageScrolled(page, pageOffset(page))
+                    }
                 }
             },
         )
@@ -431,7 +436,10 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
         if (recycler.isGone) {
             logcat { "Recycler first layout" }
             val pages = chapters.currChapter.pages ?: return
-            moveToPage(pages[min(chapters.currChapter.requestedPage, pages.lastIndex)])
+            moveToPage(
+                pages[min(chapters.currChapter.requestedPage, pages.lastIndex)],
+                chapters.currChapter.requestedPageOffset,
+            )
             recycler.isVisible = true
         }
     }
@@ -440,9 +448,15 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
      * Tells this viewer to move to the given [page].
      */
     override fun moveToPage(page: ReaderPage) {
+        moveToPage(page, 0)
+    }
+
+    private fun moveToPage(page: ReaderPage, pageOffset: Int) {
         val position = adapter.items.indexOf(page)
         if (position != -1) {
+            pendingPageOffset = page to pageOffset
             layoutManager.scrollToPositionWithOffset(position, 0)
+            restorePendingPageOffset()
             if (layoutManager.findLastEndVisibleItemPosition() == -1) {
                 onScrolled(pos = position)
             }
@@ -453,6 +467,30 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
 
     private fun onScrolled(pos: Int? = null) {
         tracker.onScrolled(pos ?: layoutManager.findLastEndVisibleItemPosition())
+    }
+
+    fun onPageDecoded(page: ReaderPage) {
+        if (pendingPageOffset?.first == page) {
+            restorePendingPageOffset()
+        }
+    }
+
+    private fun restorePendingPageOffset() {
+        val (page, pageOffset) = pendingPageOffset ?: return
+        val position = adapter.items.indexOf(page)
+        val view = layoutManager.findViewByPosition(position) ?: return
+        val maxOffset = (view.height - recycler.height).coerceAtLeast(0)
+        val offset = (maxOffset * pageOffset / PAGE_OFFSET_MAX.toFloat()).roundToInt()
+        layoutManager.scrollToPositionWithOffset(position, -offset)
+        pendingPageOffset = null
+    }
+
+    private fun pageOffset(page: ReaderPage): Int {
+        val position = adapter.items.indexOf(page)
+        val view = layoutManager.findViewByPosition(position) ?: return 0
+        val maxOffset = (view.height - recycler.height).coerceAtLeast(0)
+        if (maxOffset == 0) return 0
+        return ((-view.top).coerceIn(0, maxOffset) * PAGE_OFFSET_MAX / maxOffset.toFloat()).roundToInt()
     }
 
     /**
@@ -493,6 +531,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
 
 // Double the cache size to reduce rebinds/recycles incurred by the extra layout space on scroll direction changes
 private const val RECYCLER_VIEW_CACHE_SIZE = 4
+private const val PAGE_OFFSET_MAX = 1000
 
 // Auto-scroll constants
 private const val AUTO_SCROLL_POLL_DELAY_MILLIS = 100L
