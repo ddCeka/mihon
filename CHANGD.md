@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add Yokai inspired theme
 - Add failed update(s) screen
 - Add display chapter number in the resume button
 - Add configurable position for continue reading FAB
