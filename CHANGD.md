@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add custom manga title
 - Add color filter schedule on reader
 - Add Yokai inspired theme
 - Add display chapter number in the resume button
