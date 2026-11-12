@@ -22,7 +22,10 @@ class SetReadStatus(
     private val mapper = { chapter: Chapter, read: Boolean ->
         ChapterUpdate(chapter.id) {
             this.read = read
-            if (!read) lastPageRead = 0
+            if (!read) {
+                lastPageRead = 0
+                lastPageReadOffset = 0
+            }
         }
     }
 

@@ -82,6 +82,7 @@ object DatabaseBindings {
                 remote_date_uploadAdapter = InstantColumnAdapter,
                 remote_memoAdapter = MemoColumnAdapter,
                 user_last_page_readAdapter = IntColumnAdapter,
+                user_last_page_read_offsetAdapter = IntColumnAdapter,
                 state_date_fetchAdapter = InstantColumnAdapter,
             ),
             manga_trackAdapter = Manga_track.Adapter(
