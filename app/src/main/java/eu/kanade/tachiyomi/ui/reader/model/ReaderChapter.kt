@@ -28,6 +28,7 @@ data class ReaderChapter(private val loadedChapter: Chapter) {
     var pageLoader: PageLoader? = null
 
     var requestedPage: Int = 0
+    var requestedPageOffset: Int = 0
 
     private var references = 0
 
