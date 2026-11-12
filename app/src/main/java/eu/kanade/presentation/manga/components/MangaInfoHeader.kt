@@ -251,6 +251,7 @@ fun MangaActionRow(
 fun ExpandableMangaDescription(
     defaultExpandState: Boolean,
     description: String?,
+    originalTitle: String?,
     tagsProvider: () -> List<String>?,
     notes: String,
     onTagSearch: (String) -> Unit,
@@ -264,6 +265,17 @@ fun ExpandableMangaDescription(
         }
         val desc =
             description.takeIf { !it.isNullOrBlank() } ?: stringResource(MR.strings.description_placeholder)
+
+        originalTitle?.let { title ->
+            Text(
+                text = "${stringResource(MR.strings.action_original_title)}: $title",
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .padding(horizontal = 16.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         MangaSummary(
             description = desc,
@@ -369,7 +381,7 @@ private fun MangaAndSourceTitlesLarge(
         )
         Spacer(modifier = Modifier.height(16.dp))
         MangaContentInfo(
-            title = manga.title,
+            title = manga.customTitle?.takeIf { it.isNotBlank() } ?: manga.title,
             author = manga.author,
             artist = manga.artist,
             status = manga.status,
@@ -412,7 +424,7 @@ private fun MangaAndSourceTitlesSmall(
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             MangaContentInfo(
-                title = manga.title,
+                title = manga.customTitle?.takeIf { it.isNotBlank() } ?: manga.title,
                 author = manga.author,
                 artist = manga.artist,
                 status = manga.status,
