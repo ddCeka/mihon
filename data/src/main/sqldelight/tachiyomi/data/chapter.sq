@@ -16,6 +16,7 @@ CREATE TABLE chapter(
     user_read INTEGER AS Boolean NOT NULL,
     user_bookmark INTEGER AS Boolean NOT NULL,
     user_last_page_read INTEGER AS Int NOT NULL,
+    user_last_page_read_offset INTEGER AS Int NOT NULL,
     state_date_fetch INTEGER AS Instant NOT NULL,
     UNIQUE(manga_id, remote_url),
     FOREIGN KEY(manga_id) REFERENCES manga (id)
@@ -29,7 +30,7 @@ getChapterById:
 SELECT
     id, manga_id, remote_url, remote_name, remote_scanlator, remote_chapter_number,
     remote_date_upload, remote_order, remote_memo, user_read, user_bookmark,
-    user_last_page_read, state_date_fetch
+    user_last_page_read, user_last_page_read_offset, state_date_fetch
 FROM chapter
 WHERE id = :id;
 
@@ -37,7 +38,7 @@ getChaptersByMangaId:
 SELECT
     C.id, C.manga_id, C.remote_url, C.remote_name, C.remote_scanlator, C.remote_chapter_number,
     C.remote_date_upload, C.remote_order, C.remote_memo, C.user_read, C.user_bookmark,
-    C.user_last_page_read, C.state_date_fetch
+    C.user_last_page_read, C.user_last_page_read_offset, C.state_date_fetch
 FROM chapter C
 LEFT JOIN excluded_scanlator ES
 ON C.manga_id = ES.manga_id
@@ -53,7 +54,7 @@ getChaptersByMangaIds:
 SELECT
     id, manga_id, remote_url, remote_name, remote_scanlator, remote_chapter_number,
     remote_date_upload, remote_order, remote_memo, user_read, user_bookmark,
-    user_last_page_read, state_date_fetch
+    user_last_page_read, user_last_page_read_offset, state_date_fetch
 FROM chapter
 WHERE manga_id IN :mangaIds
 ORDER BY manga_id, remote_url;
@@ -72,7 +73,7 @@ getBookmarkedChaptersByMangaId:
 SELECT
     id, manga_id, remote_url, remote_name, remote_scanlator, remote_chapter_number,
     remote_date_upload, remote_order, remote_memo, user_read, user_bookmark,
-    user_last_page_read, state_date_fetch
+    user_last_page_read, user_last_page_read_offset, state_date_fetch
 FROM chapter
 WHERE manga_id = :mangaId
 AND user_bookmark;
@@ -81,7 +82,7 @@ getChapterByUrlAndMangaId:
 SELECT
     id, manga_id, remote_url, remote_name, remote_scanlator, remote_chapter_number,
     remote_date_upload, remote_order, remote_memo, user_read, user_bookmark,
-    user_last_page_read, state_date_fetch
+    user_last_page_read, user_last_page_read_offset, state_date_fetch
 FROM chapter
 WHERE manga_id = :mangaId
 AND remote_url = :remoteUrl;
@@ -94,12 +95,12 @@ insertReturningId:
 INSERT INTO chapter(
     manga_id, remote_url, remote_name, remote_scanlator, remote_chapter_number,
     remote_date_upload, remote_order, remote_memo, user_read, user_bookmark,
-    user_last_page_read, state_date_fetch
+    user_last_page_read, user_last_page_read_offset, state_date_fetch
 )
 VALUES (
     :mangaId, :remoteUrl, :remoteName, :remoteScanlator, :remoteChapterNumber,
     :remoteDateUpload, :remoteOrder, :remoteMemo, :userRead, :userBookmark,
-    :userLastPageRead, :stateDateFetch
+    :userLastPageRead, :userLastPageReadOffset, :stateDateFetch
 )
 -- Two syncs of the same entry can race; the chapter the other one already stored is skipped rather
 -- than failing the whole batch
@@ -111,6 +112,7 @@ UPDATE chapter
 SET user_read = coalesce(:userRead, user_read),
     user_bookmark = coalesce(:userBookmark, user_bookmark),
     user_last_page_read = coalesce(:userLastPageRead, user_last_page_read),
+    user_last_page_read_offset = coalesce(:userLastPageReadOffset, user_last_page_read_offset),
     state_date_fetch = coalesce(:stateDateFetch, state_date_fetch)
 WHERE id = :id;
 
@@ -119,6 +121,7 @@ UPDATE chapter
 SET user_read = coalesce(:userRead, user_read),
     user_bookmark = coalesce(:userBookmark, user_bookmark),
     user_last_page_read = coalesce(:userLastPageRead, user_last_page_read),
+    user_last_page_read_offset = coalesce(:userLastPageReadOffset, user_last_page_read_offset),
     remote_memo = coalesce(:remoteMemo, remote_memo)
 WHERE id = :id;
 

@@ -65,6 +65,7 @@ class ChapterRepositoryImpl(
                     userRead = chapter.read,
                     userBookmark = chapter.bookmark,
                     userLastPageRead = chapter.lastPageRead,
+                    userLastPageReadOffset = chapter.lastPageReadOffset,
                     remoteChapterNumber = chapter.chapterNumber,
                     remoteOrder = chapter.sourceOrder,
                     stateDateFetch = chapter.dateFetch,
@@ -96,6 +97,7 @@ class ChapterRepositoryImpl(
                     userRead = chapterUpdate.read,
                     userBookmark = chapterUpdate.bookmark,
                     userLastPageRead = chapterUpdate.lastPageRead,
+                    userLastPageReadOffset = chapterUpdate.lastPageReadOffset,
                     stateDateFetch = chapterUpdate.dateFetch,
                     id = chapterUpdate.id,
                 )
@@ -181,6 +183,7 @@ class ChapterRepositoryImpl(
         userRead: Boolean,
         userBookmark: Boolean,
         userLastPageRead: Int,
+        userLastPageReadOffset: Int,
         stateDateFetch: Instant,
     ): Chapter = Chapter(
         id = id,
@@ -188,6 +191,7 @@ class ChapterRepositoryImpl(
         read = userRead,
         bookmark = userBookmark,
         lastPageRead = userLastPageRead,
+        lastPageReadOffset = userLastPageReadOffset,
         dateFetch = stateDateFetch,
         sourceOrder = remoteOrder,
         url = remoteUrl,
