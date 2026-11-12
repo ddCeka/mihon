@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Yokai Dark Palette -->
+<resources>
+    <color name="yokai_primary">#E58A8A</color>
+    <color name="yokai_onPrimary">#2B1515</color>
+    <color name="yokai_primaryContainer">#542828</color>
+    <color name="yokai_onPrimaryContainer">#F5D6D6</color>
+    <color name="yokai_secondary">#C4A1CC</color>
+    <color name="yokai_onSecondary">#261829</color>
+    <color name="yokai_secondaryContainer">#3E2942</color>
+    <color name="yokai_onSecondaryContainer">#EBD9EF</color>
+    <color name="yokai_tertiary">#939EC9</color>
+    <color name="yokai_onTertiary">#1A1E2E</color>
+    <color name="yokai_tertiaryContainer">#2B324A</color>
+    <color name="yokai_onTertiaryContainer">#DCE1F5</color>
+    <color name="yokai_error">#E59890</color>
+    <color name="yokai_onError">#331411</color>
+    <color name="yokai_errorContainer">#592620</color>
+    <color name="yokai_onErrorContainer">#F7DCD9</color>
+    <color name="yokai_background">#171412</color>
+    <color name="yokai_onBackground">#DCD3C9</color>
+    <color name="yokai_surface">#1E1A17</color>
+    <color name="yokai_onSurface">#DCD3C9</color>
+    <color name="yokai_surfaceVariant">#2E2824</color>
+    <color name="yokai_onSurfaceVariant">#B8ACA0</color>
+    <color name="yokai_outline">#82766B</color>
+    <color name="yokai_outlineVariant">#3D352F</color>
+    <color name="yokai_scrim">#000000</color>
+    <color name="yokai_inverseSurface">#DCD3C9</color>
+    <color name="yokai_inverseOnSurface">#1E1A17</color>
+    <color name="yokai_inversePrimary">#9E3B3B</color>
+    <color name="yokai_surfaceDim">#14110F</color>
+    <color name="yokai_surfaceBright">#362F2B</color>
+    <color name="yokai_surfaceContainerLowest">#120F0E</color>
+    <color name="yokai_surfaceContainerLow">#1A1714</color>
+    <color name="yokai_surfaceContainer">#1E1A17</color>
+    <color name="yokai_surfaceContainerHigh">#26211E</color>
+    <color name="yokai_surfaceContainerHighest">#2E2824</color>
+</resources>
