@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Yokai Light Palette -->
+<resources>
+    <color name="yokai_primary">#9E3B3B</color>
+    <color name="yokai_onPrimary">#FAF3EB</color>
+    <color name="yokai_primaryContainer">#EED3CE</color>
+    <color name="yokai_onPrimaryContainer">#3B1414</color>
+    <color name="yokai_secondary">#634078</color>
+    <color name="yokai_onSecondary">#FAF3EB</color>
+    <color name="yokai_secondaryContainer">#E5D7EC</color>
+    <color name="yokai_onSecondaryContainer">#261430</color>
+    <color name="yokai_tertiary">#3B4578</color>
+    <color name="yokai_onTertiary">#FAF3EB</color>
+    <color name="yokai_tertiaryContainer">#D7DCF0</color>
+    <color name="yokai_onTertiaryContainer">#141933</color>
+    <color name="yokai_error">#A63A32</color>
+    <color name="yokai_onError">#FAF3EB</color>
+    <color name="yokai_errorContainer">#F2D4D0</color>
+    <color name="yokai_onErrorContainer">#3B110E</color>
+    <color name="yokai_background">#EDE4D5</color>
+    <color name="yokai_onBackground">#2E2925</color>
+    <color name="yokai_surface">#F3ECE0</color>
+    <color name="yokai_onSurface">#2E2925</color>
+    <color name="yokai_surfaceVariant">#E0D5C5</color>
+    <color name="yokai_onSurfaceVariant">#524942</color>
+    <color name="yokai_outline">#82766A</color>
+    <color name="yokai_outlineVariant">#C9BCAE</color>
+    <color name="yokai_scrim">#000000</color>
+    <color name="yokai_inverseSurface">#2E2925</color>
+    <color name="yokai_inverseOnSurface">#EDE4D5</color>
+    <color name="yokai_inversePrimary">#E58A8A</color>
+    <color name="yokai_surfaceDim">#DCD1C0</color>
+    <color name="yokai_surfaceBright">#F7F1E6</color>
+    <color name="yokai_surfaceContainerLowest">#FAF5EC</color>
+    <color name="yokai_surfaceContainerLow">#F3ECE0</color>
+    <color name="yokai_surfaceContainer">#ECE3D4</color>
+    <color name="yokai_surfaceContainerHigh">#E5DBC9</color>
+    <color name="yokai_surfaceContainerHighest">#DED2BF</color>
+</resources>
