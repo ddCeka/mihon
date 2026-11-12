@@ -7,6 +7,7 @@ class ChapterUpdate(val id: Long, block: ChapterUpdate.() -> Unit) : PartialUpda
     var read: Boolean? by field(null)
     var bookmark: Boolean? by field(null)
     var lastPageRead: Int? by field(null)
+    var lastPageReadOffset: Int? by field(null)
     var dateFetch: Instant? by field(null)
 
     init {
