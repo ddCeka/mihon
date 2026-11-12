@@ -10,6 +10,7 @@ data class Chapter(
     val read: Boolean,
     val bookmark: Boolean,
     val lastPageRead: Int,
+    val lastPageReadOffset: Int = 0,
     val dateFetch: Instant,
     val sourceOrder: Long,
     val url: String,

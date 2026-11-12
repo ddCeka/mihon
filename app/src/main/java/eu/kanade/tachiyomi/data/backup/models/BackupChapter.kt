@@ -29,6 +29,7 @@ class BackupChapter(
     // @ProtoNumber(11) var lastModifiedAt: Long, artifact of the abandoned sync attempt
     // @ProtoNumber(12) var version: Long, artifact of the abandoned sync attempt
     @ProtoNumber(13) var memo: ByteArray = JsonObjectEmptyBytes,
+    @ProtoNumber(14) var lastPageReadOffset: Int = 0,
 ) {
     fun toChapterImpl(): Chapter {
         return Chapter.create().copy(
@@ -40,6 +41,7 @@ class BackupChapter(
             bookmark = this@BackupChapter.bookmark,
             // Only untrusted source of this value, and a truncating narrow can land negative
             lastPageRead = this@BackupChapter.lastPageRead.coerceIn(0L, Int.MAX_VALUE.toLong()).toInt(),
+            lastPageReadOffset = this@BackupChapter.lastPageReadOffset.coerceIn(0, 1000),
             dateFetch = Instant.fromEpochMilliseconds(this@BackupChapter.dateFetch),
             dateUpload = this@BackupChapter.dateUpload.toInstantOrNull(),
             sourceOrder = this@BackupChapter.sourceOrder,
@@ -56,6 +58,7 @@ fun Chapter.toBackupChapter() = BackupChapter(
     read = read,
     bookmark = bookmark,
     lastPageRead = lastPageRead.toLong(),
+    lastPageReadOffset = lastPageReadOffset,
     dateFetch = dateFetch.toEpochMilliseconds(),
     dateUpload = dateUpload.toEpochMillisOrZero(),
     sourceOrder = sourceOrder,
