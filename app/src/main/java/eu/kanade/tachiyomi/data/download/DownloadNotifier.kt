@@ -50,9 +50,13 @@ class DownloadNotifier(
     private val activeDownloads = LinkedHashMap<Long, Download>()
     private val renderLock = Any()
 
+    private val lastProgressNotificationTimes = mutableMapOf<Long, Long>()
+    private val notificationLargeIcon by lazy {
+        BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
+    }
+
     /**
      * Updates the current set of active downloads and reconciles the notification tree.
-     * TODO: this is pretty fragile and may not work on some OEM
      */
     @Synchronized
     fun setActiveDownloads(downloads: List<Download>) {
@@ -61,17 +65,20 @@ class DownloadNotifier(
 
         // Remove stale notifications
         (previous.keys - next.keys).forEach { chapterId ->
-            childNotificationIds[chapterId]?.let { childId ->
+            childNotificationIds.remove(chapterId)?.let { childId ->
                 context.cancelNotification(childId)
             }
-            childNotificationIds.remove(chapterId)
+            lastProgressNotificationTimes.remove(chapterId)
             activeDownloads.remove(chapterId)
         }
 
         // Update existing and add new
         next.forEach { (chapterId, download) ->
-            activeDownloads[chapterId] = download
-            renderChildNotification(download)
+            val existing = activeDownloads[chapterId]
+            // Avoid overwriting newer progress if a progress tick arrived first
+            if (existing == null || download.downloadedImages >= existing.downloadedImages) {
+                activeDownloads[chapterId] = download
+            }
         }
 
         val active = activeDownloads.values.toList()
@@ -80,7 +87,12 @@ class DownloadNotifier(
             return
         }
 
+        val now = SystemClock.elapsedRealtime()
         renderSummaryNotification(active)
+        active.forEach { download ->
+            lastProgressNotificationTimes[download.chapter.id] = now
+            renderChildNotification(download)
+        }
     }
 
     private fun makeStableChildNotificationId(chapterId: Long): Int {
@@ -92,56 +104,74 @@ class DownloadNotifier(
     }
 
     private fun renderSummaryNotification(downloads: List<Download>) {
+        if (downloads.isEmpty()) return
+
         val count = downloads.size
         val title = context.stringResource(MR.strings.download_notifier_downloader_title)
-        val text = when {
-            count <= 1 -> context.stringResource(
+        val text = if (count == 1) {
+            val single = downloads.first()
+            context.stringResource(
                 MR.strings.chapter_downloading_progress,
                 downloads.first().downloadedImages,
                 downloads.first().pages?.size ?: 1,
             )
-            else -> "Downloading $count chapters"
+        } else {
+            "Downloading $count chapters"
         }
 
-        context.notify(
-            Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS,
-            Notifications.CHANNEL_DOWNLOADER_PROGRESS,
-        ) {
-            setGroupSummary(true)
-            setGroup(Notifications.GROUP_DOWNLOADER_PROGRESS)
-            setSmallIcon(android.R.drawable.stat_sys_download)
-            setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
-            setAutoCancel(false)
-            setOnlyAlertOnce(true)
-            setOngoing(true)
-            setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
-            setContentTitle(title)
-            setContentText(text)
+        with(progressNotificationBuilder) {
+            if (!isDownloading) {
+                context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_PAUSED)
+                setSmallIcon(android.R.drawable.stat_sys_download)
+                setLargeIcon(notificationLargeIcon)
+                setGroup(Notifications.GROUP_DOWNLOADER_PROGRESS)
+                setGroupSummary(true)
+                setOnlyAlertOnce(true)
+                setOngoing(true)
+                setAutoCancel(false)
+                setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+                isDownloading = true
+            }
+
+            // Refresh actions so "Show Manga" only appears when 1 chapter is active
             clearActions()
             addAction(
                 MaterialSymbolsR.drawable.rounded_filled_pause,
                 context.stringResource(MR.strings.action_pause),
                 NotificationReceiver.pauseDownloadsPendingBroadcast(context),
             )
-            addAction(
-                MaterialSymbolsR.drawable.rounded_book,
-                context.stringResource(MR.strings.action_show_manga),
-                NotificationReceiver.openEntryPendingActivity(context, downloads.first().manga.id),
-            )
+            if (count == 1) {
+                addAction(
+                    MaterialSymbolsR.drawable.rounded_book,
+                    context.stringResource(MR.strings.action_show_manga),
+                    NotificationReceiver.openEntryPendingActivity(context, downloads.first().manga.id),
+                )
+            }
+
+            setContentTitle(title)
+            setContentText(text)
+            show(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS)
         }
     }
 
     private fun renderChildNotification(download: Download) {
         val chapterId = download.chapter.id
-        val childId = makeStableChildNotificationId(chapterId)
+        val childId = childNotificationIds.getOrPut(chapterId) {
+            makeStableChildNotificationId(chapterId)
+        }
         val totalPages = download.pages?.size ?: 0
         val progress = download.downloadedImages.coerceAtMost(totalPages)
 
-        val title = if (download.manga.title.isNotBlank()) {
-            val cleanedChapter = download.chapter.name
-            "${download.manga.title.chop(18)} - ${cleanedChapter.chop(18)}"
-        } else {
-            download.chapter.name.chop(30)
+        val title = when {
+            preferences.hideNotificationContent.get() -> {
+                context.stringResource(MR.strings.download_notifier_downloader_title)
+            }
+            download.manga.title.isNotBlank() -> {
+                "${download.manga.title.chop(18)} - ${download.chapter.name.chop(18)}"
+            }
+            else -> {
+                download.chapter.name.chop(30)
+            }
         }
 
         context.notify(
@@ -151,7 +181,7 @@ class DownloadNotifier(
             setGroupSummary(false)
             setGroup(Notifications.GROUP_DOWNLOADER_PROGRESS)
             setSmallIcon(android.R.drawable.stat_sys_download)
-            setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+            setLargeIcon(notificationLargeIcon)
             setAutoCancel(false)
             setOnlyAlertOnce(true)
             setOngoing(true)
@@ -186,6 +216,7 @@ class DownloadNotifier(
      * Dismiss the downloader's notification. Downloader error notifications use a different id, so
      * those can only be dismissed by the user.
      */
+    @Synchronized
     fun dismissProgress() {
         context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS)
         context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_PAUSED)
@@ -193,10 +224,10 @@ class DownloadNotifier(
             context.cancelNotification(childId)
         }
         childNotificationIds.clear()
+        lastProgressNotificationTimes.clear()
         activeDownloads.clear()
+        isDownloading = false
     }
-
-    private var lastProgressNotificationTime = 0L
 
     /**
      * Called when download progress changes.
@@ -208,65 +239,26 @@ class DownloadNotifier(
      */
     @Synchronized
     fun onProgressChange(download: Download) {
-        // Reconcile the notification set instead of overwriting a single builder.
-        val allActive = activeDownloads.values.toList()
-        if (allActive.isNotEmpty()) {
-            renderSummaryNotification(allActive)
-            renderChildNotification(download)
-            return
-        }
+        // Ignore ticks for downloads that were canceled or not yet registered
+        if (!activeDownloads.containsKey(download.chapter.id)) return
+        activeDownloads[download.chapter.id] = download
 
+        // Throttle per chapter ID, always letting the final completion tick through
         val now = SystemClock.elapsedRealtime()
-        val isComplete = download.downloadedImages == download.pages?.size
-        if (!isComplete && now - lastProgressNotificationTime < PROGRESS_NOTIFICATION_INTERVAL_MS) return
-        lastProgressNotificationTime = now
+        val totalPages = download.pages?.size ?: 0
+        val isComplete = totalPages > 0 && download.downloadedImages >= totalPages
+        val lastTime = lastProgressNotificationTimes[download.chapter.id] ?: 0L
 
-        with(progressNotificationBuilder) {
-            if (!isDownloading) {
-                context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_PAUSED)
-                setSmallIcon(android.R.drawable.stat_sys_download)
-                clearActions()
-                // Open download manager when clicked
-                setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
-                isDownloading = true
-                // Pause action
-                addAction(
-                    MaterialSymbolsR.drawable.rounded_filled_pause,
-                    context.stringResource(MR.strings.action_pause),
-                    NotificationReceiver.pauseDownloadsPendingBroadcast(context),
-                )
-                addAction(
-                    MaterialSymbolsR.drawable.rounded_book,
-                    context.stringResource(MR.strings.action_show_manga),
-                    NotificationReceiver.openEntryPendingActivity(context, download.manga.id),
-                )
-            }
+        if (!isComplete && now - lastTime < PROGRESS_NOTIFICATION_INTERVAL_MS) return
+        lastProgressNotificationTimes[download.chapter.id] = now
 
-            val downloadingProgressText = context.stringResource(
-                MR.strings.chapter_downloading_progress,
-                download.downloadedImages,
-                download.pages!!.size,
-            )
-
-            if (preferences.hideNotificationContent.get()) {
-                setContentTitle(downloadingProgressText)
-                setContentText(null)
-            } else {
-                val title = download.manga.title.chop(15)
-                val quotedTitle = Pattern.quote(title)
-                val chapter = download.chapter.name.replaceFirst(
-                    "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE),
-                    "",
-                )
-                setContentTitle("$title - $chapter".chop(30))
-                setContentText(downloadingProgressText)
-            }
-
-            setProgress(download.pages!!.size, download.downloadedImages, false)
-            setOngoing(true)
-
-            show(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS)
+        val allActive = activeDownloads.values.toList()
+        // Only update summary on progress ticks when 1 chapter is active
+        // multi-chapter text ("Downloading X chapters") only changes in setActiveDownloads.
+        if (allActive.size == 1) {
+            renderSummaryNotification(allActive)
         }
+        renderChildNotification(download)
     }
 
     /**
@@ -322,6 +314,7 @@ class DownloadNotifier(
      * Only works on Android 8+.
      */
     fun onWarning(reason: String, timeout: Long? = null, contentIntent: PendingIntent? = null, mangaId: Long? = null) {
+        // TODO: fix this shit
         // Temporary workaround: suppress the raw NPE from a null javaClass dereference
         val isNullClassWarning =
             reason.contains("NullPointerException") ||
@@ -364,6 +357,7 @@ class DownloadNotifier(
      * @param mangaId the id of the entry that the error occurred on
      */
     fun onError(error: String? = null, chapter: String? = null, mangaTitle: String? = null, mangaId: Long? = null) {
+        // TODO: fix this shit
         // Temporary workaround: suppress the raw NPE from a null javaClass dereference
         val isNullClassError =
             error?.contains("NullPointerException") == true ||
