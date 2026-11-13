@@ -54,6 +54,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add onboarding permissions request on permissions step
 
 ### Changed
+- Hide disabled sources from migration destination choices
 - Show origin source and latest chapter during migration
 - Change render images in descriptions default to false
 - Change manga display mode default to comfortable grid
