@@ -927,6 +927,11 @@
     <string name="action_collapse">Collapse</string>
     <string name="new_chapters_count">%1$d new chapters</string>
     <string name="pref_filter_update_categories_details">Updates in excluded categories will not be shown even if they are also in any included categories.</string>
+    <string name="clear_updates_list_title">Clear update list</string>
+    <string name="clear_updates_list_description">Hide all updates currently in the list.
+        Reading progress, bookmarks, chapter data, downloads, and reading history database will not be deleted.
+        Only updates fetched after this cleanup will appear.
+    </string>
 
     <!-- Upcoming -->
     <string name="upcoming_guide">Upcoming Guide</string>
