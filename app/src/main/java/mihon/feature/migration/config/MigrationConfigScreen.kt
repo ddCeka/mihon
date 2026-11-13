@@ -426,11 +426,11 @@ class MigrationConfigViewModel(
         val pinnedSources = sourcePreferences.pinnedSources.get().mapNotNull { it.toLongOrNull() }
         val includedSources = sourcePreferences.migrationSources.get()
         val disabledSources = sourcePreferences.disabledSources.get()
-            .mapNotNull { it.toLongOrNull() }
+            .mapNotNullTo(HashSet()) { it.toLongOrNull() }
         val sources = sourceManager.getAll()
             .asSequence()
             .filterIsInstance<HttpSource>()
-            .filter { it.lang in languages }
+            .filter { isEligibleMigrationDestination(it.id, it.lang, languages, disabledSources) }
             .map {
                 val source = Source(
                     id = it.id,
@@ -444,7 +444,7 @@ class MigrationConfigViewModel(
                     isSelected = when {
                         includedSources.isNotEmpty() -> source.id in includedSources
                         pinnedSources.isNotEmpty() -> source.id in pinnedSources
-                        else -> source.id !in disabledSources
+                        else -> true
                     },
                 )
             }
@@ -523,6 +523,17 @@ data class MigrationSource(
 
     val shortLanguage: String = LocaleHelper.getShortDisplayName(source.lang)
 }
+
+/**
+ * Only enabled sources in enabled languages are offered as migration destinations.
+ * This does not remove their manga from the migration *origin* screen.
+ */
+internal fun isEligibleMigrationDestination(
+    sourceId: Long,
+    language: String,
+    enabledLanguages: Set<String>,
+    disabledSourceIds: Set<Long>,
+): Boolean = language in enabledLanguages && sourceId !in disabledSourceIds
 
 private enum class SourceSearchSection {
     All,
