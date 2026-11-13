@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add source search functionality to the migration page
 - Add 4-koma reading mode
 - Add high quality page upscaling image viewer
 - Add custom manga title
