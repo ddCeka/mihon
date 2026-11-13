@@ -1,5 +1,6 @@
 package eu.kanade.presentation.reader.settings
 
+import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material3.FilterChip
@@ -29,6 +30,7 @@ private val themes = listOf(
 @Composable
 internal fun ColumnScope.GeneralPage(viewModel: ReaderSettingsViewModel) {
     val readerTheme by viewModel.preferences.readerTheme.collectAsState()
+    val isWebGpu by viewModel.isWebGpu.collectAsState()
 
     SettingsChipRow(MR.strings.pref_reader_theme) {
         themes.map { (labelRes, value) ->
@@ -92,6 +94,13 @@ internal fun ColumnScope.GeneralPage(viewModel: ReaderSettingsViewModel) {
         CheckboxItem(
             label = stringResource(MR.strings.pref_cutout_short),
             pref = viewModel.preferences.drawUnderCutout,
+        )
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !isWebGpu) {
+        CheckboxItem(
+            label = stringResource(MR.strings.pref_high_quality_upscaling),
+            pref = viewModel.preferences.highQualityUpscaling,
         )
     }
 
