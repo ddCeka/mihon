@@ -42,6 +42,7 @@ fun UpdatesTab() {
         onSelectAll = viewModel::toggleAllSelection,
         onInvertSelection = viewModel::invertSelection,
         onUpdateLibrary = viewModel::updateLibrary,
+        onClearHistory = viewModel::clearUpdateHistory,
         onDownloadChapter = viewModel::downloadChapters,
         onMultiBookmarkClicked = viewModel::bookmarkUpdates,
         onMultiMarkAsReadClicked = viewModel::markUpdatesRead,
