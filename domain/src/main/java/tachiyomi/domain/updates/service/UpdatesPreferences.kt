@@ -15,6 +15,8 @@ class UpdatesPreferences(
     preferenceStore: PreferenceStore,
 ) {
 
+    val clearedBefore: Preference<Long> = preferenceStore.getLong("pref_updates_cleared_before", 0L)
+
     val filterDownloaded: Preference<TriState> = preferenceStore.getEnum(
         "pref_filter_updates_downloaded",
         TriState.DISABLED,
