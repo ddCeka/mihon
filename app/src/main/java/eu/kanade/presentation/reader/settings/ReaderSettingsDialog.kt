@@ -12,11 +12,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.window.DialogWindowProvider
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.TabbedDialog
 import eu.kanade.presentation.components.TabbedDialogPaddings
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsViewModel
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
+
+private enum class ReaderSettingsTab(val titleRes: StringResource) {
+    TEXT(MR.strings.reader_text_tab),
+    READING_MODE(MR.strings.pref_category_reading_mode),
+    GENERAL(MR.strings.pref_category_general),
+    COLOR_FILTER(MR.strings.custom_filter),
+}
 
 @Composable
 fun ReaderSettingsDialog(
@@ -24,13 +32,11 @@ fun ReaderSettingsDialog(
     onShowMenus: () -> Unit,
     onHideMenus: () -> Unit,
     viewModel: ReaderSettingsViewModel,
+    isTextBook: Boolean,
 ) {
-    val tabTitles = listOf(
-        stringResource(MR.strings.pref_category_reading_mode),
-        stringResource(MR.strings.pref_category_general),
-        stringResource(MR.strings.custom_filter),
-    )
-    val pagerState = rememberPagerState { tabTitles.size }
+    val tabs = ReaderSettingsTab.entries.filter { it != ReaderSettingsTab.TEXT || isTextBook }
+    val tabTitles = tabs.map { stringResource(it.titleRes) }
+    val pagerState = rememberPagerState { tabs.size }
 
     BoxWithConstraints {
         TabbedDialog(
@@ -45,7 +51,7 @@ fun ReaderSettingsDialog(
             val window = (LocalView.current.parent as? DialogWindowProvider)?.window
 
             LaunchedEffect(pagerState.currentPage) {
-                if (pagerState.currentPage == 2) {
+                if (tabs[pagerState.currentPage] == ReaderSettingsTab.COLOR_FILTER) {
                     window?.setDimAmount(0f)
                     onHideMenus()
                 } else {
@@ -59,10 +65,11 @@ fun ReaderSettingsDialog(
                     .padding(vertical = TabbedDialogPaddings.Vertical)
                     .verticalScroll(rememberScrollState()),
             ) {
-                when (page) {
-                    0 -> ReadingModePage(viewModel)
-                    1 -> GeneralPage(viewModel)
-                    2 -> ColorFilterPage(viewModel)
+                when (tabs[page]) {
+                    ReaderSettingsTab.TEXT -> TextSettingsPage(viewModel)
+                    ReaderSettingsTab.READING_MODE -> ReadingModePage(viewModel)
+                    ReaderSettingsTab.GENERAL -> GeneralPage(viewModel)
+                    ReaderSettingsTab.COLOR_FILTER -> ColorFilterPage(viewModel)
                 }
             }
         }

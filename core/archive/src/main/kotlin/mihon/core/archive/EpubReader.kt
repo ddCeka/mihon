@@ -1,11 +1,20 @@
 package mihon.core.archive
 
+import mihon.core.archive.book.Book
+import mihon.core.archive.book.BookSection
+import mihon.core.archive.book.TocEntry
+import mihon.core.archive.book.TocTarget
+import mihon.core.archive.book.parseHtmlBlocks
+import mihon.core.archive.book.parseNavToc
+import mihon.core.archive.book.parseNcxToc
+import mihon.core.archive.book.resolveToc
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.parser.Parser
 import java.io.Closeable
 import java.io.File
 import java.io.InputStream
+import java.net.URLDecoder
 
 /**
  * Wrapper over ArchiveReader to load files in epub format.
@@ -57,6 +66,45 @@ class EpubReader(private val reader: ArchiveReader) : Closeable by reader {
     }
 
     /**
+     * True when the epub is prose rather than a comic: it has noticeably more text than images.
+     */
+    fun isTextBook(): Boolean {
+        val ref = getPackageHref()
+        val basePath = getParentDirectory(ref)
+        var textLength = 0
+        var imageCount = 0
+        getPagesFromDocument(getPackageDocument(ref)).forEach { page ->
+            val document = parseHtmlEntry(resolveZipPath(basePath, page)) ?: return@forEach
+            textLength += document.body().text().length
+            imageCount += document.select("img, image").size
+        }
+        return textLength > 500 && textLength > imageCount * 300
+    }
+
+    /**
+     * Reads the epub as a [Book]: one section per spine page, with the TOC from the nav document or the ncx.
+     */
+    fun readBook(): Book {
+        val ref = getPackageHref()
+        val packageDoc = getPackageDocument(ref)
+        val basePath = getParentDirectory(ref)
+
+        val sections = mutableListOf<BookSection>()
+        val pages = mutableMapOf<String, EpubPage>()
+        getPagesFromDocument(packageDoc).forEach { page ->
+            val entryPath = resolveZipPath(basePath, page)
+            val document = parseHtmlEntry(entryPath) ?: return@forEach
+            val pageDir = getParentDirectory(entryPath)
+            val parsed = parseHtmlBlocks(document.body()) { src -> resolveImage(pageDir, src) }
+            pages[entryPath] = EpubPage(sections.size, parsed.anchors)
+            sections += BookSection(parsed.blocks)
+        }
+
+        val title = packageDoc.getElementsByTag("dc:title").firstOrNull()?.text()?.takeIf { it.isNotBlank() }
+        return Book(title, sections, readToc(packageDoc, basePath, pages, sections))
+    }
+
+    /**
      * Returns all the pages from the epub.
      */
     private fun getPagesFromDocument(document: Document): List<String> {
@@ -88,6 +136,74 @@ class EpubReader(private val reader: ArchiveReader) : Closeable by reader {
         }
 
         return result
+    }
+
+    /**
+     * Prefers the EPUB 3 navigation document and falls back to the EPUB 2 ncx.
+     */
+    private fun readToc(
+        packageDoc: Document,
+        basePath: String,
+        pages: Map<String, EpubPage>,
+        sections: List<BookSection>,
+    ): List<TocEntry> {
+        val manifest = packageDoc.select("manifest > item")
+
+        val navItem = manifest.firstOrNull { it.attr("properties").split(' ').contains("nav") }
+        if (navItem != null) {
+            val navPath = resolveZipPath(basePath, navItem.attr("href"))
+            val links = parseHtmlEntry(navPath)?.let { parseNavToc(it) }.orEmpty()
+            if (links.isNotEmpty()) {
+                val dir = getParentDirectory(navPath)
+                return resolveToc(links) { href -> locateTocTarget(dir, href, pages, sections) }
+            }
+        }
+
+        val ncxItem = manifest.firstOrNull { it.attr("media-type") == "application/x-dtbncx+xml" }
+            ?: return emptyList()
+        val ncxPath = resolveZipPath(basePath, ncxItem.attr("href"))
+        val links = getInputStream(ncxPath)
+            ?.use { parseNcxToc(Jsoup.parse(it, null, "", Parser.xmlParser())) }
+            .orEmpty()
+        val dir = getParentDirectory(ncxPath)
+        return resolveToc(links) { href -> locateTocTarget(dir, href, pages, sections) }
+    }
+
+    /**
+     * Resolves a TOC href, relative to the nav or ncx file in [dir], to a section and a block of that section.
+     */
+    private fun locateTocTarget(
+        dir: String,
+        href: String,
+        pages: Map<String, EpubPage>,
+        sections: List<BookSection>,
+    ): TocTarget? {
+        val page = pages[resolveZipPath(dir, decodeUrlPath(href.substringBefore('#')))] ?: return null
+        val fragment = href.substringAfter('#', "")
+        val lastBlock = (sections[page.section].blocks.size - 1).coerceAtLeast(0)
+        val block = if (fragment.isEmpty()) 0 else page.anchors[decodeUrlPath(fragment)] ?: 0
+        return TocTarget(page.section, block.coerceAtMost(lastBlock))
+    }
+
+    private fun resolveImage(pageDir: String, src: String): String? {
+        if (src.startsWith("data:") || src.startsWith("http:") || src.startsWith("https:")) return null
+        return resolveZipPath(pageDir, decodeUrlPath(src.substringBefore('#')))
+    }
+
+    private fun parseHtmlEntry(entryPath: String): Document? {
+        return getInputStream(entryPath)?.use { Jsoup.parse(it, null, "") }
+    }
+
+    /**
+     * Decodes percent escapes in an href. A literal plus stays a plus, since URLDecoder would read it as a space,
+     * and an href with a stray percent sign is used as written rather than failing the whole book.
+     */
+    private fun decodeUrlPath(value: String): String {
+        return try {
+            URLDecoder.decode(value.replace("+", "%2B"), "UTF-8")
+        } catch (e: IllegalArgumentException) {
+            value
+        }
     }
 
     /**
@@ -133,4 +249,6 @@ class EpubReader(private val reader: ArchiveReader) : Closeable by reader {
             ""
         }
     }
+
+    private class EpubPage(val section: Int, val anchors: Map<String, Int>)
 }

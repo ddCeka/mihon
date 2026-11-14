@@ -931,6 +931,18 @@
     <string name="transition_pages_error">Failed to load pages: %1$s</string>
     <string name="page_list_empty_error">No pages found</string>
     <string name="loader_not_implemented_error">Source not found</string>
+    <string name="reader_toc">Table of contents</string>
+    <string name="reader_text_tab">Text</string>
+    <string name="reader_text_font_size">Font size</string>
+    <string name="reader_text_line_spacing">Line spacing</string>
+    <string name="reader_text_side_margin">Side margins</string>
+    <string name="reader_text_font">Font</string>
+    <string name="reader_text_font_sans">Sans serif</string>
+    <string name="reader_text_font_serif">Serif</string>
+    <string name="reader_text_font_mono">Monospace</string>
+    <string name="reader_text_justify">Justify text</string>
+    <string name="reader_book_drm_error">This book is DRM-protected and can\'t be opened.</string>
+    <string name="reader_book_compression_error">This book uses a compression that isn\'t supported.</string>
 
     <!-- Updates -->
     <string name="updating_library">Updating library</string>
