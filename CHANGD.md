@@ -92,6 +92,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Remove firebase dependencies
 
 ### Fixed
+- Fix duplicate download notification and add completion state
 - Fix search filters reusing the previous query
 - Fix settings search highlighting for duplicate preference titles
 - Fix preference search highlighting when groups are hidden
