@@ -189,6 +189,7 @@ class MainActivity : BaseActivity() {
 
             var incognito by remember { mutableStateOf(false) }
             val downloadOnly by preferences.downloadedOnly.collectAsState()
+            val incognitoSetting by preferences.incognitoMode.collectAsState()
             val indexing by downloadCache.isInitializing.collectAsState()
 
             val isSystemInDarkTheme = isSystemInDarkTheme()
@@ -239,6 +240,8 @@ class MainActivity : BaseActivity() {
                             downloadedOnlyMode = downloadOnly,
                             incognitoMode = incognito,
                             indexing = indexing,
+                            onDownloadedOnlyClick = { preferences.downloadedOnly.set(false) },
+                            onIncognitoModeClick = { preferences.incognitoMode.set(false) }.takeIf { incognitoSetting },
                             modifier = Modifier.windowInsetsPadding(scaffoldInsets),
                         )
                     },
