@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.download
 
-import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.graphics.BitmapFactory
@@ -19,7 +18,6 @@ import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notify
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
-import java.util.regex.Pattern
 import mihon.icons.materialsymbols.R as MaterialSymbolsR
 
 /**
@@ -35,7 +33,7 @@ class DownloadNotifier(
 
     private val progressNotificationBuilder by lazy {
         context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER_PROGRESS) {
-            setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+            setLargeIcon(notificationLargeIcon)
             setAutoCancel(false)
             setOnlyAlertOnce(true)
         }
@@ -43,17 +41,26 @@ class DownloadNotifier(
 
     /**
      * State for grouped progress notifications:
-     * - one notification for ongoing download batch
-     * - one notification per active chapter
+     * - one notification for ongoing download batch (or single chapter when count == 1)
+     * - one child notification per active chapter when count > 1
      */
     private val childNotificationIds = mutableMapOf<Long, Int>()
     private val activeDownloads = LinkedHashMap<Long, Download>()
-    private val renderLock = Any()
 
     private val lastProgressNotificationTimes = mutableMapOf<Long, Long>()
     private val notificationLargeIcon by lazy {
         BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
     }
+
+    /**
+     * Status of download. Used for correct notification icon and state transitions.
+     */
+    private var isDownloading = false
+
+    /**
+     * Tracks whether the builder is currently configured as a group summary (2+ chapters).
+     */
+    private var isGroupedMode = false
 
     /**
      * Updates the current set of active downloads and reconciles the notification tree.
@@ -83,15 +90,24 @@ class DownloadNotifier(
 
         val active = activeDownloads.values.toList()
         if (active.isEmpty()) {
-            dismissProgress()
+            dismissChildNotifications()
             return
         }
 
         val now = SystemClock.elapsedRealtime()
-        renderSummaryNotification(active)
-        active.forEach { download ->
-            lastProgressNotificationTimes[download.chapter.id] = now
-            renderChildNotification(download)
+        if (active.size == 1) {
+            // Single active download: avoid group summary + 1 child duplication
+            dismissChildNotifications()
+            val single = active.first()
+            lastProgressNotificationTimes[single.chapter.id] = now
+            renderSingleNotification(single)
+        } else {
+            // Multiple active downloads: render group summary + per-chapter child notifications
+            renderSummaryNotification(active)
+            active.forEach { download ->
+                lastProgressNotificationTimes[download.chapter.id] = now
+                renderChildNotification(download)
+            }
         }
     }
 
@@ -103,13 +119,57 @@ class DownloadNotifier(
         }
     }
 
+    private fun renderSingleNotification(download: Download) {
+        val totalPages = download.pages?.size ?: 0
+        val progress = download.downloadedImages.coerceAtMost(totalPages)
+
+        with(progressNotificationBuilder) {
+            if (!isDownloading || isGroupedMode) {
+                context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_PAUSED)
+                context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE)
+                setSmallIcon(android.R.drawable.stat_sys_download)
+                setLargeIcon(notificationLargeIcon)
+                setGroup(null)
+                setGroupSummary(false)
+                setOnlyAlertOnce(true)
+                setOngoing(true)
+                setAutoCancel(false)
+                setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+                isDownloading = true
+                isGroupedMode = false
+            }
+
+            clearActions()
+            addAction(
+                MaterialSymbolsR.drawable.rounded_filled_pause,
+                context.stringResource(MR.strings.action_pause),
+                NotificationReceiver.pauseDownloadsPendingBroadcast(context),
+            )
+            addAction(
+                MaterialSymbolsR.drawable.rounded_book,
+                context.stringResource(MR.strings.action_show_manga),
+                NotificationReceiver.openEntryPendingActivity(context, download.manga.id),
+            )
+
+            setContentTitle(getDownloadTitle(download))
+            setContentText(
+                context.stringResource(
+                    MR.strings.chapter_downloading_progress,
+                    progress,
+                    totalPages.coerceAtLeast(1),
+                ),
+            )
+            setProgress(totalPages.coerceAtLeast(1), progress, false)
+            show(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS)
+        }
+    }
+
     private fun renderSummaryNotification(downloads: List<Download>) {
         if (downloads.isEmpty()) return
 
         val count = downloads.size
         val title = context.stringResource(MR.strings.download_notifier_downloader_title)
         val text = if (count == 1) {
-            val single = downloads.first()
             context.stringResource(
                 MR.strings.chapter_downloading_progress,
                 downloads.first().downloadedImages,
@@ -120,8 +180,9 @@ class DownloadNotifier(
         }
 
         with(progressNotificationBuilder) {
-            if (!isDownloading) {
+            if (!isDownloading || !isGroupedMode) {
                 context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_PAUSED)
+                context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE)
                 setSmallIcon(android.R.drawable.stat_sys_download)
                 setLargeIcon(notificationLargeIcon)
                 setGroup(Notifications.GROUP_DOWNLOADER_PROGRESS)
@@ -131,7 +192,11 @@ class DownloadNotifier(
                 setAutoCancel(false)
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
                 isDownloading = true
+                isGroupedMode = true
             }
+
+            // Clear progress bar on the summary card when transitioning from single mode
+            setProgress(0, 0, false)
 
             // Refresh actions so "Show Manga" only appears when 1 chapter is active
             clearActions()
@@ -162,18 +227,6 @@ class DownloadNotifier(
         val totalPages = download.pages?.size ?: 0
         val progress = download.downloadedImages.coerceAtMost(totalPages)
 
-        val title = when {
-            preferences.hideNotificationContent.get() -> {
-                context.stringResource(MR.strings.download_notifier_downloader_title)
-            }
-            download.manga.title.isNotBlank() -> {
-                "${download.manga.title.chop(18)} - ${download.chapter.name.chop(18)}"
-            }
-            else -> {
-                download.chapter.name.chop(30)
-            }
-        }
-
         context.notify(
             childId,
             Notifications.CHANNEL_DOWNLOADER_PROGRESS,
@@ -185,7 +238,7 @@ class DownloadNotifier(
             setAutoCancel(false)
             setOnlyAlertOnce(true)
             setOngoing(true)
-            setContentTitle(title)
+            setContentTitle(getDownloadTitle(download))
             setContentText(
                 context.stringResource(
                     MR.strings.chapter_downloading_progress,
@@ -198,10 +251,26 @@ class DownloadNotifier(
         }
     }
 
-    /**
-     * Status of download. Used for correct notification icon.
-     */
-    private var isDownloading = false
+    private fun getDownloadTitle(download: Download): String {
+        return when {
+            preferences.hideNotificationContent.get() -> {
+                context.stringResource(MR.strings.download_notifier_downloader_title)
+            }
+            download.manga.title.isNotBlank() -> {
+                "${download.manga.title.chop(18)} - ${download.chapter.name.chop(18)}"
+            }
+            else -> {
+                download.chapter.name.chop(30)
+            }
+        }
+    }
+
+    private fun dismissChildNotifications() {
+        childNotificationIds.values.forEach { childId ->
+            context.cancelNotification(childId)
+        }
+        childNotificationIds.clear()
+    }
 
     /**
      * Shows a notification from this builder.
@@ -220,13 +289,11 @@ class DownloadNotifier(
     fun dismissProgress() {
         context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS)
         context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_PAUSED)
-        childNotificationIds.values.forEach { childId ->
-            context.cancelNotification(childId)
-        }
-        childNotificationIds.clear()
+        dismissChildNotifications()
         lastProgressNotificationTimes.clear()
         activeDownloads.clear()
         isDownloading = false
+        isGroupedMode = false
     }
 
     /**
@@ -253,12 +320,11 @@ class DownloadNotifier(
         lastProgressNotificationTimes[download.chapter.id] = now
 
         val allActive = activeDownloads.values.toList()
-        // Only update summary on progress ticks when 1 chapter is active
-        // multi-chapter text ("Downloading X chapters") only changes in setActiveDownloads.
         if (allActive.size == 1) {
-            renderSummaryNotification(allActive)
+            renderSingleNotification(download)
+        } else {
+            renderChildNotification(download)
         }
-        renderChildNotification(download)
     }
 
     /**
@@ -268,7 +334,6 @@ class DownloadNotifier(
         // The progress id belongs to the download worker's foreground service, which takes the
         // notification with it when the worker stops
         dismissProgress()
-        isDownloading = false
 
         context.notify(
             Notifications.ID_DOWNLOAD_CHAPTER_PAUSED,
@@ -277,7 +342,7 @@ class DownloadNotifier(
             setContentTitle(context.stringResource(MR.strings.chapter_paused))
             setContentText(context.stringResource(MR.strings.download_notifier_download_paused))
             setSmallIcon(MaterialSymbolsR.drawable.rounded_filled_pause)
-            setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+            setLargeIcon(notificationLargeIcon)
             setOnlyAlertOnce(true)
             // Open download manager when clicked
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
@@ -297,12 +362,25 @@ class DownloadNotifier(
     }
 
     /**
-     * Resets the state once downloads are completed.
+     * Resets the state once downloads are completed and displays a brief completion notification.
      */
     @Synchronized
     fun onComplete() {
         dismissProgress()
-        isDownloading = false
+
+        context.notify(
+            Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE,
+            Notifications.CHANNEL_DOWNLOADER_PROGRESS,
+        ) {
+            setContentTitle(context.stringResource(MR.strings.download_notifier_downloader_title))
+            setContentText(context.stringResource(MR.strings.download_notifier_download_finished))
+            setSmallIcon(android.R.drawable.stat_sys_download_done)
+            setLargeIcon(notificationLargeIcon)
+            setOngoing(false)
+            setAutoCancel(true)
+            setTimeoutAfter(3000L)
+            setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+        }
     }
 
     /**
@@ -346,6 +424,7 @@ class DownloadNotifier(
 
         // Reset download information
         isDownloading = false
+        isGroupedMode = false
     }
 
     /**
@@ -389,6 +468,7 @@ class DownloadNotifier(
 
         // Reset download information
         isDownloading = false
+        isGroupedMode = false
     }
 }
 
