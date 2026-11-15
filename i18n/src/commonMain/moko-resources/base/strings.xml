@@ -1055,6 +1055,7 @@
 
     <!-- Download Notification -->
     <string name="download_notifier_downloader_title">Downloader</string>
+    <string name="download_notifier_download_finished">Download finished</string>
     <string name="download_notifier_title_error">Error</string>
     <string name="download_notifier_unknown_error">Could not download chapter due to unexpected error</string>
     <string name="download_notifier_text_only_wifi">No Wi-Fi connection available</string>
