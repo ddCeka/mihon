@@ -11,9 +11,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mihon.core.archive.archiveReader
+import mihon.core.archive.book.UnsupportedMobiException
+import mihon.core.archive.book.parseFb2
+import mihon.core.archive.book.parseMobi
+import mihon.core.archive.book.parseTxt
 import mihon.core.archive.epubReader
+import mihon.core.archive.pdfReader
 import mihon.data.cache.ChapterCache
 import tachiyomi.core.common.i18n.stringResource
+import tachiyomi.core.common.storage.extension
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.model.StubSource
@@ -106,7 +112,35 @@ class ChapterLoader(
                 when (format) {
                     is Format.Directory -> DirectoryPageLoader(format.file)
                     is Format.Archive -> ArchivePageLoader(format.file.archiveReader(context))
-                    is Format.Epub -> EpubPageLoader(format.file.epubReader(context))
+                    is Format.Epub -> {
+                        val reader = format.file.epubReader(context)
+                        if (reader.isTextBook()) {
+                            TextPageLoader(reader.readBook(), reader::getInputStream, reader::close)
+                        } else {
+                            EpubPageLoader(reader)
+                        }
+                    }
+                    is Format.Pdf -> PdfPageLoader(format.file.pdfReader(context))
+                    is Format.Text -> when (format.file.extension?.lowercase()) {
+                        "fb2" -> {
+                            val document = parseFb2(format.file.openInputStream())
+                            TextPageLoader(document.book, { ref -> document.images[ref]?.inputStream() })
+                        }
+                        "mobi", "azw", "azw3" -> {
+                            val document = try {
+                                parseMobi(format.file.openInputStream())
+                            } catch (e: UnsupportedMobiException) {
+                                val message = when (e.reason) {
+                                    UnsupportedMobiException.Reason.Drm -> MR.strings.reader_book_drm_error
+                                    UnsupportedMobiException.Reason.Compression ->
+                                        MR.strings.reader_book_compression_error
+                                }
+                                throw Exception(context.stringResource(message), e)
+                            }
+                            TextPageLoader(document.book, document::openImage)
+                        }
+                        else -> TextPageLoader(parseTxt(format.file.openInputStream()), { null })
+                    }
                 }
             }
             source is HttpSource -> HttpPageLoader(chapter, source, chapterCache, appScope, canLoadAhead)

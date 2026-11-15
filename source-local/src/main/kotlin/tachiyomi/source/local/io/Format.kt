@@ -8,14 +8,22 @@ sealed interface Format {
     data class Directory(val file: UniFile) : Format
     data class Archive(val file: UniFile) : Format
     data class Epub(val file: UniFile) : Format
+    data class Pdf(val file: UniFile) : Format
+    data class Text(val file: UniFile) : Format
 
     class UnknownFormatException : Exception()
 
     companion object {
 
+        private val TEXT_EXTENSIONS = listOf("txt", "fb2", "mobi", "azw", "azw3")
+
+        fun isText(file: UniFile) = file.extension?.lowercase() in TEXT_EXTENSIONS
+
         fun valueOf(file: UniFile) = when {
             file.isDirectory -> Directory(file)
             file.extension.equals("epub", true) -> Epub(file)
+            file.extension.equals("pdf", true) -> Pdf(file)
+            isText(file) -> Text(file)
             isArchiveSupported(file) -> Archive(file)
             else -> throw UnknownFormatException()
         }

@@ -27,7 +27,11 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import logcat.LogPriority
 import mihon.core.archive.archiveReader
+import mihon.core.archive.book.BookBlock
+import mihon.core.archive.book.parseFb2
+import mihon.core.archive.book.parseMobi
 import mihon.core.archive.epubReader
+import mihon.core.archive.pdfReader
 import nl.adaptivity.xmlutil.core.AndroidXmlReader
 import nl.adaptivity.xmlutil.serialization.XML
 import tachiyomi.core.common.i18n.stringResource
@@ -292,7 +296,10 @@ class LocalSource(
         val chapters = fileSystem.getFilesInMangaDirectory(manga.url)
             // Only keep supported formats
             .filterNot { it.name.orEmpty().startsWith('.') }
-            .filter { it.isDirectory || Archive.isSupported(it) || it.extension.equals("epub", true) }
+            .filter {
+                it.isDirectory || Archive.isSupported(it) || it.extension.equals("epub", true) ||
+                    it.extension.equals("pdf", true) || Format.isText(it)
+            }
             .map { chapterFile ->
                 SChapter.create().apply {
                     url = "${manga.url}/${chapterFile.name}"
@@ -312,7 +319,7 @@ class LocalSource(
                             format.file.epubReader(context).use { epub ->
                                 epub.fillMetadata(manga, this)
                             }
-                        } else {
+                        } else if (format !is Format.Text && format !is Format.Pdf) {
                             getComicInfoForChapter(chapterFile) { stream ->
                                 setChapterDetailsFromComicInfoFile(stream, this)
                             }
@@ -392,6 +399,26 @@ class LocalSource(
 
                         entry?.let { coverManager.update(manga, epub.getInputStream(it)!!) }
                     }
+                }
+                is Format.Pdf -> {
+                    format.file.pdfReader(context).use { pdf ->
+                        coverManager.update(manga, pdf.renderPage(0))
+                    }
+                }
+                is Format.Text -> {
+                    val cover = when (format.file.extension?.lowercase()) {
+                        "fb2" -> {
+                            val document = parseFb2(format.file.openInputStream())
+                            document.book.sections
+                                .flatMap { it.blocks }
+                                .firstNotNullOfOrNull { (it as? BookBlock.Image)?.ref }
+                                ?.let { document.images[it] }
+                        }
+                        "mobi", "azw", "azw3" -> parseMobi(format.file.openInputStream()).cover
+                        else -> null
+                    }
+
+                    cover?.let { coverManager.update(manga, it.inputStream()) }
                 }
             }
         } catch (e: Throwable) {
