@@ -76,6 +76,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Update workflows
 
 ### Improved
+- Improve performance by reducing motion on low-end devices
 - Improve reading position to also save for long-strip
 - Improve performance by reducing unnecessary media scanning
 

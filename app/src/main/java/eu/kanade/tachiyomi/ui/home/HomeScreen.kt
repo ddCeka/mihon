@@ -3,6 +3,8 @@ package eu.kanade.tachiyomi.ui.home
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -63,6 +65,7 @@ import mihon.app.di.appGraph
 import soup.compose.material.motion.animation.materialFadeThroughIn
 import soup.compose.material.motion.animation.materialFadeThroughOut
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.material.LocalReducedMotion
 import tachiyomi.presentation.core.i18n.pluralStringResource
 
 object HomeScreen : Screen() {
@@ -127,14 +130,19 @@ object HomeScreen : Screen() {
                     },
                 ) {
                     Column(modifier = Modifier.fillMaxSize()) {
+                        val reducedMotion = LocalReducedMotion.current
                         AnimatedContent(
                             targetState = tabNavigator.current,
                             modifier = Modifier.weight(1f),
                             transitionSpec = {
-                                materialFadeThroughIn(
-                                    initialScale = 1f,
-                                    durationMillis = TabFadeDuration,
-                                ) togetherWith materialFadeThroughOut(durationMillis = TabFadeDuration)
+                                if (reducedMotion) {
+                                    EnterTransition.None togetherWith ExitTransition.None
+                                } else {
+                                    materialFadeThroughIn(
+                                        initialScale = 1f,
+                                        durationMillis = TabFadeDuration,
+                                    ) togetherWith materialFadeThroughOut(durationMillis = TabFadeDuration)
+                                }
                             },
                             label = "tabContent",
                         ) {
@@ -143,13 +151,21 @@ object HomeScreen : Screen() {
                             }
                         }
                         if (!tabletUi) {
-                            AnimatedVisibility(
-                                visible = floatingBarVisible,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut(),
-                            ) {
-                                FloatingNavBar(modifier = Modifier.fillMaxWidth()) {
-                                    TABS.fastForEach { FloatingNavigationItem(it) }
+                            if (reducedMotion) {
+                                if (floatingBarVisible) {
+                                    FloatingNavBar(modifier = Modifier.fillMaxWidth()) {
+                                        TABS.fastForEach { FloatingNavigationItem(it) }
+                                    }
+                                }
+                            } else {
+                                AnimatedVisibility(
+                                    visible = floatingBarVisible,
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut(),
+                                ) {
+                                    FloatingNavBar(modifier = Modifier.fillMaxWidth()) {
+                                        TABS.fastForEach { FloatingNavigationItem(it) }
+                                    }
                                 }
                             }
                         }

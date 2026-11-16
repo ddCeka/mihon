@@ -25,19 +25,21 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import tachiyomi.presentation.core.components.material.LocalReducedMotion
 
 @Composable
 fun FloatingNavBar(
     modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit,
 ) {
+    val reducedMotion = LocalReducedMotion.current
     Surface(
         modifier = modifier
             .navigationBarsPadding()
             .padding(horizontal = 12.dp, vertical = 8.dp),
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shadowElevation = 8.dp,
+        shadowElevation = if (reducedMotion) 0.dp else 8.dp,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Row(

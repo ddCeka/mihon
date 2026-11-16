@@ -265,6 +265,8 @@
     <string name="theme_yokai">Yokai</string>
     <string name="theme_yotsuba">Yotsuba</string>
     <string name="pref_dark_theme_pure_black">Pure black dark mode</string>
+    <string name="pref_reduced_motion">Reduce motion and effects</string>
+    <string name="pref_reduced_motion_summary">Disable UI-heavy operations for a smoother experience. Low-end devices enabled by default.</string>
     <string name="pref_relative_format">Relative timestamps</string>
     <string name="recent_searches">Recent searches</string>
     <!-- "Today" instead of "2023-12-31" -->

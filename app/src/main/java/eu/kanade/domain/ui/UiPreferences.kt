@@ -1,5 +1,6 @@
 package eu.kanade.domain.ui
 
+import android.content.Context
 import android.text.format.DateFormat
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
@@ -8,6 +9,9 @@ import eu.kanade.domain.ui.model.AppTheme
 import eu.kanade.domain.ui.model.TabletUiMode
 import eu.kanade.domain.ui.model.ThemeMode
 import eu.kanade.domain.ui.model.TimeFormat
+import eu.kanade.tachiyomi.util.system.DeviceUtil
+import eu.kanade.tachiyomi.util.system.areAnimationsDisabled
+import eu.kanade.tachiyomi.util.system.isLowRamDevice
 import logcat.LogPriority
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
@@ -21,6 +25,7 @@ import java.util.Locale
 @Inject
 @SingleIn(AppScope::class)
 class UiPreferences(
+    private val context: Context,
     preferenceStore: PreferenceStore,
 ) {
 
@@ -32,6 +37,11 @@ class UiPreferences(
     )
 
     val themeDarkAmoled: Preference<Boolean> = preferenceStore.getBoolean("pref_theme_dark_amoled_key", false)
+
+    val reducedMotion: Preference<Boolean> = preferenceStore.getBoolean(
+        "pref_reduced_motion_key",
+        DeviceUtil.isLowRamDevice(context) || DeviceUtil.areAnimationsDisabled(context),
+    )
 
     val relativeTime: Preference<Boolean> = preferenceStore.getBoolean("relative_time_v2", true)
 
