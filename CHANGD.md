@@ -56,6 +56,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add onboarding permissions request on permissions step
 
 ### Changed
+- Refactor floating bottom navigation
 - Change Downloaded only and Incognito mode banner to clickable
 - Hide disabled sources from migration destination choices
 - Show origin source and latest chapter during migration

@@ -1,10 +1,19 @@
 package eu.kanade.tachiyomi.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -18,9 +27,11 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
@@ -34,6 +45,8 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.result.LocalResultEventBus
 import androidx.navigation3.runtime.result.ResultEffect
+import eu.kanade.presentation.components.FloatingNavBar
+import eu.kanade.presentation.components.FloatingNavItem
 import eu.kanade.presentation.util.rememberAnimatedVectorPainter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.browse.BrowseShowExtensionsEvent
@@ -141,14 +154,16 @@ fun HomeScreen() {
     val navigationSuiteType = if (tabletUi) {
         NavigationSuiteType.NavigationRail
     } else {
-        NavigationSuiteType.NavigationBar
+        NavigationSuiteType.None
     }
     val navigationSuiteState = rememberNavigationSuiteScaffoldState()
+    var floatingBarVisible by remember { mutableStateOf(true) }
     LaunchedEffect(navigationSuiteState, tabletUi) {
         if (tabletUi) navigationSuiteState.show()
     }
 
     ResultEffect<ShowBottomNavEvent> {
+        floatingBarVisible = tabletUi || it.visible
         if (tabletUi || it.visible) {
             navigationSuiteState.show()
         } else {
@@ -168,41 +183,55 @@ fun HomeScreen() {
             TABS.fastForEach { NavigationSuiteItem(it, tabNavigator, navigationSuiteType) }
         },
     ) {
-        val tabStateHolder = rememberSaveableStateHolder()
-        NavigatorDisplay(
-            navigator = tabNavigator,
-            entryDecorators = listOf(
-                remember(tabStateHolder) {
-                    NavEntryDecorator { entry ->
-                        tabStateHolder.SaveableStateProvider(entry.contentKey) { entry.Content() }
+        Column(modifier = Modifier.fillMaxSize()) {
+            val tabStateHolder = rememberSaveableStateHolder()
+            NavigatorDisplay(
+                navigator = tabNavigator,
+                modifier = Modifier.weight(1f),
+                entryDecorators = listOf(
+                    remember(tabStateHolder) {
+                        NavEntryDecorator { entry ->
+                            tabStateHolder.SaveableStateProvider(entry.contentKey) { entry.Content() }
+                        }
+                    },
+                ),
+                transitionSpec = { spec },
+                popTransitionSpec = { spec },
+                predictivePopTransitionSpec = { spec },
+                entryProvider = entryProvider {
+                    entry<TopLevelRoute.Library> {
+                        LibraryTab()
+                    }
+
+                    entry<TopLevelRoute.Updates> {
+                        UpdatesTab()
+                    }
+
+                    entry<TopLevelRoute.History> {
+                        HistoryTab()
+                    }
+
+                    entry<TopLevelRoute.Browse> {
+                        BrowseTab()
+                    }
+
+                    entry<TopLevelRoute.More> {
+                        MoreTab()
                     }
                 },
-            ),
-            transitionSpec = { spec },
-            popTransitionSpec = { spec },
-            predictivePopTransitionSpec = { spec },
-            entryProvider = entryProvider {
-                entry<TopLevelRoute.Library> {
-                    LibraryTab()
+            )
+            if (!tabletUi) {
+                AnimatedVisibility(
+                    visible = floatingBarVisible,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut(),
+                ) {
+                    FloatingNavBar(modifier = Modifier.fillMaxWidth()) {
+                        TABS.fastForEach { FloatingNavigationItem(it, tabNavigator) }
+                    }
                 }
-
-                entry<TopLevelRoute.Updates> {
-                    UpdatesTab()
-                }
-
-                entry<TopLevelRoute.History> {
-                    HistoryTab()
-                }
-
-                entry<TopLevelRoute.Browse> {
-                    BrowseTab()
-                }
-
-                entry<TopLevelRoute.More> {
-                    MoreTab()
-                }
-            },
-        )
+            }
+        }
     }
 
     ResultEffect<TabEvent> {
@@ -228,6 +257,38 @@ fun HomeScreen() {
             navigator.push(DownloadQueueRoute)
         }
     }
+}
+
+@Composable
+private fun RowScope.FloatingNavigationItem(
+    tab: TopLevelRoute,
+    tabNavigator: Navigator,
+) {
+    val resultEventBus = LocalResultEventBus.current
+    val selected = tabNavigator.current == tab
+    val options = tab.options(selected)
+
+    FloatingNavItem(
+        selected = selected,
+        onClick = {
+            if (!selected) {
+                tabNavigator.replaceAll(tab)
+            } else {
+                resultEventBus.sendResult(
+                    resultKey = tab.reselectEventKey,
+                    result = Unit,
+                )
+            }
+        },
+        icon = {
+            Icon(
+                painter = options.icon,
+                contentDescription = options.title,
+            )
+        },
+        label = options.title,
+        badge = tabBadge(tab),
+    )
 }
 
 @Composable
