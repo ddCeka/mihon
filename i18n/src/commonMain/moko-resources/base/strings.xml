@@ -325,6 +325,11 @@
     <string name="pref_update_only_in_release_period">Predict next release time</string>
     <string name="pref_library_update_show_tab_badge">Show unread count on Updates icon</string>
 
+    <string name="pref_confirm_remove_from_library">Confirm before removing from library</string>
+    <string name="pref_confirm_remove_from_library_summary">Always ask if the entry has downloaded chapters</string>
+    <string name="manga_removed_library">Removed from library</string>
+    <string name="action_undo">Undo</string>
+
     <string name="pref_library_update_refresh_metadata">Automatically refresh metadata</string>
     <string name="pref_library_update_refresh_metadata_summary">Check for new cover and details when updating library</string>
 

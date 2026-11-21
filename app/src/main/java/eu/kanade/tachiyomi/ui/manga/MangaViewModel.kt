@@ -386,6 +386,53 @@ class MangaViewModel(
 
     // Manga info - start
 
+    /**
+     * Called when the user clicks the favorite/in-library button on the UI.
+     */
+    fun onFavoriteClick() {
+        val state = successState ?: return
+        if (state.manga.favorite) {
+            if (libraryPreferences.confirmRemoveFromLibrary.get() || hasDownloads()) {
+                showRemoveFromLibraryDialog()
+            } else {
+                removeFromLibraryWithUndo()
+            }
+        } else {
+            toggleFavorite()
+        }
+    }
+
+    private fun removeFromLibraryWithUndo() {
+        val state = successState ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val manga = state.manga
+            val previousCategoryIds = getMangaCategoryIds(manga)
+
+            if (updateManga.awaitUpdateFavorite(manga.id, false)) {
+                manga.removeCovers(coverCache)
+
+                viewModelScope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    val result = snackbarHostState.showSnackbar(
+                        message = context.stringResource(MR.strings.manga_removed_library),
+                        actionLabel = context.stringResource(MR.strings.action_undo),
+                        duration = SnackbarDuration.Short,
+                        withDismissAction = true,
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        restoreToLibrary(manga, previousCategoryIds)
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun restoreToLibrary(manga: Manga, categoryIds: List<Long>) {
+        if (updateManga.awaitUpdateFavorite(manga.id, true)) {
+            setMangaCategories.await(manga.id, categoryIds)
+        }
+    }
+
     fun toggleFavorite() {
         toggleFavorite(
             onRemoved = {
