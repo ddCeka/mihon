@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add option to skip removal confirmation dialog
 - Add root silent installer option
 - Add option to clear update history on the Updates page
 - Add source search functionality to the migration page
