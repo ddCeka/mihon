@@ -8,6 +8,7 @@ import androidx.core.net.toUri
 import dev.zacsweers.metro.Inject
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.tachiyomi.extension.installer.Installer
+import eu.kanade.tachiyomi.extension.installer.RootInstaller
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -122,7 +123,7 @@ class ExtensionInstaller(
      * @param packageInfo The package info already read from [tempFile].
      * @param isUpdateForPrivatelyInstalled If this install is an update for a privately installed extension
      */
-    private fun installApk(
+    private suspend fun installApk(
         downloadId: Long,
         tempFile: File,
         packageInfo: PackageInfo,
@@ -133,8 +134,18 @@ class ExtensionInstaller(
             return
         }
 
-        when (val installer = extensionInstaller.get()) {
-            BasePreferences.ExtensionInstaller.LEGACY -> {
+        val installer = extensionInstaller.get()
+        if (installer == BasePreferences.ExtensionInstaller.ROOT) {
+            val result = RootInstaller.install(context, tempFile)
+            if (result != null) {
+                tempFile.delete()
+                updateInstallStep(downloadId, result)
+                return
+            }
+        }
+
+        when (installer) {
+            BasePreferences.ExtensionInstaller.LEGACY, BasePreferences.ExtensionInstaller.ROOT -> {
                 val intent = Intent(context, ExtensionInstallActivity::class.java)
                     .setDataAndType(tempFile.getUriCompat(context), APK_MIME)
                     .putExtra(EXTRA_DOWNLOAD_ID, downloadId)
@@ -147,7 +158,7 @@ class ExtensionInstaller(
                 installApkPrivately(downloadId, tempFile, packageInfo)
             }
 
-            else -> {
+            BasePreferences.ExtensionInstaller.PACKAGEINSTALLER -> {
                 val intent = ExtensionInstallService.getIntent(
                     context,
                     downloadId,
