@@ -123,11 +123,7 @@ fun MangaScreen(
         onDownloadChapter = viewModel::runChapterDownloadActions.takeIf { !successState.source.isLocalOrStub() },
         downloadProgressProvider = viewModel::getDownloadProgress,
         onAddToLibraryClicked = {
-            if (successState.manga.favorite) {
-                viewModel.showRemoveFromLibraryDialog()
-            } else {
-                viewModel.toggleFavorite()
-            }
+            viewModel.onFavoriteClick()
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         },
         onWebViewClicked = {

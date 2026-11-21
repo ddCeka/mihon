@@ -254,6 +254,11 @@ data object SettingsLibraryScreen : SearchableSettings {
                     preference = libraryPreferences.hideMissingChapters,
                     title = stringResource(MR.strings.pref_hide_missing_chapter_indicators),
                 ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = libraryPreferences.confirmRemoveFromLibrary,
+                    title = stringResource(MR.strings.pref_confirm_remove_from_library),
+                    subtitle = stringResource(MR.strings.pref_confirm_remove_from_library_summary),
+                ),
             ),
         )
     }
