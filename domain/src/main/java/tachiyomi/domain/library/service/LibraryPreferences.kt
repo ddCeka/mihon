@@ -71,6 +71,11 @@ class LibraryPreferences(
         emptySet(),
     )
 
+    val confirmRemoveFromLibrary: Preference<Boolean> = preferenceStore.getBoolean(
+        "confirm_remove_from_library",
+        true,
+    )
+
     // region Filter
 
     val filterDownloaded: Preference<TriState> = preferenceStore.getEnum(
