@@ -34,6 +34,7 @@ class BasePreferences(
         LEGACY(MR.strings.ext_installer_legacy, true),
         PACKAGEINSTALLER(MR.strings.ext_installer_packageinstaller, true),
         PRIVATE(MR.strings.ext_installer_private, false),
+        ROOT(MR.strings.ext_installer_root, false),
     }
 
     val highQualityRenderer: Preference<Boolean> = preferenceStore.getBoolean("pref_high_quality_renderer_key", false)

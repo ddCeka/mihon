@@ -393,6 +393,7 @@
     <string name="ext_installer_legacy">Legacy</string>
     <string name="ext_installer_packageinstaller" translatable="false">PackageInstaller</string>
     <string name="ext_installer_private" translatable="false">Private</string>
+    <string name="ext_installer_root" translatable="false">Root</string>
     <string name="ext_revoke_trust">Revoke trusted unknown extensions</string>
     <string name="downloading_with_progress">Downloading… (%d%%)</string>
 
