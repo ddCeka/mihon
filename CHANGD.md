@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add root installer option
 - Add option to clear update history on the Updates page
 - Add source search functionality to the migration page
 - Add 4-koma reading mode
