@@ -2,8 +2,12 @@ package eu.kanade.domain.base
 
 import android.content.Context
 import eu.kanade.domain.base.BasePreferences.ExtensionInstaller
+import eu.kanade.tachiyomi.extension.installer.RootInstaller
 import eu.kanade.tachiyomi.util.system.hasMiuiPackageInstaller
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.preference.getEnum
@@ -13,15 +17,16 @@ class ExtensionInstallerPreference(
     preferenceStore: PreferenceStore,
 ) : Preference<ExtensionInstaller> {
 
+    private val hasSu = RootInstaller.hasSu()
     private val basePref = preferenceStore.getEnum(key(), defaultValue())
 
     override fun key() = "extension_installer"
 
-    val entries get() = ExtensionInstaller.entries.run {
-        if (context.hasMiuiPackageInstaller) {
-            filter { it != ExtensionInstaller.PACKAGEINSTALLER }
-        } else {
-            toList()
+    val entries get() = ExtensionInstaller.entries.filter {
+        when (it) {
+            ExtensionInstaller.PACKAGEINSTALLER -> !context.hasMiuiPackageInstaller
+            ExtensionInstaller.ROOT -> hasSu
+            else -> true
         }
     }
 
@@ -35,6 +40,9 @@ class ExtensionInstallerPreference(
         when (value) {
             ExtensionInstaller.PACKAGEINSTALLER -> {
                 if (context.hasMiuiPackageInstaller) return ExtensionInstaller.LEGACY
+            }
+            ExtensionInstaller.ROOT -> {
+                if (!hasSu) return ExtensionInstaller.LEGACY
             }
             else -> {}
         }
@@ -58,7 +66,7 @@ class ExtensionInstallerPreference(
 
     override fun delete() = basePref.delete()
 
-    override fun changes() = basePref.changes()
+    override fun changes() = basePref.changes().map(::check)
 
-    override fun stateIn(scope: CoroutineScope) = basePref.stateIn(scope)
+    override fun stateIn(scope: CoroutineScope) = changes().stateIn(scope, SharingStarted.Eagerly, get())
 }
