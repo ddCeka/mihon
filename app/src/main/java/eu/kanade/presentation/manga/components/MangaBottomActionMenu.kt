@@ -29,6 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -78,6 +79,32 @@ fun MangaBottomActionMenu(
     onDownloadClicked: (() -> Unit)? = null,
     onDeleteClicked: (() -> Unit)? = null,
 ) {
+    val currentActions = booleanArrayOf(
+        onBookmarkClicked != null,
+        onRemoveBookmarkClicked != null,
+        onMarkAsReadClicked != null,
+        onMarkAsUnreadClicked != null,
+        onMarkPreviousAsReadClicked != null,
+        onDownloadClicked != null,
+        onDeleteClicked != null,
+    )
+
+    // Retain the last visible action set so buttons don't disappear mid-exit animation when selection clears.
+    val lastActions = remember { BooleanArray(7) }
+    SideEffect {
+        if (visible && currentActions.any { it }) {
+            currentActions.copyInto(lastActions)
+        }
+    }
+
+    val showBookmark = if (visible) currentActions[0] else lastActions[0]
+    val showRemoveBookmark = if (visible) currentActions[1] else lastActions[1]
+    val showMarkAsRead = if (visible) currentActions[2] else lastActions[2]
+    val showMarkAsUnread = if (visible) currentActions[3] else lastActions[3]
+    val showMarkPreviousAsRead = if (visible) currentActions[4] else lastActions[4]
+    val showDownload = if (visible) currentActions[5] else lastActions[5]
+    val showDelete = if (visible) currentActions[6] else lastActions[6]
+
     AnimatedVisibility(
         visible = visible,
         enter = expandVertically(expandFrom = Alignment.Bottom),
@@ -93,12 +120,14 @@ fun MangaBottomActionMenu(
             val confirm = remember { mutableStateListOf(false, false, false, false, false, false, false) }
             var resetJob by remember { mutableStateOf<Job?>(null) }
             val onLongClickItem: (Int) -> Unit = { toConfirmIndex ->
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                confirm.indices.forEach { i -> confirm[i] = i == toConfirmIndex }
-                resetJob?.cancel()
-                resetJob = scope.launch {
-                    delay(1.seconds)
-                    if (isActive) confirm[toConfirmIndex] = false
+                if (visible) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    confirm.indices.forEach { i -> confirm[i] = i == toConfirmIndex }
+                    resetJob?.cancel()
+                    resetJob = scope.launch {
+                        delay(1.seconds)
+                        if (isActive) confirm[toConfirmIndex] = false
+                    }
                 }
             }
             Row(
@@ -110,67 +139,74 @@ fun MangaBottomActionMenu(
                     )
                     .padding(horizontal = 8.dp, vertical = 12.dp),
             ) {
-                if (onBookmarkClicked != null) {
+                if (showBookmark) {
                     Button(
                         title = stringResource(MR.strings.action_bookmark),
                         icon = MaterialSymbols.Rounded.BookmarkAdd,
                         toConfirm = confirm[0],
                         onLongClick = { onLongClickItem(0) },
-                        onClick = onBookmarkClicked,
+                        onClick = onBookmarkClicked?.takeIf { visible } ?: {},
+                        enabled = visible,
                     )
                 }
-                if (onRemoveBookmarkClicked != null) {
+                if (showRemoveBookmark) {
                     Button(
                         title = stringResource(MR.strings.action_remove_bookmark),
                         icon = MaterialSymbols.Rounded.BookmarkRemove,
                         toConfirm = confirm[1],
                         onLongClick = { onLongClickItem(1) },
-                        onClick = onRemoveBookmarkClicked,
+                        onClick = onRemoveBookmarkClicked?.takeIf { visible } ?: {},
+                        enabled = visible,
                     )
                 }
-                if (onMarkAsReadClicked != null) {
+                if (showMarkAsRead) {
                     Button(
                         title = stringResource(MR.strings.action_mark_as_read),
                         icon = MaterialSymbols.Rounded.DoneAll,
                         toConfirm = confirm[2],
                         onLongClick = { onLongClickItem(2) },
-                        onClick = onMarkAsReadClicked,
+                        onClick = onMarkAsReadClicked?.takeIf { visible } ?: {},
+                        enabled = visible,
                     )
                 }
-                if (onMarkAsUnreadClicked != null) {
+                if (showMarkAsUnread) {
                     Button(
                         title = stringResource(MR.strings.action_mark_as_unread),
                         icon = MaterialSymbols.Rounded.RemoveDone,
                         toConfirm = confirm[3],
                         onLongClick = { onLongClickItem(3) },
-                        onClick = onMarkAsUnreadClicked,
+                        onClick = onMarkAsUnreadClicked?.takeIf { visible } ?: {},
+                        enabled = visible,
                     )
                 }
-                if (onMarkPreviousAsReadClicked != null) {
+                if (showMarkPreviousAsRead) {
                     Button(
                         title = stringResource(MR.strings.action_mark_previous_as_read),
                         icon = CustomMaterialSymbols.Rounded.DonePrevious,
                         toConfirm = confirm[4],
                         onLongClick = { onLongClickItem(4) },
-                        onClick = onMarkPreviousAsReadClicked,
+                        onClick = onMarkPreviousAsReadClicked?.takeIf { visible } ?: {},
+                        enabled = visible,
                     )
                 }
-                if (onDownloadClicked != null) {
+                if (showDownload) {
                     Button(
                         title = stringResource(MR.strings.action_download),
                         icon = MaterialSymbols.Rounded.Download,
                         toConfirm = confirm[5],
                         onLongClick = { onLongClickItem(5) },
-                        onClick = onDownloadClicked,
+                        onClick = onDownloadClicked?.takeIf { visible } ?: {},
+                        enabled = visible,
                     )
                 }
-                if (onDeleteClicked != null) {
+                if (showDelete) {
                     Button(
                         title = stringResource(MR.strings.action_delete),
                         icon = MaterialSymbols.Rounded.Delete,
                         toConfirm = confirm[6],
                         onLongClick = { onLongClickItem(6) },
-                        onClick = onDeleteClicked,
+                        onClick = onDeleteClicked?.takeIf { visible } ?: {},
+                        enabled = visible,
                     )
                 }
             }
@@ -185,6 +221,7 @@ private fun RowScope.Button(
     toConfirm: Boolean,
     onLongClick: () -> Unit,
     onClick: () -> Unit,
+    enabled: Boolean = true,
     content: (@Composable () -> Unit)? = null,
 ) {
     val animatedWeight by animateFloatAsState(
@@ -196,6 +233,7 @@ private fun RowScope.Button(
             .size(48.dp)
             .weight(animatedWeight)
             .combinedClickable(
+                enabled = enabled,
                 interactionSource = null,
                 indication = ripple(bounded = false),
                 onLongClick = onLongClick,
