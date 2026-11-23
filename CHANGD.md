@@ -95,6 +95,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Remove firebase dependencies
 
 ### Fixed
+- Fix bottom action bar flashing during exit animation
 - Fix duplicate download notification and add completion state
 - Fix search filters reusing the previous query
 - Fix settings search highlighting for duplicate preference titles
