@@ -93,6 +93,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Remove the WebGPU reader and go back to the old image decoder
 
 ### Fixed
+- Fix bottom action bar flashing during exit animation
 - Fix search filters reusing the previous query
 - Fix settings search highlighting for duplicate preference titles
 - Fix preference search highlighting when groups are hidden
