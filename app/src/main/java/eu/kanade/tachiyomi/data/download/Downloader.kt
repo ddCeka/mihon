@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.network.HttpException
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.util.lang.compareToCaseInsensitiveNaturalOrder
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.DiskUtil.NOMEDIA_FILE
 import eu.kanade.tachiyomi.util.storage.saveTo
@@ -679,9 +680,13 @@ class Downloader(
     ) {
         val zip = mangaDir.createFile("$dirname.cbz$TMP_DIR_SUFFIX")!!
         ZipWriter(context, zip).use { writer ->
-            tmpDir.listFiles()?.forEach { file ->
-                writer.write(file)
-            }
+            tmpDir.listFiles()
+                ?.sortedWith { first, second ->
+                    first.name.orEmpty().compareToCaseInsensitiveNaturalOrder(second.name.orEmpty())
+                }
+                ?.forEach { file ->
+                    writer.write(file)
+                }
         }
         zip.renameTo("$dirname.cbz")
         tmpDir.delete()
