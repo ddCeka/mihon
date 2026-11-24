@@ -65,6 +65,7 @@ import eu.kanade.presentation.more.settings.screen.browse.ExtensionStoresScreen
 import eu.kanade.presentation.more.settings.screen.data.RestoreBackupScreen
 import eu.kanade.presentation.util.AssistContentScreen
 import eu.kanade.presentation.util.DefaultNavigatorScreenTransition
+import eu.kanade.presentation.webview.CloudflareChallengeDialog
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -294,6 +295,8 @@ class MainActivity : BaseActivity() {
                     if (isLaunch) CheckForUpdates()
                     ShowOnboarding()
                 }
+
+                CloudflareChallengeDialog()
             }
         }
 
