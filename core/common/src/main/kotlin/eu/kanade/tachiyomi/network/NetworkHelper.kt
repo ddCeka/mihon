@@ -4,6 +4,7 @@ import android.content.Context
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import eu.kanade.tachiyomi.network.interceptor.CloudflareChallengeQueue
 import eu.kanade.tachiyomi.network.interceptor.CloudflareInterceptor
 import eu.kanade.tachiyomi.network.interceptor.RetryOnThrottleInterceptor
 import eu.kanade.tachiyomi.network.interceptor.UncaughtExceptionInterceptor
@@ -23,6 +24,7 @@ class NetworkHelper(
     @AppCoroutineScope private val scope: CoroutineScope,
     private val context: Context,
     private val preferences: NetworkPreferences,
+    private val challengeQueue: CloudflareChallengeQueue,
 ) {
 
     val cookieJar = AndroidCookieJar()
@@ -77,7 +79,7 @@ class NetworkHelper(
     val client: OkHttpClient by lazy {
         clientBuilder()
             .addInterceptor(
-                CloudflareInterceptor(context, cookieJar, scope, ::defaultUserAgentProvider),
+                CloudflareInterceptor(context, cookieJar, challengeQueue, scope, ::defaultUserAgentProvider),
             )
             .build()
     }

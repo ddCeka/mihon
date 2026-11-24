@@ -113,4 +113,8 @@
         <item quantity="one">%1$d entry skipped</item>
         <item quantity="other">%1$d entries skipped</item>
     </plurals>
+    <plurals name="cloudflare_challenge_waiting">
+        <item quantity="one">%1$d more waiting: %2$s</item>
+        <item quantity="other">%1$d more waiting: %2$s</item>
+    </plurals>
 </resources>
