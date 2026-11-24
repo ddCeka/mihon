@@ -67,6 +67,7 @@ import eu.kanade.presentation.components.IndexingBannerBackgroundColor
 import eu.kanade.presentation.more.AppMigratingScreen
 import eu.kanade.presentation.more.settings.screen.browse.ExtensionStoreDeepLinkEvent
 import eu.kanade.presentation.more.settings.screen.openSettings
+import eu.kanade.presentation.webview.CloudflareChallengeDialog
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.extension.ExtensionManager
@@ -341,6 +342,8 @@ class MainActivity : BaseActivity() {
                     if (isLaunch) CheckForUpdates()
                     ShowOnboarding()
                 }
+
+                CloudflareChallengeDialog()
             }
         }
 
