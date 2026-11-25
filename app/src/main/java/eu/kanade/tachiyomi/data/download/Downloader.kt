@@ -189,7 +189,7 @@ class Downloader(
         if (isPaused && queueState.value.isNotEmpty()) {
             notifier.onPaused()
         } else {
-            notifier.onComplete()
+            notifier.dismissProgress()
         }
 
         isPaused = false

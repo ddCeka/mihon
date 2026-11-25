@@ -98,6 +98,8 @@ class DownloadNotifier(
             return
         }
 
+        context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE)
+
         val now = SystemClock.elapsedRealtime()
         if (active.size == 1) {
             // Single active download: avoid group summary + 1 child duplication
@@ -127,7 +129,17 @@ class DownloadNotifier(
     fun createForegroundNotification(): Notification {
         val active = activeDownloads.values.toList()
         return when {
-            active.isEmpty() -> buildSummaryNotification(active)
+            // Avoid mutating progressNotificationBuilder before activeDownloadsFlow emits
+            active.isEmpty() -> context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER_PROGRESS) {
+                setSmallIcon(android.R.drawable.stat_sys_download)
+                setLargeIcon(notificationLargeIcon)
+                setContentTitle(context.stringResource(MR.strings.download_notifier_downloader_title))
+                setOnlyAlertOnce(true)
+                setOngoing(true)
+                setAutoCancel(false)
+                setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+            }.build()
+
             active.size == 1 -> buildSingleNotification(active.first())
             else -> buildSummaryNotification(active)
         }
@@ -151,6 +163,7 @@ class DownloadNotifier(
             setOnlyAlertOnce(true)
             setOngoing(true)
             setAutoCancel(false)
+            setTimeoutAfter(0L)
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
 
             clearActions()
@@ -212,6 +225,7 @@ class DownloadNotifier(
             setOnlyAlertOnce(true)
             setOngoing(true)
             setAutoCancel(false)
+            setTimeoutAfter(0L)
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
             setProgress(0, 0, false)
 
@@ -301,6 +315,7 @@ class DownloadNotifier(
     fun dismissProgress() {
         context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS)
         context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_PAUSED)
+        context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE)
         dismissChildNotifications()
         lastProgressNotificationTimes.clear()
         activeDownloads.clear()
@@ -374,21 +389,21 @@ class DownloadNotifier(
     }
 
     /**
-     * Resets the state once downloads are completed and morphs the progress notification into a completion banner.
+     * Resets the state once downloads are completed and shows a completion banner.
      */
     @Synchronized
     fun onComplete() {
-        context.cancelNotification(Notifications.ID_DOWNLOAD_CHAPTER_PAUSED)
-        dismissChildNotifications()
-        lastProgressNotificationTimes.clear()
-        activeDownloads.clear()
-        isDownloading = false
-        isGroupedMode = false
+        dismissProgress()
 
+        // Post on a dedicated ID after DownloadWorker finishes so foreground service teardown does not cancel it
         context.notify(
-            Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS,
+            Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE,
             Notifications.CHANNEL_DOWNLOADER_PROGRESS,
         ) {
+            setGroup(null)
+            setGroupSummary(false)
+            setProgress(0, 0, false)
+            clearActions()
             setContentTitle(context.stringResource(MR.strings.download_notifier_downloader_title))
             setContentText(context.stringResource(MR.strings.download_notifier_download_finished))
             setSmallIcon(android.R.drawable.stat_sys_download_done)

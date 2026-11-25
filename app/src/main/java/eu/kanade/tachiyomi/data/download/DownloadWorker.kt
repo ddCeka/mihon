@@ -82,6 +82,9 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
                         delay(1.seconds)
                         networkIssue = networkIssue()
                     }
+                    if (networkIssue == null && !isStopped && downloader.queueState.value.isEmpty()) {
+                        notifier.onComplete()
+                    }
                     return Result.success()
                 } finally {
                     // Stopped by WorkManager means already canceled, and taking the lock would then throw instead of stopping
