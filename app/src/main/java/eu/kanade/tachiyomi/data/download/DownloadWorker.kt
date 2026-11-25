@@ -15,7 +15,6 @@ import androidx.work.WorkerParameters
 import dev.zacsweers.metro.Inject
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.activeNetworkState
-import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.setForegroundSafely
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -39,6 +38,8 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
 
     @Inject private lateinit var downloader: Downloader
 
+    @Inject private lateinit var notifier: DownloadNotifier
+
     @Inject private lateinit var downloadPreferences: DownloadPreferences
 
     init {
@@ -46,13 +47,9 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        val notification = applicationContext.notificationBuilder(Notifications.CHANNEL_DOWNLOADER_PROGRESS) {
-            setContentTitle(applicationContext.getString(R.string.download_notifier_downloader_title))
-            setSmallIcon(android.R.drawable.stat_sys_download)
-        }.build()
         return ForegroundInfo(
             Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS,
-            notification,
+            notifier.createForegroundNotification(),
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
             } else {
