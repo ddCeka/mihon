@@ -16,6 +16,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - `Other` - for technical stuff.
 
 ### Added
+- Add autoscroll
 - Add automatic webtoon detection
 - Add back Download All chapters dropdown option
 - Add grouped multi-chapter download notifications
