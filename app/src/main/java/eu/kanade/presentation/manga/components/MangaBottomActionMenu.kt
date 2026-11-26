@@ -344,6 +344,7 @@ fun LibraryBottomActionMenu(
                             onDismissRequest = { downloadExpanded = false },
                             onDownloadClicked = onDownloadClicked,
                             offset = BottomBarMenuDpOffset,
+                            onDownloadAll = false,
                         )
                     }
                 }
