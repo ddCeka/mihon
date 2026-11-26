@@ -96,6 +96,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Remove firebase dependencies
 
 ### Fixed
+- Fix snackbar offset on screens without FAB
 - Fix bulk download actions not resuming paused download queue
 - Fix bottom action bar flashing during exit animation
 - Fix search filters reusing the previous query
