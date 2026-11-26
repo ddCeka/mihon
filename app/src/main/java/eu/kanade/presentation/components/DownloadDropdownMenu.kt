@@ -17,6 +17,7 @@ fun DownloadDropdownMenu(
     onDismissRequest: () -> Unit,
     onDownloadClicked: (DownloadAction) -> Unit,
     offset: DpOffset? = null,
+    onDownloadAll: Boolean = true,
 ) {
     if (offset != null) {
         DropdownMenu(
@@ -28,6 +29,7 @@ fun DownloadDropdownMenu(
                 DownloadDropdownMenuItems(
                     onDismissRequest = onDismissRequest,
                     onDownloadClicked = onDownloadClicked,
+                    onDownloadAll = onDownloadAll,
                 )
             },
         )
@@ -40,6 +42,7 @@ fun DownloadDropdownMenu(
                 DownloadDropdownMenuItems(
                     onDismissRequest = onDismissRequest,
                     onDownloadClicked = onDownloadClicked,
+                    onDownloadAll = onDownloadAll,
                 )
             },
         )
@@ -50,17 +53,19 @@ fun DownloadDropdownMenu(
 private fun DownloadDropdownMenuItems(
     onDismissRequest: () -> Unit,
     onDownloadClicked: (DownloadAction) -> Unit,
+    onDownloadAll: Boolean = true,
 ) {
-    val options = listOf(
+    val options = listOfNotNull(
         DownloadAction.NEXT_1_CHAPTER to pluralStringResource(MR.plurals.download_amount, 1, 1),
         DownloadAction.NEXT_5_CHAPTERS to pluralStringResource(MR.plurals.download_amount, 5, 5),
         DownloadAction.NEXT_10_CHAPTERS to pluralStringResource(MR.plurals.download_amount, 10, 10),
         DownloadAction.NEXT_25_CHAPTERS to pluralStringResource(MR.plurals.download_amount, 25, 25),
+        (DownloadAction.NOT_DOWNLOADED_CHAPTERS to stringResource(MR.strings.download_all)).takeIf { onDownloadAll },
         DownloadAction.UNREAD_CHAPTERS to stringResource(MR.strings.download_unread),
         DownloadAction.BOOKMARKED_CHAPTERS to stringResource(MR.strings.download_bookmarked),
     )
 
-    options.map { (downloadAction, string) ->
+    options.forEach { (downloadAction, string) ->
         DropdownMenuItem(
             text = { Text(text = string) },
             onClick = {

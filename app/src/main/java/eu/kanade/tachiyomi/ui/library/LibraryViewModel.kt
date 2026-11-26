@@ -576,6 +576,7 @@ class LibraryViewModel(
             DownloadAction.NEXT_5_CHAPTERS -> downloadNextChapters(5)
             DownloadAction.NEXT_10_CHAPTERS -> downloadNextChapters(10)
             DownloadAction.NEXT_25_CHAPTERS -> downloadNextChapters(25)
+            DownloadAction.NOT_DOWNLOADED_CHAPTERS -> downloadAllChapters()
             DownloadAction.UNREAD_CHAPTERS -> downloadNextChapters(null)
             DownloadAction.BOOKMARKED_CHAPTERS -> downloadBookmarkedChapters()
         }
@@ -590,6 +591,19 @@ class LibraryViewModel(
                     .filterNotDownloaded(manga)
                     .let { if (amount != null) it.take(amount) else it }
 
+                if (chapters.isNotEmpty()) {
+                    downloadManager.downloadChapters(manga, chapters)
+                }
+            }
+        }
+    }
+
+    private fun downloadAllChapters() {
+        val mangas = selectedManga
+        appScope.launch {
+            mangas.forEach { manga ->
+                val chapters = getChaptersByMangaId.await(manga.id, applyScanlatorFilter = true)
+                    .filterNotDownloaded(manga)
                 if (chapters.isNotEmpty()) {
                     downloadManager.downloadChapters(manga, chapters)
                 }
