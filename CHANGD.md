@@ -96,6 +96,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Remove the WebGPU reader and go back to the old image decoder
 
 ### Fixed
+- Fix bulk download actions not resuming paused download queue
 - Fix bottom action bar flashing during exit animation
 - Fix search filters reusing the previous query
 - Fix settings search highlighting for duplicate preference titles

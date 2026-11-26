@@ -585,10 +585,12 @@ class LibraryViewModel(
         appScope.launch {
             mangas.forEach { manga ->
                 val chapters = getNextChapters.await(manga.id)
-                    .filterNotQueuedOrDownloaded(manga)
+                    .filterNotDownloaded(manga)
                     .let { if (amount != null) it.take(amount) else it }
 
-                downloadManager.downloadChapters(manga, chapters)
+                if (chapters.isNotEmpty()) {
+                    downloadManager.downloadChapters(manga, chapters)
+                }
             }
         }
     }
@@ -598,16 +600,17 @@ class LibraryViewModel(
         appScope.launch {
             mangas.forEach { manga ->
                 val chapters = getBookmarkedChaptersByMangaId.await(manga.id)
-                    .filterNotQueuedOrDownloaded(manga)
-                downloadManager.downloadChapters(manga, chapters)
+                    .filterNotDownloaded(manga)
+                if (chapters.isNotEmpty()) {
+                    downloadManager.downloadChapters(manga, chapters)
+                }
             }
         }
     }
 
-    private fun List<Chapter>.filterNotQueuedOrDownloaded(manga: Manga): List<Chapter> {
-        val queuedDownloads = downloadManager.getQueuedDownloadsByChapterId()
+    private fun List<Chapter>.filterNotDownloaded(manga: Manga): List<Chapter> {
         val downloadedChapterIds = downloadManager.getDownloadedChapterIds(this, manga)
-        return fastFilterNot { it.id in queuedDownloads || it.id in downloadedChapterIds }
+        return fastFilterNot { it.id in downloadedChapterIds }
     }
 
     /**
