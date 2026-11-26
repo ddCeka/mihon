@@ -54,9 +54,13 @@ fun Scaffold(
         snackbarHost = snackbarHost,
         floatingActionButton = {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                modifier = if (fabHeight > 0) {
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                } else {
+                    Modifier
+                },
             ) {
                 Box(
                     modifier = Modifier
