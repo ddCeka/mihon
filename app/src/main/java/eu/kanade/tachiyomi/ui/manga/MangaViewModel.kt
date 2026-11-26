@@ -718,7 +718,7 @@ class MangaViewModel(
     private fun getUnreadChapters(): List<Chapter> {
         val chapterItems = if (skipFiltered) filteredChapters.orEmpty() else allChapters.orEmpty()
         return chapterItems
-            .filter { (chapter, dlStatus) -> !chapter.read && dlStatus == Download.State.NOT_DOWNLOADED }
+            .filter { (chapter, dlStatus) -> !chapter.read && dlStatus != Download.State.DOWNLOADED }
             .map { it.chapter }
     }
 
@@ -731,7 +731,7 @@ class MangaViewModel(
     private fun getBookmarkedChapters(): List<Chapter> {
         val chapterItems = if (skipFiltered) filteredChapters.orEmpty() else allChapters.orEmpty()
         return chapterItems
-            .filter { (chapter, dlStatus) -> chapter.bookmark && dlStatus == Download.State.NOT_DOWNLOADED }
+            .filter { (chapter, dlStatus) -> chapter.bookmark && dlStatus != Download.State.DOWNLOADED }
             .map { it.chapter }
     }
 
