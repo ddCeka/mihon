@@ -1002,6 +1002,33 @@ class ReaderViewModel(
         mutableState.update { it.copy(dialog = Dialog.Settings) }
     }
 
+    fun openChapterSearchDialog() {
+        mutableState.update { it.copy(dialog = Dialog.ChapterSearch) }
+    }
+
+    fun getChapterList(): List<ReaderChapter> {
+        if (!::chapterList.isInitialized) return emptyList()
+        return if (manga?.sortDescending() == true) {
+            chapterList.asReversed()
+        } else {
+            chapterList
+        }
+    }
+
+    fun selectChapter(chapter: ReaderChapter) {
+        if (chapter.chapter.id == getCurrentChapter()?.chapter?.id) return
+        chapterPageIndex = -1
+        chapterPageOffset = 0
+        if (!chapter.chapter.read || libraryPreferences.resumeLastSeenPage.get()) {
+            chapter.requestedPage = chapter.chapter.lastPageRead
+            chapter.requestedPageOffset = chapter.chapter.lastPageReadOffset
+        } else {
+            chapter.requestedPage = 0
+            chapter.requestedPageOffset = 0
+        }
+        loadNewChapter(chapter)
+    }
+
     fun closeDialog() {
         mutableState.update { it.copy(dialog = null) }
     }
@@ -1186,6 +1213,7 @@ class ReaderViewModel(
         data object ReadingModeSelect : Dialog
         data object OrientationModeSelect : Dialog
         data object AutoScrollHelp : Dialog
+        data object ChapterSearch : Dialog
         data class PageActions(val page: ReaderPage) : Dialog
     }
 
