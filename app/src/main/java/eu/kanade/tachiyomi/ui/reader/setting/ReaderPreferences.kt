@@ -56,7 +56,7 @@ class ReaderPreferences(
 
     val defaultReadingMode: Preference<Int> = preferenceStore.getInt(
         "pref_default_reading_mode_key",
-        ReadingMode.RIGHT_TO_LEFT.flagValue,
+        ReadingMode.VERTICAL.flagValue,
     )
 
     val defaultOrientationType: Preference<Int> = preferenceStore.getInt(

@@ -60,6 +60,7 @@ and this repository don't fucking care for [Semantic Versioning](https://semver.
 - Add onboarding permissions request on permissions step
 
 ### Changed
+- Change default reading mode to Vertical
 - Sort pages before writing CBZ files
 - Change Downloaded only and Incognito mode banner to clickable
 - Hide disabled sources from migration destination choices

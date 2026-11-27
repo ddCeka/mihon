@@ -40,7 +40,7 @@ fun Manga.defaultReaderType(type: MangaType): Int? {
         MangaType.TYPE_WEBTOON,
         MangaType.TYPE_MANHUA,
         -> ReadingMode.WEBTOON.flagValue
-        MangaType.TYPE_COMIC -> ReadingMode.LEFT_TO_RIGHT.flagValue
+        MangaType.TYPE_COMIC -> ReadingMode.VERTICAL.flagValue
         else -> null
     }
 }

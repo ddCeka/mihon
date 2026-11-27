@@ -854,7 +854,7 @@ class ReaderViewModel(
     fun getMangaReadingMode(resolveDefault: Boolean = true): Int {
         val defaultPref = readerPreferences.defaultReadingMode.get()
         val default = if (defaultPref == ReadingMode.DEFAULT.flagValue) {
-            ReadingMode.RIGHT_TO_LEFT.flagValue
+            ReadingMode.VERTICAL.flagValue
         } else {
             defaultPref
         }
