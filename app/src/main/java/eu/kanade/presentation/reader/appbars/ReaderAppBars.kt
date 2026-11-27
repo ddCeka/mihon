@@ -76,6 +76,7 @@ fun ReaderAppBars(
     onOpenInWebView: (() -> Unit)?,
     onOpenInBrowser: (() -> Unit)?,
     onShare: (() -> Unit)?,
+    onClickSearch: () -> Unit,
 
     chapterNavigatorType: ChapterNavigatorType,
     verticalNavigatorHeight: Float,
@@ -127,6 +128,7 @@ fun ReaderAppBars(
                     onOpenInWebView = onOpenInWebView,
                     onOpenInBrowser = onOpenInBrowser,
                     onShare = onShare,
+                    onClickSearch = onClickSearch,
                 )
                 if (showAutoscrollToggle) {
                     AutoScrollBar(

@@ -54,6 +54,7 @@ import dev.zacsweers.metro.Inject
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.presentation.reader.OrientationSelectDialog
 import eu.kanade.presentation.reader.PageJumpDialog
+import eu.kanade.presentation.reader.ReaderChapterSearchDialog
 import eu.kanade.presentation.reader.ReaderContentOverlay
 import eu.kanade.presentation.reader.ReaderPageActionsDialog
 import eu.kanade.presentation.reader.ReaderPageIndicator
@@ -354,6 +355,15 @@ class ReaderActivity : BaseActivity() {
                     text = { Text(text = stringResource(MR.strings.autoscroll_help_message)) },
                 )
             }
+            is ReaderViewModel.Dialog.ChapterSearch -> {
+                val chapters = remember(state.viewerChapters, state.manga) { viewModel.getChapterList() }
+                ReaderChapterSearchDialog(
+                    chapters = chapters,
+                    currentChapterId = state.currentChapter?.chapter?.id,
+                    onDismissRequest = onDismissRequest,
+                    onSelectChapter = viewModel::selectChapter,
+                )
+            }
             is ReaderViewModel.Dialog.PageJump -> {
                 if (state.currentChapter === dialog.chapter && state.totalPages == dialog.totalPages) {
                     PageJumpDialog(
@@ -520,6 +530,7 @@ class ReaderActivity : BaseActivity() {
             onOpenInWebView = ::openChapterInWebView.takeIf { isHttpSource },
             onOpenInBrowser = ::openChapterInBrowser.takeIf { isHttpSource },
             onShare = ::shareChapter.takeIf { isHttpSource },
+            onClickSearch = viewModel::openChapterSearchDialog,
 
             chapterNavigatorType = if (!verticalNavigator) {
                 if (state.viewer is R2LPagerViewer) {
